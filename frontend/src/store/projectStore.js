@@ -1,19 +1,41 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+import { MOCK_PROJECTS } from '../data/mockProjects'
 
-export const useProjectStore = create((set, get) => ({
-  projects: [],
-  activeProject: null,
-  importedData: null,
+export const useProjectStore = create(
+  persist(
+    (set, get) => ({
+      projects: MOCK_PROJECTS,
+      activeProject: null,
+      importedData: null,
+      scenarios: [],
 
-  setActiveProject: (project) => set({ activeProject: project }),
+      setActiveProject: (project) => set({ activeProject: project }),
 
-  addProject: (project) => set((s) => ({ projects: [...s.projects, { ...project, id: Date.now() }] })),
+      addProject: (project) =>
+        set((s) => ({ projects: [{ ...project, id: Date.now(), createdAt: new Date().toISOString() }, ...s.projects] })),
 
-  setImportedData: (data) => set({ importedData: data }),
+      removeProject: (id) =>
+        set((s) => ({ projects: s.projects.filter((p) => p.id !== id) })),
 
-  updateProject: (id, updates) =>
-    set((s) => ({
-      projects: s.projects.map((p) => (p.id === id ? { ...p, ...updates } : p)),
-      activeProject: s.activeProject?.id === id ? { ...s.activeProject, ...updates } : s.activeProject,
-    })),
-}))
+      setImportedData: (data) => set({ importedData: data }),
+
+      updateProject: (id, updates) =>
+        set((s) => ({
+          projects: s.projects.map((p) => (p.id === id ? { ...p, ...updates } : p)),
+          activeProject: s.activeProject?.id === id ? { ...s.activeProject, ...updates } : s.activeProject,
+        })),
+
+      saveScenario: (scenario) =>
+        set((s) => ({
+          scenarios: [...s.scenarios, { ...scenario, id: Date.now() }].slice(-3),
+        })),
+
+      removeScenario: (id) =>
+        set((s) => ({ scenarios: s.scenarios.filter((sc) => sc.id !== id) })),
+
+      resetMockData: () => set({ projects: MOCK_PROJECTS }),
+    }),
+    { name: 'urc_projects' }
+  )
+)

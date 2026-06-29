@@ -1,132 +1,170 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
+import { MapPin, Filter } from 'lucide-react'
 import { useProjectStore } from '../store/projectStore'
-import { MapPin, Filter, Layers } from 'lucide-react'
+import { useTranslation } from '../i18n/useTranslation'
+import { formatCurrency, formatPercent } from '../utils/formatters'
+import { CITY_NAMES } from '../data/cityPrices'
+import { STATUS_LABELS } from '../data/mockProjects'
+import { Card, Select, Badge } from '../components/ui'
+import PageHeader from '../components/layout/PageHeader'
+import 'leaflet/dist/leaflet.css'
 
-const STATUS_COLOR = {
-  'בתכנון': '#f59e0b',
-  'אושר': '#10b981',
-  'בביצוע': '#3b82f6',
-  'הושלם': '#8b5cf6',
+const STATUS_COLORS = {
+  planning: '#64748b',
+  approved: '#06b6d4',
+  in_progress: '#f59e0b',
+  completed: '#10b981',
 }
 
-const DEMO_PROJECTS = [
-  { id: 1, name: 'פרויקט רוטשילד', city: 'תל אביב', lat: 32.0643, lng: 34.7726, status: 'בביצוע', roi: 42, type: 'פינוי-בינוי', units: 180 },
-  { id: 2, name: 'שדרות ויצמן', city: 'רחובות', lat: 31.8928, lng: 34.8113, status: 'אושר', roi: 31, type: 'תמ"א 38/2', units: 80 },
-  { id: 3, name: 'שכונת נורדאו', city: 'חיפה', lat: 32.8191, lng: 34.9976, status: 'בתכנון', roi: 28, type: 'עיבוי-בינוי', units: 120 },
-  { id: 4, name: 'רח\' הרצל', city: 'ראשון לציון', lat: 31.9641, lng: 34.8001, status: 'הושלם', roi: 38, type: 'תמ"א 38/1', units: 60 },
-  { id: 5, name: 'שכונת הדר', city: 'חיפה', lat: 32.8208, lng: 35.0067, status: 'בתכנון', roi: 24, type: 'פינוי-בינוי', units: 200 },
-  { id: 6, name: 'גבעת שמואל מרכז', city: 'גבעת שמואל', lat: 32.0728, lng: 34.8479, status: 'אושר', roi: 35, type: 'תמ"א 38/2', units: 90 },
-  { id: 7, name: 'שכונת פלורנטין', city: 'תל אביב', lat: 32.0523, lng: 34.7707, status: 'בביצוע', roi: 55, type: 'פינוי-בינוי', units: 320 },
-  { id: 8, name: 'רמת אביב', city: 'תל אביב', lat: 32.1097, lng: 34.7976, status: 'הושלם', roi: 48, type: 'עיבוי-בינוי', units: 140 },
-]
-
 export default function MapView() {
+  const projects = useProjectStore((s) => s.projects)
+  const { t, lang } = useTranslation()
   const mapRef = useRef(null)
-  const mapInstance = useRef(null)
+  const mapInstanceRef = useRef(null)
   const markersRef = useRef([])
-  const storeProjects = useProjectStore((s) => s.projects)
-  const [statusFilter, setStatusFilter] = useState('הכל')
+
+  const [cityFilter, setCityFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
   const [selected, setSelected] = useState(null)
 
-  const allProjects = [...DEMO_PROJECTS, ...storeProjects.filter(p => p.lat && p.lng)]
-  const filtered = statusFilter === 'הכל' ? allProjects : allProjects.filter(p => p.status === statusFilter)
+  const filtered = useMemo(
+    () => projects.filter((p) => (!cityFilter || p.city === cityFilter) && (!statusFilter || p.status === statusFilter)),
+    [projects, cityFilter, statusFilter]
+  )
 
   useEffect(() => {
-    if (mapInstance.current || !mapRef.current) return
-    import('leaflet').then((L) => {
-      const map = L.map(mapRef.current, { center: [31.9, 34.85], zoom: 9, zoomControl: false })
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '© OpenStreetMap © CartoDB',
-        subdomains: 'abcd',
+    let map
+    const init = async () => {
+      const L = await import('leaflet')
+
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove()
+      }
+      map = L.default.map(mapRef.current, { center: [32.07, 34.78], zoom: 9, zoomControl: true })
+      mapInstanceRef.current = map
+
+      L.default.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
       }).addTo(map)
-      L.control.zoom({ position: 'bottomleft' }).addTo(map)
-      mapInstance.current = map
-    })
-    return () => { mapInstance.current?.remove(); mapInstance.current = null }
-  }, [])
 
-  useEffect(() => {
-    if (!mapInstance.current) return
-    import('leaflet').then((L) => {
-      markersRef.current.forEach(m => m.remove())
+      markersRef.current.forEach((m) => m.remove())
       markersRef.current = []
-      filtered.forEach((p) => {
-        const color = STATUS_COLOR[p.status] || '#94a3b8'
-        const icon = L.divIcon({
-          className: '',
-          html: `<div style="width:28px;height:28px;border-radius:50%;background:${color};border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;color:white;box-shadow:0 2px 8px rgba(0,0,0,0.5)">${p.roi || '?'}%</div>`,
-          iconSize: [28, 28], iconAnchor: [14, 14],
+
+      filtered.forEach((project) => {
+        if (!project.lat || !project.lng) return
+
+        const color = STATUS_COLORS[project.status] || '#6366f1'
+        const circle = L.default.circleMarker([project.lat, project.lng], {
+          radius: 10,
+          fillColor: color,
+          color: '#fff',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.8,
         })
-        const marker = L.marker([p.lat, p.lng], { icon }).addTo(mapInstance.current)
-        marker.on('click', () => setSelected(p))
-        markersRef.current.push(marker)
+
+        circle.bindPopup(`
+          <div style="min-width:180px;background:#0d1526;color:#f1f5f9;border-radius:10px;padding:12px;font-family:sans-serif">
+            <strong style="font-size:13px">${project.name}</strong><br>
+            <span style="font-size:11px;color:#64748b">${project.city} · ${project.planType}</span><br>
+            <div style="margin-top:8px;display:flex;justify-content:space-between;">
+              <span style="font-size:12px;color:#10b981;font-weight:600">${project.roi}% ROI</span>
+              <span style="font-size:12px;color:#94a3b8">${project.units} units</span>
+            </div>
+          </div>
+        `, {
+          className: 'dark-popup',
+        })
+
+        circle.on('click', () => setSelected(project))
+        circle.addTo(map)
+        markersRef.current.push(circle)
       })
-    })
+    }
+
+    if (mapRef.current) init()
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove()
+        mapInstanceRef.current = null
+      }
+    }
   }, [filtered])
 
   return (
-    <div className="h-screen flex flex-col">
-      <div className="p-6 pb-3">
-        <h1 className="text-3xl font-bold gradient-text">מפת פרויקטים</h1>
-        <p className="text-slate-400 mt-1">פרויקטי התחדשות עירונית ברחבי ישראל</p>
+    <div className="space-y-4 h-full flex flex-col">
+      <PageHeader title={t('nav.map')} breadcrumb={[{ label: t('nav.dashboard'), to: '/dashboard' }, { label: t('nav.map') }]} />
+
+      <div className="flex flex-wrap gap-3">
+        <Select
+          className="w-44"
+          placeholder={t('common.city')}
+          value={cityFilter}
+          onChange={setCityFilter}
+          options={[{ value: '', label: t('common.all') }, ...CITY_NAMES.map((c) => ({ value: c, label: c }))]}
+        />
+        <Select
+          className="w-44"
+          placeholder={t('common.status')}
+          value={statusFilter}
+          onChange={setStatusFilter}
+          options={[
+            { value: '', label: t('common.all') },
+            ...Object.entries(STATUS_LABELS).map(([k, v]) => ({ value: k, label: v[lang === 'he' ? 'he' : 'en'] })),
+          ]}
+        />
+        <span className="text-xs text-text-muted self-center">{filtered.length} {lang === 'he' ? 'פרויקטים' : 'projects'}</span>
       </div>
 
-      <div className="flex items-center gap-3 px-6 pb-3">
-        {['הכל', ...Object.keys(STATUS_COLOR)].map((s) => (
-          <button key={s} onClick={() => setStatusFilter(s)}
-            className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all border ${
-              statusFilter === s ? 'bg-blue-600 border-blue-600 text-white' : 'glass border-slate-700 text-slate-400 hover:text-white'
-            }`}>
-            {s}
-            {s !== 'הכל' && (
-              <span className="mr-2 opacity-60">
-                ({allProjects.filter(p => p.status === s).length})
-              </span>
-            )}
-          </button>
-        ))}
-        <span className="mr-auto text-xs text-slate-500">{filtered.length} פרויקטים מוצגים</span>
-      </div>
-
-      <div className="flex-1 relative">
-        <div ref={mapRef} className="w-full h-full" />
-
-        <div className="absolute top-4 right-4 space-y-2 z-[1000]">
-          {Object.entries(STATUS_COLOR).map(([status, color]) => (
-            <div key={status} className="glass flex items-center gap-2 px-3 py-1.5 rounded-full text-xs">
-              <div className="w-2.5 h-2.5 rounded-full" style={{ background: color }} />
-              <span className="text-slate-300">{status}</span>
-            </div>
-          ))}
+      <div className="flex gap-4 flex-1 min-h-0">
+        <div className="flex-1 rounded-2xl overflow-hidden border border-dark-600 min-h-[500px]">
+          <div ref={mapRef} className="w-full h-full" style={{ minHeight: 500 }} />
         </div>
 
         {selected && (
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000] glass rounded-2xl p-5 min-w-72 shadow-xl">
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <h3 className="font-bold text-white">{selected.name}</h3>
-                <p className="text-sm text-slate-400">{selected.city}</p>
+          <div className="w-72 shrink-0">
+            <Card>
+              <button onClick={() => setSelected(null)} className="text-text-muted hover:text-text-primary text-xs mb-3">✕ Close</button>
+              <h3 className="font-semibold text-text-primary mb-1">{selected.name}</h3>
+              <p className="text-xs text-text-muted mb-3">{selected.address}, {selected.city}</p>
+              <Badge variant={STATUS_LABELS[selected.status]?.variant}>{STATUS_LABELS[selected.status]?.[lang === 'he' ? 'he' : 'en']}</Badge>
+              <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
+                <div className="p-2 rounded-lg bg-dark-700/60">
+                  <p className="text-text-muted">ROI</p>
+                  <p className="text-success font-bold">{formatPercent(selected.roi)}</p>
+                </div>
+                <div className="p-2 rounded-lg bg-dark-700/60">
+                  <p className="text-text-muted">Units</p>
+                  <p className="text-text-primary font-bold">{selected.units}</p>
+                </div>
+                <div className="p-2 rounded-lg bg-dark-700/60">
+                  <p className="text-text-muted">Investment</p>
+                  <p className="text-text-primary font-bold">{formatCurrency(selected.investment, { compact: true })}</p>
+                </div>
+                <div className="p-2 rounded-lg bg-dark-700/60">
+                  <p className="text-text-muted">Plan</p>
+                  <p className="text-text-primary font-bold text-[10px]">{selected.planType}</p>
+                </div>
               </div>
-              <button onClick={() => setSelected(null)} className="text-slate-500 hover:text-white text-xl leading-none">&times;</button>
+            </Card>
+
+            <div className="mt-4 space-y-2 max-h-72 overflow-y-auto">
+              {filtered.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setSelected(p)}
+                  className={`w-full text-start p-3 rounded-xl border transition-all ${selected?.id === p.id ? 'border-brand-primary bg-brand-primary/10' : 'border-dark-600 bg-dark-800/60 hover:border-dark-500'}`}
+                >
+                  <p className="text-xs font-medium text-text-primary truncate">{p.name}</p>
+                  <p className="text-[10px] text-text-muted">{p.city} · {formatPercent(p.roi)}</p>
+                </button>
+              ))}
             </div>
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="bg-slate-800/60 rounded-xl p-2">
-                <p className="text-lg font-bold text-green-400">{selected.roi}%</p>
-                <p className="text-xs text-slate-400">ROI</p>
-              </div>
-              <div className="bg-slate-800/60 rounded-xl p-2">
-                <p className="text-lg font-bold text-blue-400">{selected.units}</p>
-                <p className="text-xs text-slate-400">יח"ד</p>
-              </div>
-              <div className="bg-slate-800/60 rounded-xl p-2">
-                <p className="text-xs font-bold mt-1" style={{ color: STATUS_COLOR[selected.status] }}>{selected.status}</p>
-                <p className="text-xs text-slate-400">סטטוס</p>
-              </div>
-            </div>
-            <p className="text-xs text-slate-500 mt-3 text-center">{selected.type}</p>
           </div>
         )}
       </div>
     </div>
   )
 }
+
