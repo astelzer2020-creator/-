@@ -1,8 +1,9 @@
 import clsx from 'clsx'
 
-export default function Card({ header, footer, children, className, bodyClassName, hover = false }) {
+export default function Card({ header, footer, children, className, bodyClassName, hover = false, onClick }) {
   return (
     <div
+      onClick={onClick}
       className={clsx(
         'glass rounded-2xl shadow-card overflow-hidden',
         hover && 'transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-glow',

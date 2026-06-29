@@ -7,6 +7,8 @@ import ROICalculator from './pages/ROICalculator'
 import Visualization3D from './pages/Visualization3D'
 import MapView from './pages/MapView'
 import Reports from './pages/Reports'
+import Projects from './pages/Projects'
+import ProjectDetail from './pages/ProjectDetail'
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
 
@@ -26,6 +28,8 @@ export default function App() {
         >
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="projects" element={<Projects />} />
+          <Route path="projects/:id" element={<ProjectDetail />} />
           <Route path="import" element={<DataImport />} />
           <Route path="roi" element={<ROICalculator />} />
           <Route path="3d" element={<Visualization3D />} />
