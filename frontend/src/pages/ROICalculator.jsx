@@ -119,7 +119,7 @@ export default function ROICalculator() {
             <div className="space-y-5">
               <Slider label={'עלות בנייה למ"ר'} value={buildCost} min={8000} max={20000} step={500} onChange={setBuildCostOverride} unit=" ₪" />
               <Slider label={'מחיר מכירה למ"ר'} value={salePrice} min={12000} max={80000} step={500} onChange={setSalePriceOverride} unit=" ₪" />
-              <Slider label="שכ\"ד ממוצע לחודש לדייר" value={tenantCompensation} min={1000} max={6000} step={100} onChange={setTenantCompensation} unit=" ₪" />
+              <Slider label={'שכ"ד ממוצע לחודש לדייר'} value={tenantCompensation} min={1000} max={6000} step={100} onChange={setTenantCompensation} unit=" ₪" />
               <Slider label="ריבית מימון שנתית" value={financeRate} min={2} max={12} step={0.5} onChange={setFinanceRate} unit="%" />
               <Slider label="משך הפרויקט" value={projectYears} min={1} max={10} onChange={setProjectYears} unit=" שנים" />
             </div>
