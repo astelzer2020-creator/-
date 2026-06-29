@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "התחדשות עירונית",
+    "slug": "urban-renewal-il",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0f172a"
+    },
+    "android": {
+      "adaptiveIcon": { "foregroundImage": "./assets/icon.png", "backgroundColor": "#0f172a" },
+      "package": "com.urbanrenewal.israel",
+      "permissions": ["READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
+    },
+    "ios": {
+      "bundleIdentifier": "com.urbanrenewal.israel",
+      "supportsTablet": true
+    },
+    "plugins": [
+      "expo-router",
+      "expo-document-picker",
+      [
+        "expo-build-properties",
+        { "android": { "compileSdkVersion": 35 } }
+      ]
+    ],
+    "scheme": "urbanrenewal"
+  }
+}
