@@ -9,6 +9,7 @@ import MapView from './pages/MapView'
 import Reports from './pages/Reports'
 import Projects from './pages/Projects'
 import ProjectDetail from './pages/ProjectDetail'
+import Settings from './pages/Settings'
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
 
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="3d" element={<Visualization3D />} />
           <Route path="map" element={<MapView />} />
           <Route path="reports" element={<Reports />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
     </BrowserRouter>
