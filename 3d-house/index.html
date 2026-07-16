@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>בית תלת־מימדי מפורט — Three.js</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { overflow: hidden; font-family: 'Segoe UI', Arial, sans-serif; background: #000; }
+  #app { width: 100vw; height: 100vh; display: block; }
+  #panel {
+    position: fixed; top: 16px; right: 16px; z-index: 10;
+    background: rgba(20, 24, 34, 0.82); color: #eef2f7;
+    padding: 14px 18px; border-radius: 12px; max-width: 280px;
+    backdrop-filter: blur(6px); box-shadow: 0 6px 24px rgba(0,0,0,.35);
+  }
+  #panel h1 { font-size: 17px; margin-bottom: 6px; }
+  #panel p { font-size: 12.5px; line-height: 1.6; color: #c3ccd8; }
+  #panel .row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  button {
+    cursor: pointer; border: none; border-radius: 8px;
+    padding: 7px 12px; font-size: 13px; font-family: inherit;
+    background: #3b82f6; color: #fff; transition: background .15s;
+  }
+  button:hover { background: #2563eb; }
+  button.ghost { background: rgba(255,255,255,.12); }
+  button.ghost:hover { background: rgba(255,255,255,.22); }
+</style>
+</head>
+<body>
+<div id="panel">
+  <h1>🏠 בית תלת־מימדי</h1>
+  <p>
+    גרירה — סיבוב · גלגלת — זום · לחצן ימני — הזזה.<br/>
+    הבית כולל גג רעפים, ארובה מעשנת, מרפסת, גינה, גדר ותאורת לילה.
+  </p>
+  <div class="row">
+    <button id="dayNightBtn">🌙 מצב לילה</button>
+    <button id="autoRotateBtn" class="ghost">⟳ סיבוב אוטומטי</button>
+  </div>
+</div>
+<canvas id="app"></canvas>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/* ---------- סצנה בסיסית ---------- */
+const canvas = document.getElementById('app');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 300);
+camera.position.set(16, 10, 20);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 2.2, 0);
+controls.enableDamping = true;
+controls.maxPolarAngle = Math.PI / 2 - 0.03;
+controls.minDistance = 6;
+controls.maxDistance = 70;
+
+/* ---------- תאורה ושמיים ---------- */
+const skyDay = new THREE.Color(0x87ceeb);
+const skyNight = new THREE.Color(0x0b1026);
+scene.background = skyDay.clone();
+scene.fog = new THREE.Fog(scene.background, 60, 160);
+
+const sun = new THREE.DirectionalLight(0xfff3d6, 2.6);
+sun.position.set(18, 24, 12);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.left = -30; sun.shadow.camera.right = 30;
+sun.shadow.camera.top = 30;   sun.shadow.camera.bottom = -30;
+sun.shadow.bias = -0.0004;
+scene.add(sun);
+
+const ambient = new THREE.AmbientLight(0xbfd4ff, 0.55);
+scene.add(ambient);
+
+const hemi = new THREE.HemisphereLight(0xcfe8ff, 0x556b2f, 0.5);
+scene.add(hemi);
+
+// ירח (נראה רק בלילה)
+const moon = new THREE.Mesh(
+  new THREE.SphereGeometry(1.6, 24, 24),
+  new THREE.MeshBasicMaterial({ color: 0xf5f3ce })
+);
+moon.position.set(-30, 26, -40);
+moon.visible = false;
+scene.add(moon);
+
+/* ---------- חומרים משותפים ---------- */
+const MAT = {
+  wall:    new THREE.MeshStandardMaterial({ color: 0xf5e6c8, roughness: 0.9 }),
+  plinth:  new THREE.MeshStandardMaterial({ color: 0x8d8d8d, roughness: 1 }),
+  roof:    new THREE.MeshStandardMaterial({ color: 0xa63c2e, roughness: 0.8 }),
+  ridge:   new THREE.MeshStandardMaterial({ color: 0x7c2a20, roughness: 0.8 }),
+  wood:    new THREE.MeshStandardMaterial({ color: 0x6b4423, roughness: 0.85 }),
+  woodLight:new THREE.MeshStandardMaterial({ color: 0x9c6b3c, roughness: 0.85 }),
+  frame:   new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6 }),
+  glass:   new THREE.MeshPhysicalMaterial({
+             color: 0x9fd8ff, roughness: 0.05, metalness: 0,
+             transmission: 0.9, transparent: true, opacity: 0.55 }),
+  glassLit:new THREE.MeshStandardMaterial({
+             color: 0xffd97a, emissive: 0xffb830, emissiveIntensity: 0.0 }),
+  brick:   new THREE.MeshStandardMaterial({ color: 0x9e4a3a, roughness: 1 }),
+  metal:   new THREE.MeshStandardMaterial({ color: 0x444a52, roughness: 0.35, metalness: 0.8 }),
+  grass:   new THREE.MeshStandardMaterial({ color: 0x5da13f, roughness: 1 }),
+  path:    new THREE.MeshStandardMaterial({ color: 0xb8b2a5, roughness: 1 }),
+  leaves:  new THREE.MeshStandardMaterial({ color: 0x2f7d32, roughness: 0.9 }),
+  trunk:   new THREE.MeshStandardMaterial({ color: 0x5d4030, roughness: 1 }),
+  fence:   new THREE.MeshStandardMaterial({ color: 0xe8e2d5, roughness: 0.9 }),
+};
+
+function box(w, h, d, mat, x = 0, y = 0, z = 0) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+  m.position.set(x, y, z);
+  m.castShadow = m.receiveShadow = true;
+  return m;
+}
+
+/* ---------- קרקע, שביל וכביש ---------- */
+const ground = new THREE.Mesh(new THREE.CircleGeometry(80, 48), MAT.grass);
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// שביל מרוצף מהשער לדלת
+for (let i = 0; i < 7; i++) {
+  const tile = box(1.6, 0.06, 1.0, MAT.path, 0, 0.03, 5.2 + i * 1.15);
+  tile.receiveShadow = true;
+  scene.add(tile);
+}
+
+/* ---------- הבית ---------- */
+const house = new THREE.Group();
+scene.add(house);
+
+const W = 10, D = 8, H = 3.2;      // רוחב, עומק, גובה קומה
+
+// יסוד / סוקל
+house.add(box(W + 0.4, 0.5, D + 0.4, MAT.plinth, 0, 0.25, 0));
+
+// קומת קרקע + קומה ראשונה
+house.add(box(W, H, D, MAT.wall, 0, 0.5 + H / 2, 0));
+house.add(box(W, H, D, MAT.wall, 0, 0.5 + H + H / 2, 0));
+
+// קרניז בין הקומות
+house.add(box(W + 0.3, 0.18, D + 0.3, MAT.frame, 0, 0.5 + H, 0));
+
+/* --- גג משופע (גמלון) עם רעפים --- */
+const roofH = 2.6;
+const roofGroup = new THREE.Group();
+roofGroup.position.y = 0.5 + 2 * H;
+house.add(roofGroup);
+
+// גמלונים (משולשי קיר קדמי/אחורי)
+const gableShape = new THREE.Shape();
+gableShape.moveTo(-W / 2, 0);
+gableShape.lineTo(W / 2, 0);
+gableShape.lineTo(0, roofH);
+gableShape.closePath();
+const gableGeo = new THREE.ExtrudeGeometry(gableShape, { depth: 0.25, bevelEnabled: false });
+for (const zSign of [1, -1]) {
+  const gable = new THREE.Mesh(gableGeo, MAT.wall);
+  gable.position.z = zSign * D / 2 - (zSign > 0 ? 0.25 : 0);
+  gable.castShadow = gable.receiveShadow = true;
+  roofGroup.add(gable);
+}
+
+// שני משטחי גג משופעים
+const slopeLen = Math.hypot(W / 2 + 0.7, roofH);
+const slopeAngle = Math.atan2(roofH, W / 2 + 0.7);
+for (const side of [1, -1]) {
+  const slope = box(slopeLen, 0.16, D + 1.4, MAT.roof);
+  slope.position.set(side * (W / 2 + 0.7) / 2, roofH / 2 + 0.02, 0);
+  slope.rotation.z = -side * slopeAngle;
+  roofGroup.add(slope);
+
+  // שורות רעפים — פסים בולטים לאורך השיפוע
+  for (let r = 1; r < 6; r++) {
+    const strip = box(0.12, 0.07, D + 1.45, MAT.ridge);
+    const t = r / 6;
+    strip.position.set(side * (W / 2 + 0.7) * (1 - t), roofH * t + 0.12, 0);
+    roofGroup.add(strip);
+  }
+}
+// רכס הגג
+const ridge = box(0.35, 0.22, D + 1.5, MAT.ridge, 0, roofH + 0.08, 0);
+roofGroup.add(ridge);
+
+/* --- ארובה + עשן --- */
+const chimney = new THREE.Group();
+chimney.position.set(2.6, 0.5 + 2 * H + roofH * 0.45, -1.5);
+chimney.add(box(0.9, 2.2, 0.9, MAT.brick, 0, 1.1, 0));
+chimney.add(box(1.15, 0.25, 1.15, MAT.plinth, 0, 2.25, 0));
+house.add(chimney);
+
+const smokePuffs = [];
+const smokeMat = new THREE.MeshBasicMaterial({ color: 0xdddddd, transparent: true, opacity: 0.5 });
+for (let i = 0; i < 10; i++) {
+  const puff = new THREE.Mesh(new THREE.SphereGeometry(0.28, 10, 10), smokeMat.clone());
+  puff.userData.seed = i / 10;
+  scene.add(puff);
+  smokePuffs.push(puff);
+}
+
+/* --- חלון ניתן לשימוש חוזר --- */
+const litWindows = [];
+function makeWindow(w = 1.4, h = 1.5) {
+  const g = new THREE.Group();
+  g.add(box(w + 0.24, h + 0.24, 0.12, MAT.frame));                 // מסגרת
+  const pane = box(w, h, 0.06, MAT.glassLit.clone());              // זכוכית
+  pane.position.z = 0.02;
+  g.add(pane);
+  litWindows.push(pane);
+  g.add(box(0.08, h, 0.14, MAT.frame));                            // אנך אמצעי
+  g.add(box(w, 0.08, 0.14, MAT.frame));                            // אופק אמצעי
+  const sill = box(w + 0.4, 0.12, 0.3, MAT.frame, 0, -h / 2 - 0.12, 0.08); // אדן
+  g.add(sill);
+  // תריסים
+  for (const s of [-1, 1]) g.add(box(0.35, h + 0.1, 0.06, MAT.wood, s * (w / 2 + 0.32), 0, 0.02));
+  return g;
+}
+
+function placeOnWall(obj, x, y, z, ry = 0) {
+  obj.position.set(x, y, z);
+  obj.rotation.y = ry;
+  house.add(obj);
+}
+
+// חלונות חזית (z+)
+placeOnWall(makeWindow(), -3.1, 0.5 + H / 2 + 0.2, D / 2 + 0.07);
+placeOnWall(makeWindow(),  3.1, 0.5 + H / 2 + 0.2, D / 2 + 0.07);
+placeOnWall(makeWindow(), -3.1, 0.5 + H * 1.5 + 0.2, D / 2 + 0.07);
+placeOnWall(makeWindow(),  3.1, 0.5 + H * 1.5 + 0.2, D / 2 + 0.07);
+placeOnWall(makeWindow(1.0, 1.1), 0, 0.5 + H * 1.5 + 0.35, D / 2 + 0.07);
+// חלונות צד
+placeOnWall(makeWindow(), W / 2 + 0.07, 0.5 + H / 2 + 0.2, -1.6, Math.PI / 2);
+placeOnWall(makeWindow(), W / 2 + 0.07, 0.5 + H * 1.5 + 0.2, 1.6, Math.PI / 2);
+placeOnWall(makeWindow(), -W / 2 - 0.07, 0.5 + H / 2 + 0.2, 1.6, -Math.PI / 2);
+placeOnWall(makeWindow(), -W / 2 - 0.07, 0.5 + H * 1.5 + 0.2, -1.6, -Math.PI / 2);
+// חלון עגול בגמלון
+const roundWin = new THREE.Group();
+roundWin.add(new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.1, 10, 32), MAT.frame));
+const roundPane = new THREE.Mesh(new THREE.CircleGeometry(0.55, 32), MAT.glassLit.clone());
+litWindows.push(roundPane);
+roundWin.add(roundPane);
+roundWin.position.set(0, 0.5 + 2 * H + 1.2, D / 2 + 0.28);
+house.add(roundWin);
+
+/* --- דלת כניסה + מדרגות + גגון --- */
+const door = new THREE.Group();
+door.add(box(1.5, 2.5, 0.15, MAT.frame, 0, 1.25, 0));              // משקוף
+door.add(box(1.2, 2.25, 0.1, MAT.wood, 0, 1.12, 0.04));           // כנף
+door.add(box(0.9, 0.5, 0.12, MAT.woodLight, 0, 1.7, 0.06));       // פאנל עליון
+door.add(box(0.9, 0.9, 0.12, MAT.woodLight, 0, 0.75, 0.06));      // פאנל תחתון
+const handle = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 12), MAT.metal);
+handle.position.set(0.42, 1.15, 0.14);
+door.add(handle);
+door.position.set(0, 0.5, D / 2 + 0.05);
+house.add(door);
+
+// מדרגות כניסה
+for (let i = 0; i < 3; i++)
+  house.add(box(2.6 - i * 0.4, 0.17, 1.4 - i * 0.35, MAT.plinth, 0, 0.085 + i * 0.17, D / 2 + 0.9 - i * 0.3));
+
+// גגון מעל הדלת על שני עמודים
+house.add(box(2.6, 0.12, 1.6, MAT.roof, 0, 3.2, D / 2 + 0.8));
+for (const s of [-1, 1])
+  house.add(box(0.14, 2.6, 0.14, MAT.frame, s * 1.1, 1.85, D / 2 + 1.4));
+
+/* --- מרפסת קומה עליונה עם מעקה --- */
+const balcony = new THREE.Group();
+balcony.position.set(-3.1, 0.5 + H, D / 2);
+balcony.add(box(3.2, 0.16, 1.5, MAT.plinth, 0, 0, 0.75));
+for (let i = 0; i <= 8; i++)
+  balcony.add(box(0.08, 0.85, 0.08, MAT.frame, -1.5 + i * 0.375, 0.5, 1.42));
+for (const s of [-1, 1])
+  for (let i = 0; i <= 3; i++)
+    balcony.add(box(0.08, 0.85, 0.08, MAT.frame, s * 1.5, 0.5, i * 0.45));
+balcony.add(box(3.2, 0.1, 0.1, MAT.wood, 0, 0.95, 1.42));          // מאחז יד
+for (const s of [-1, 1]) balcony.add(box(0.1, 0.1, 1.5, MAT.wood, s * 1.5, 0.95, 0.7));
+house.add(balcony);
+
+/* ---------- גינה: עצים, שיחים, פרחים ---------- */
+function makeTree(x, z, s = 1) {
+  const t = new THREE.Group();
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.18 * s, 0.28 * s, 2.2 * s, 10), MAT.trunk);
+  trunk.position.y = 1.1 * s;
+  trunk.castShadow = true;
+  t.add(trunk);
+  for (const [dy, r] of [[2.4, 1.3], [3.2, 1.0], [3.9, 0.65]]) {
+    const ball = new THREE.Mesh(new THREE.SphereGeometry(r * s, 14, 14), MAT.leaves);
+    ball.position.y = dy * s;
+    ball.castShadow = true;
+    t.add(ball);
+  }
+  t.position.set(x, 0, z);
+  scene.add(t);
+}
+makeTree(-10, 6, 1.2);
+makeTree(11, 2, 1);
+makeTree(-9, -7, 0.9);
+makeTree(9, -9, 1.1);
+
+function makeBush(x, z, s = 1) {
+  const bush = new THREE.Mesh(new THREE.SphereGeometry(0.55 * s, 12, 12), MAT.leaves);
+  bush.position.set(x, 0.4 * s, z);
+  bush.scale.y = 0.75;
+  bush.castShadow = true;
+  scene.add(bush);
+}
+[[-4.5, 5.2], [4.5, 5.2], [-6.2, 4.6], [6.2, 4.6], [-2, 5.4], [2, 5.4]].forEach(([x, z]) => makeBush(x, z, 0.9));
+
+// ערוגות פרחים
+const flowerColors = [0xe63946, 0xffb703, 0xd6459c, 0xffffff];
+for (let i = 0; i < 26; i++) {
+  const fx = (Math.random() - 0.5) * 2 > 0 ? 2 + Math.random() * 4 : -2 - Math.random() * 4;
+  const fz = 5 + Math.random() * 2.2;
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.4, 6),
+    new THREE.MeshStandardMaterial({ color: 0x2e7d32 }));
+  stem.position.set(fx, 0.2, fz);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 8),
+    new THREE.MeshStandardMaterial({ color: flowerColors[i % flowerColors.length] }));
+  head.position.set(fx, 0.45, fz);
+  scene.add(stem, head);
+}
+
+/* ---------- גדר היקפית + שער ---------- */
+const fenceR = 15;
+const posts = 44;
+for (let i = 0; i < posts; i++) {
+  const a = (i / posts) * Math.PI * 2;
+  // פתח שער בחזית
+  if (Math.abs(a - Math.PI / 2) < 0.16) continue;
+  const px = Math.cos(a) * fenceR, pz = Math.sin(a) * fenceR;
+  const post = box(0.16, 1.1, 0.16, MAT.fence, px, 0.55, pz);
+  scene.add(post);
+  const a2 = ((i + 0.5) / posts) * Math.PI * 2;
+  if (Math.abs(a2 - Math.PI / 2) < 0.16) continue;
+  const rail = box(0.1, 0.1, 2.1, MAT.fence, Math.cos(a2) * fenceR, 0.85, Math.sin(a2) * fenceR);
+  rail.rotation.y = -a2;
+  scene.add(rail);
+}
+// עמודי שער
+for (const s of [-1, 1]) scene.add(box(0.3, 1.5, 0.3, MAT.plinth, s * 1.6, 0.75, fenceR));
+
+/* ---------- פנס רחוב ליד השביל ---------- */
+const lampGroup = new THREE.Group();
+lampGroup.position.set(2.4, 0, 9);
+lampGroup.add(box(0.12, 3.4, 0.12, MAT.metal, 0, 1.7, 0));
+const lampHead = new THREE.Mesh(new THREE.SphereGeometry(0.28, 14, 14),
+  new THREE.MeshStandardMaterial({ color: 0xfff2c0, emissive: 0xffc44d, emissiveIntensity: 0 }));
+lampHead.position.y = 3.5;
+lampGroup.add(lampHead);
+const lampLight = new THREE.PointLight(0xffc44d, 0, 12, 2);
+lampLight.position.y = 3.4;
+lampGroup.add(lampLight);
+scene.add(lampGroup);
+
+// מנורת קיר מעל הדלת
+const porchLight = new THREE.PointLight(0xffd27a, 0, 8, 2);
+porchLight.position.set(0, 3.0, D / 2 + 0.9);
+scene.add(porchLight);
+
+/* ---------- מצב יום / לילה ---------- */
+let night = false;
+const dayNightBtn = document.getElementById('dayNightBtn');
+dayNightBtn.addEventListener('click', () => {
+  night = !night;
+  dayNightBtn.textContent = night ? '☀️ מצב יום' : '🌙 מצב לילה';
+  moon.visible = night;
+  sun.intensity = night ? 0.15 : 2.6;
+  sun.color.set(night ? 0x8fa8ff : 0xfff3d6);
+  ambient.intensity = night ? 0.12 : 0.55;
+  hemi.intensity = night ? 0.08 : 0.5;
+  lampLight.intensity = night ? 2.4 : 0;
+  porchLight.intensity = night ? 1.6 : 0;
+  lampHead.material.emissiveIntensity = night ? 1.4 : 0;
+  scene.background.copy(night ? skyNight : skyDay);
+  scene.fog.color.copy(scene.background);
+  for (const pane of litWindows) pane.material.emissiveIntensity = night ? 1.6 : 0;
+});
+
+const autoRotateBtn = document.getElementById('autoRotateBtn');
+autoRotateBtn.addEventListener('click', () => {
+  controls.autoRotate = !controls.autoRotate;
+  controls.autoRotateSpeed = 1.2;
+});
+
+/* ---------- לולאת אנימציה ---------- */
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  // עשן עולה מהארובה
+  const base = new THREE.Vector3().setFromMatrixPosition(chimney.matrixWorld);
+  for (const puff of smokePuffs) {
+    const p = (t * 0.12 + puff.userData.seed) % 1;
+    puff.position.set(
+      base.x + Math.sin(p * 9 + puff.userData.seed * 20) * 0.35 * p,
+      base.y + 2.4 + p * 4.5,
+      base.z + Math.cos(p * 7) * 0.3 * p
+    );
+    const grow = 0.6 + p * 1.8;
+    puff.scale.setScalar(grow);
+    puff.material.opacity = 0.45 * (1 - p);
+  }
+
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>
