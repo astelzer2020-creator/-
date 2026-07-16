@@ -74,14 +74,10 @@ export default function Lighting({ materials, quality }) {
     }
     if (starsRef.current) starsRef.current.visible = k > 0.35;
 
-    // תאורת פנים
-    const inner = THREE.MathUtils.lerp(0, 1, k);
-    for (const p of pts.current) if (p) p.intensity = inner * 14;
-    materials.lampshade.emissiveIntensity = inner * 1.5;
-    if (materials.glass) {
-      materials.glass.emissive = materials.glass.emissive || new THREE.Color(0xffdf9e);
-      materials.glass.emissiveIntensity = inner * 0.25;
-    }
+    // תאורת פנים — דולקת חלש גם ביום (חמימות ועומק), חזק בלילה
+    for (const p of pts.current) if (p) p.intensity = THREE.MathUtils.lerp(3.2, 14, k);
+    materials.lampshade.emissiveIntensity = THREE.MathUtils.lerp(0.3, 1.5, k);
+    materials.glass.emissiveIntensity = k * 0.25;
   });
 
   const shadowSize = quality === 'low' ? 1024 : 2048;
