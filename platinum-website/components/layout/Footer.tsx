@@ -25,7 +25,7 @@ export function Footer() {
 
           <nav aria-label="Footer" className="grid grid-cols-2 gap-8">
             <div>
-              <p className="mb-4 text-xs font-medium uppercase tracking-eyebrow text-bronze">
+              <p className="mb-4 text-xs font-medium uppercase tracking-eyebrow text-bronze-light">
                 Explore
               </p>
               <ul className="space-y-3 text-sm">
@@ -39,7 +39,7 @@ export function Footer() {
               </ul>
             </div>
             <div>
-              <p className="mb-4 text-xs font-medium uppercase tracking-eyebrow text-bronze">
+              <p className="mb-4 text-xs font-medium uppercase tracking-eyebrow text-bronze-light">
                 Legal
               </p>
               <ul className="space-y-3 text-sm">
@@ -55,7 +55,7 @@ export function Footer() {
           </nav>
 
           <div>
-            <p className="mb-4 text-xs font-medium uppercase tracking-eyebrow text-bronze">
+            <p className="mb-4 text-xs font-medium uppercase tracking-eyebrow text-bronze-light">
               Start a conversation
             </p>
             <ul className="space-y-3 text-sm">

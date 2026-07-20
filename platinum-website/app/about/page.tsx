@@ -2,7 +2,6 @@ import Image from "next/image";
 import { Container } from "@/components/ui/Container";
 import { PageHeader } from "@/components/sections/PageHeader";
 import { ConversionBlock } from "@/components/sections/ConversionBlock";
-import { Reveal } from "@/components/ui/Reveal";
 import { Eyebrow, SectionIntro } from "@/components/ui/SectionIntro";
 import { verifiedLicensing } from "@/lib/content";
 import { pageMetadata, breadcrumbJsonLd } from "@/lib/seo";
@@ -45,7 +44,7 @@ export default function AboutPage() {
       <section className="py-14 lg:py-20">
         <Container>
           <div className="grid items-center gap-12 lg:grid-cols-2">
-            <Reveal>
+            <div data-reveal>
               <div className="relative aspect-[16/10] overflow-hidden bg-platinum">
                 <Image
                   src="/images/about-hero.svg"
@@ -55,8 +54,8 @@ export default function AboutPage() {
                   className="object-cover"
                 />
               </div>
-            </Reveal>
-            <Reveal delay={100}>
+            </div>
+            <div data-reveal style={{ transitionDelay: "100ms" }}>
               <Eyebrow>The work we want</Eyebrow>
               <h2 className="font-display text-h2 text-ink">
                 Built for projects where the details carry the value.
@@ -75,7 +74,7 @@ export default function AboutPage() {
                 {/* Founder name, title, bio and portrait publish after the
                     client content interview and approval (docs/APPROVALS.md). */}
               </p>
-            </Reveal>
+            </div>
           </div>
         </Container>
       </section>
@@ -90,12 +89,12 @@ export default function AboutPage() {
           />
           <div className="mt-12 grid gap-10 md:grid-cols-2">
             {principles.map((p, i) => (
-              <Reveal key={p.title} delay={i * 60}>
+              <div key={p.title} data-reveal style={{ transitionDelay: `${i * 60}ms` }}>
                 <div className="border-l-2 border-bronze pl-6">
                   <h3 className="font-display text-h3 text-ivory">{p.title}</h3>
                   <p className="mt-3 text-platinum/85">{p.body}</p>
                 </div>
-              </Reveal>
+              </div>
             ))}
           </div>
         </Container>

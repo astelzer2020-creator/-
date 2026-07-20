@@ -1,7 +1,6 @@
 import { Container } from "@/components/ui/Container";
 import { PageHeader } from "@/components/sections/PageHeader";
 import { ConversionBlock } from "@/components/sections/ConversionBlock";
-import { Reveal } from "@/components/ui/Reveal";
 import { processSteps, processHeadline, processSupport } from "@/content/process";
 import { pageMetadata, breadcrumbJsonLd } from "@/lib/seo";
 
@@ -24,7 +23,7 @@ export default function ProcessPage() {
                 key={step.number}
                 className={`border-ink/10 py-12 ${i > 0 ? "border-t" : ""}`}
               >
-                <Reveal>
+                <div data-reveal>
                   <div className="grid gap-6 lg:grid-cols-[120px_1fr_280px] lg:gap-12">
                     <p className="font-display text-5xl text-bronze-dark">{step.number}</p>
                     <div>
@@ -39,7 +38,7 @@ export default function ProcessPage() {
                       <p className="mt-2 text-sm text-ink">{step.deliverable}</p>
                     </div>
                   </div>
-                </Reveal>
+                </div>
               </li>
             ))}
           </ol>

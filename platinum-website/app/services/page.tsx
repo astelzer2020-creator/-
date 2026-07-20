@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { PageHeader } from "@/components/sections/PageHeader";
 import { ConversionBlock } from "@/components/sections/ConversionBlock";
-import { Reveal } from "@/components/ui/Reveal";
 import { services } from "@/content/services";
 import { pageMetadata, breadcrumbJsonLd } from "@/lib/seo";
 
@@ -26,7 +25,7 @@ export default function ServicesPage() {
         <Container>
           <div className="space-y-16">
             {services.map((service, i) => (
-              <Reveal key={service.slug}>
+              <div key={service.slug} data-reveal>
                 <article
                   className={`group relative grid items-center gap-8 lg:grid-cols-2 lg:gap-14 ${
                     i % 2 === 1 ? "lg:[&>*:first-child]:order-2" : ""
@@ -57,7 +56,7 @@ export default function ServicesPage() {
                     </span>
                   </div>
                 </article>
-              </Reveal>
+              </div>
             ))}
           </div>
         </Container>

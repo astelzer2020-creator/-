@@ -49,10 +49,6 @@ export const verifiedEmail: string | null = (() => {
   return v && v.length > 0 ? v : null;
 })();
 
-/** Verified service-area label, or null. Copy falls back to "New York" as market framing (not a licensure claim). */
-export const verifiedServiceArea: string | null =
-  verifiedOrNull<string>("serviceArea");
-
 /** Verified legal entity names for the footer, or empty list. */
 export const verifiedLegalEntities: string[] =
   verifiedOrNull<string[]>("legalEntities") ?? [];

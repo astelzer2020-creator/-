@@ -20,6 +20,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: path === "" ? 1 : 0.7,
   }));
 
+  const categoryRoutes = ["residential", "commercial", "installations"].map(
+    (c) => ({
+      url: `${siteUrl}/work/category/${c}`,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    }),
+  );
+
   const serviceRoutes = services.map((s) => ({
     url: `${siteUrl}/services/${s.slug}`,
     changeFrequency: "monthly" as const,
@@ -35,5 +43,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     }));
 
-  return [...staticRoutes, ...serviceRoutes, ...projectRoutes];
+  return [...staticRoutes, ...categoryRoutes, ...serviceRoutes, ...projectRoutes];
 }

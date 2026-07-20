@@ -11,13 +11,16 @@ const fraunces = Fraunces({
   subsets: ["latin"],
   variable: "--font-fraunces",
   display: "swap",
-  axes: ["opsz"],
 });
 
+// Body font loads without preload so it never competes with the LCP
+// image for bandwidth on slow connections; the size-adjusted fallback
+// keeps CLS at zero during the swap.
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -59,6 +62,14 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
+        />
+        {/* Scroll-reveal driver — replaces a React client component so
+            static sections carry zero hydration cost. See globals.css. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){var d=document;d.documentElement.classList.add('js');var e=d.querySelectorAll('[data-reveal]');if(!('IntersectionObserver' in window)){e.forEach(function(n){n.classList.add('is-visible')});return}var o=new IntersectionObserver(function(es){es.forEach(function(x){if(x.isIntersecting){x.target.classList.add('is-visible');o.unobserve(x.target)}})},{rootMargin:'0px 0px -10% 0px',threshold:0.1});e.forEach(function(n){o.observe(n)})})();",
+          }}
         />
       </body>
     </html>

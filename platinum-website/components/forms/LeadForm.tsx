@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { submitLead } from "@/app/actions/lead";
 import { SubmitButton } from "@/components/ui/Button";
 import { track } from "@/lib/analytics";
@@ -44,10 +44,28 @@ function Field({
   );
 }
 
-export function LeadForm({ defaultProjectType }: { defaultProjectType?: string }) {
+export function LeadForm() {
   const [state, formAction, pending] = useActionState(submitLead, initialState);
   const startedRef = useRef(false);
+  const projectTypeRef = useRef<HTMLSelectElement>(null);
   const errors = state.fieldErrors ?? {};
+
+  // Preselect the project type from ?type= (links like
+  // /contact?type=commercial on service pages). Client-side so the
+  // page itself stays fully static.
+  useEffect(() => {
+    const hintMap: Record<string, (typeof projectTypes)[number]> = {
+      residential: "Residential renovation",
+      commercial: "Commercial build-out",
+      installations: "Specialty installation",
+      "general-contracting": "General contracting",
+    };
+    const hint = new URLSearchParams(window.location.search).get("type");
+    const select = projectTypeRef.current;
+    if (!hint || !select || select.value) return;
+    const match = hintMap[hint.toLowerCase()];
+    if (match) select.value = match;
+  }, []);
 
   const onFirstInteraction = () => {
     if (!startedRef.current) {
@@ -58,13 +76,6 @@ export function LeadForm({ defaultProjectType }: { defaultProjectType?: string }
       });
     }
   };
-
-  const resolvedDefault =
-    projectTypes.find((t) =>
-      defaultProjectType
-        ? t.toLowerCase().startsWith(defaultProjectType.toLowerCase().split("-")[0] ?? "")
-        : false,
-    ) ?? "";
 
   return (
     <form action={formAction} onFocus={onFirstInteraction} noValidate>
@@ -130,8 +141,9 @@ export function LeadForm({ defaultProjectType }: { defaultProjectType?: string }
             id="lead-project-type"
             name="projectType"
             required
+            ref={projectTypeRef}
             key={state.values?.projectType ?? "initial"}
-            defaultValue={state.values?.projectType ?? resolvedDefault}
+            defaultValue={state.values?.projectType ?? ""}
             aria-invalid={Boolean(errors.projectType)}
             aria-describedby={errors.projectType ? "lead-project-type-error" : "lead-project-type-hint"}
             className={inputClass}

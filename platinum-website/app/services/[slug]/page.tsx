@@ -4,7 +4,6 @@ import type { Metadata } from "next";
 import { Container } from "@/components/ui/Container";
 import { ButtonLink } from "@/components/ui/Button";
 import { Eyebrow, SectionIntro } from "@/components/ui/SectionIntro";
-import { Reveal } from "@/components/ui/Reveal";
 import { FaqList } from "@/components/sections/FaqList";
 import { ProjectCard } from "@/components/work/ProjectCard";
 import { services, getService } from "@/content/services";
@@ -79,15 +78,15 @@ export default async function ServiceDetailPage({
       <section className="py-14 lg:py-20" aria-labelledby="who-heading">
         <Container>
           <div className="grid gap-12 lg:grid-cols-3">
-            <Reveal>
+            <div data-reveal>
               <div>
                 <h2 id="who-heading" className="font-display text-h3 text-ink">
                   Who this is for
                 </h2>
                 <p className="mt-4 text-slate">{service.audience}</p>
               </div>
-            </Reveal>
-            <Reveal delay={80}>
+            </div>
+            <div data-reveal style={{ transitionDelay: "80ms" }}>
               <div>
                 <h2 className="font-display text-h3 text-ink">What&rsquo;s included</h2>
                 <ul className="mt-4 space-y-3 text-slate">
@@ -99,8 +98,8 @@ export default async function ServiceDetailPage({
                   ))}
                 </ul>
               </div>
-            </Reveal>
-            <Reveal delay={160}>
+            </div>
+            <div data-reveal style={{ transitionDelay: "160ms" }}>
               <div>
                 <h2 className="font-display text-h3 text-ink">Risks we manage</h2>
                 <ul className="mt-4 space-y-3 text-slate">
@@ -112,7 +111,7 @@ export default async function ServiceDetailPage({
                   ))}
                 </ul>
               </div>
-            </Reveal>
+            </div>
           </div>
         </Container>
       </section>
@@ -122,9 +121,9 @@ export default async function ServiceDetailPage({
           <SectionIntro eyebrow="How we work" title="The approach" onDark />
           <div className="mt-10 grid gap-8 md:grid-cols-3">
             {service.approach.map((item, i) => (
-              <Reveal key={item} delay={i * 80}>
+              <div key={item} data-reveal style={{ transitionDelay: `${i * 80}ms` }}>
                 <p className="border-l-2 border-bronze pl-5 text-platinum">{item}</p>
-              </Reveal>
+              </div>
             ))}
           </div>
         </Container>

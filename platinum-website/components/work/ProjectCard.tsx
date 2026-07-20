@@ -2,7 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Project } from "@/content/projects";
 
-export function ProjectCard({ project }: { project: Project }) {
+export function ProjectCard({
+  project,
+  headingLevel: Heading = "h3",
+}: {
+  project: Project;
+  /** h2 when the card sits directly under the page h1 (e.g. /work). */
+  headingLevel?: "h2" | "h3";
+}) {
   return (
     <article className="group relative flex flex-col">
       <div className="relative aspect-[4/3] overflow-hidden bg-platinum">
@@ -23,14 +30,14 @@ export function ProjectCard({ project }: { project: Project }) {
         <p className="text-xs uppercase tracking-eyebrow text-bronze-dark">
           {project.category} · {project.location}
         </p>
-        <h3 className="mt-2 font-display text-h3 text-ink">
+        <Heading className="mt-2 font-display text-h3 text-ink">
           <Link
             href={`/work/${project.slug}`}
             className="after:absolute after:inset-0 after:content-[''] group-hover:text-bronze-dark"
           >
             {project.title}
           </Link>
-        </h3>
+        </Heading>
         <p className="mt-2 text-sm leading-relaxed text-slate">{project.scope}</p>
       </div>
     </article>

@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { ButtonLink } from "@/components/ui/Button";
 import { Eyebrow, SectionIntro } from "@/components/ui/SectionIntro";
-import { Reveal } from "@/components/ui/Reveal";
 import { ProjectCard } from "@/components/work/ProjectCard";
 import { ConversionBlock } from "@/components/sections/ConversionBlock";
 import { site } from "@/content/site";
@@ -80,7 +79,7 @@ export default function HomePage() {
       {visibleProjects.length > 0 ? (
         <section aria-labelledby="work-heading" className="py-20 lg:py-28">
           <Container>
-            <Reveal>
+            <div data-reveal>
               <div className="flex flex-wrap items-end justify-between gap-6">
                 <SectionIntro
                   eyebrow="Selected Work"
@@ -91,12 +90,12 @@ export default function HomePage() {
                   View all work
                 </ButtonLink>
               </div>
-            </Reveal>
+            </div>
             <div className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
               {visibleProjects.map((project, i) => (
-                <Reveal key={project.slug} delay={i * 80}>
+                <div key={project.slug} data-reveal style={{ transitionDelay: `${i * 80}ms` }}>
                   <ProjectCard project={project} />
-                </Reveal>
+                </div>
               ))}
             </div>
           </Container>
@@ -106,7 +105,7 @@ export default function HomePage() {
       {/* 04 — Positioning */}
       <section aria-labelledby="positioning-heading" className="bg-ink py-20 lg:py-28">
         <Container>
-          <Reveal>
+          <div data-reveal>
             <div className="max-w-3xl">
               <Eyebrow onDark>Why Platinum</Eyebrow>
               <h2 id="positioning-heading" className="font-display text-h2 text-ivory">
@@ -120,23 +119,23 @@ export default function HomePage() {
                 installation, quality control, and closeout.
               </p>
             </div>
-          </Reveal>
+          </div>
         </Container>
       </section>
 
       {/* 05 — Services */}
       <section aria-labelledby="services-heading" className="py-20 lg:py-28">
         <Container>
-          <Reveal>
+          <div data-reveal>
             <SectionIntro
               eyebrow="Services"
               title="Four ways we take responsibility"
               lead="Each service is a defined scope of accountability — who it serves, what is included, and how the work is controlled."
             />
-          </Reveal>
+          </div>
           <div className="mt-12 grid gap-10 sm:grid-cols-2">
             {services.map((service, i) => (
-              <Reveal key={service.slug} delay={i * 80}>
+              <div key={service.slug} data-reveal style={{ transitionDelay: `${i * 80}ms` }}>
                 <article className="group relative flex flex-col">
                   <div className="relative aspect-[4/3] overflow-hidden bg-platinum">
                     <Image
@@ -159,7 +158,7 @@ export default function HomePage() {
                     {service.promise}
                   </p>
                 </article>
-              </Reveal>
+              </div>
             ))}
           </div>
         </Container>
@@ -170,7 +169,7 @@ export default function HomePage() {
         <section aria-labelledby="featured-heading" className="bg-platinum/40 py-20 lg:py-28">
           <Container>
             <div className="grid items-center gap-12 lg:grid-cols-2">
-              <Reveal>
+              <div data-reveal>
                 <div className="relative aspect-[3/2] overflow-hidden bg-platinum">
                   <Image
                     src={featured.hero.src}
@@ -180,8 +179,8 @@ export default function HomePage() {
                     className="object-cover"
                   />
                 </div>
-              </Reveal>
-              <Reveal delay={100}>
+              </div>
+              <div data-reveal style={{ transitionDelay: "100ms" }}>
                 <Eyebrow>Featured case study</Eyebrow>
                 <h2 id="featured-heading" className="font-display text-h2 text-ink">
                   {featured.title}
@@ -203,7 +202,7 @@ export default function HomePage() {
                 <ButtonLink href={`/work/${featured.slug}`} variant="ghost" className="mt-8">
                   Read the full case study
                 </ButtonLink>
-              </Reveal>
+              </div>
             </div>
           </Container>
         </section>
@@ -212,31 +211,31 @@ export default function HomePage() {
       {/* 07 — Process */}
       <section aria-labelledby="process-heading" className="py-20 lg:py-28">
         <Container>
-          <Reveal>
+          <div data-reveal>
             <SectionIntro
               eyebrow="Process"
               title={processHeadline}
               lead={processSupport}
             />
-          </Reveal>
+          </div>
           <ol className="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-5">
             {processSteps.map((step, i) => (
               <li key={step.number}>
-                <Reveal delay={i * 60}>
+                <div data-reveal style={{ transitionDelay: `${i * 60}ms` }}>
                   <p className="font-display text-3xl text-bronze-dark">{step.number}</p>
                   <h3 className="mt-3 font-medium text-ink">{step.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-slate">
                     {step.clientExplanation}
                   </p>
-                </Reveal>
+                </div>
               </li>
             ))}
           </ol>
-          <Reveal>
+          <div data-reveal>
             <ButtonLink href="/process" variant="ghost" className="mt-10">
               See the full process
             </ButtonLink>
-          </Reveal>
+          </div>
         </Container>
       </section>
 
@@ -264,7 +263,7 @@ export default function HomePage() {
           title, bio and photo publish only after client verification. */}
       <section aria-labelledby="leadership-heading" className="border-t border-ink/10 py-20 lg:py-24">
         <Container>
-          <Reveal>
+          <div data-reveal>
             <div className="max-w-2xl">
               <Eyebrow>Accountability</Eyebrow>
               <h2 id="leadership-heading" className="font-display text-h2 text-ink">
@@ -280,7 +279,7 @@ export default function HomePage() {
                 About the company
               </ButtonLink>
             </div>
-          </Reveal>
+          </div>
         </Container>
       </section>
 

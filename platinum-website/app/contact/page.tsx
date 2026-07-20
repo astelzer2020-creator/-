@@ -11,13 +11,7 @@ export const metadata = pageMetadata({
   path: "/contact",
 });
 
-export default async function ContactPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ type?: string }>;
-}) {
-  const { type } = await searchParams;
-
+export default function ContactPage() {
   return (
     <>
       <PageHeader
@@ -29,7 +23,7 @@ export default async function ContactPage({
         <Container>
           <div className="grid gap-14 lg:grid-cols-[1fr_320px]">
             <div className="relative max-w-2xl">
-              <LeadForm defaultProjectType={type} />
+              <LeadForm />
             </div>
             <aside className="space-y-8 text-sm leading-relaxed text-slate">
               <div>

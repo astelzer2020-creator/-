@@ -18,8 +18,10 @@ product specification.
 | Fonts | `next/font` — Fraunces (display) + Inter (body), self-hosted at build |
 | Deployment | Vercel-ready (also runs on any Node host: `npm run build && npm run start`) |
 
-First Load JS is ~103 kB shared; every page is statically rendered except
-`/contact` and `/work` (dynamic for form state / filters).
+First Load JS is ~102 kB shared; every page is statically rendered.
+Audited at 100/100/100/100 Lighthouse desktop (95–99 perf mobile, 100
+a11y/BP/SEO) and zero axe-core WCAG AA violations — see
+`docs/LAUNCH-CHECKLIST.md` for the full QA record.
 
 ## Quick start
 
@@ -30,12 +32,13 @@ npm run dev                  # http://localhost:3000
 
 npm run typecheck            # tsc --noEmit (strict)
 npm run lint                 # eslint
+npm test                     # vitest: schema, rate-limit, content integrity
 npm run build && npm start   # production build + serve
 ```
 
 ## Routes (all P0 routes from the brief)
 
-`/` · `/about` · `/services` · `/services/{residential-renovation,commercial-build-outs,specialty-installations,general-contracting}` · `/work` (+ `?category=` filters) · `/work/[slug]` case studies · `/process` · `/contact` · `/contact/thank-you` · `/privacy` · `/terms` · `/accessibility` · custom 404 · `sitemap.xml` · `robots.txt`
+`/` · `/about` · `/services` · `/services/{residential-renovation,commercial-build-outs,specialty-installations,general-contracting}` · `/work` · `/work/category/{residential,commercial,installations}` filters · `/work/[slug]` case studies · `/process` · `/contact` · `/contact/thank-you` · `/privacy` · `/terms` · `/accessibility` · custom 404 · `sitemap.xml` · `robots.txt` — every route statically rendered.
 
 ## The verification gate (read this first)
 
