@@ -1,0 +1,83 @@
+{
+  "_readme": "Verification gate required by the master brief (section 1). Every business fact carries a status: 'verified' (approved for publication by the client) or 'pending' (REQUIRES CLIENT APPROVAL — must never appear on the live site as fact). Components read this file through lib/content.ts and must gate rendering on status === 'verified'. The single consolidated approval list lives in docs/APPROVALS.md.",
+  "publicBrandName": {
+    "value": "PLATINUM",
+    "status": "verified",
+    "note": "Working umbrella brand per brief. Full legal lockup (2-3 logotype options) still owed to client."
+  },
+  "legalEntities": {
+    "value": [],
+    "status": "pending",
+    "note": "REQUIRES CLIENT APPROVAL — Platinum Installations Inc. / Platinum TNT LLC / Platinum Construction were provided as brief context but are NOT verified. Spelling, DBA, ownership and footer presentation must be confirmed by legal before publication."
+  },
+  "founder": {
+    "value": { "name": "Boruch Goldbaum", "role": "Founder" },
+    "status": "pending",
+    "note": "REQUIRES CLIENT APPROVAL — preferred spelling (Boruch/Baruch), title, bio and photo must be confirmed in a content interview."
+  },
+  "phone": {
+    "value": "(718) 677-1050",
+    "status": "pending",
+    "note": "REQUIRES CLIENT APPROVAL — calls, SMS, business hours and routing must be verified before Call/Text actions go live."
+  },
+  "email": {
+    "value": "",
+    "status": "pending",
+    "note": "REQUIRES CLIENT APPROVAL — no public email address was provided."
+  },
+  "address": {
+    "value": null,
+    "status": "pending",
+    "note": "REQUIRES CLIENT APPROVAL — not provided. Decide: office address, service-area-only, or mailing address."
+  },
+  "serviceArea": {
+    "value": "New York",
+    "status": "pending",
+    "note": "REQUIRES CLIENT APPROVAL — publish only boroughs/areas where the company is actually licensed and active. 'New York' used as the broadest safe label pending confirmation."
+  },
+  "licensing": {
+    "value": [],
+    "status": "pending",
+    "note": "REQUIRES CLIENT APPROVAL — license/insurance numbers only from approved documents, displayed per legal requirements."
+  },
+  "yearsOfExperience": {
+    "value": null,
+    "status": "pending",
+    "note": "REQUIRES CLIENT APPROVAL — no numbers may be used until proven."
+  },
+  "projectCounts": {
+    "value": null,
+    "status": "pending",
+    "note": "REQUIRES CLIENT APPROVAL — no counters or stats may be shown without proof."
+  },
+  "testimonials": {
+    "value": [],
+    "status": "pending",
+    "note": "REQUIRES CLIENT APPROVAL — only client-approved text with agreed attribution level."
+  },
+  "awards": {
+    "value": [],
+    "status": "pending",
+    "note": "REQUIRES CLIENT APPROVAL — none provided; nothing may be claimed."
+  },
+  "socialLinks": {
+    "value": [],
+    "status": "pending",
+    "note": "REQUIRES CLIENT APPROVAL — only active, owned profiles."
+  },
+  "domain": {
+    "value": null,
+    "status": "pending",
+    "note": "REQUIRES CLIENT APPROVAL — ownership/availability check needed (incl. audit of platinumconstructionny.com). Do not purchase or transfer without explicit approval."
+  },
+  "businessHours": {
+    "value": null,
+    "status": "pending",
+    "note": "REQUIRES CLIENT APPROVAL — needed for contact page and response-time promise."
+  },
+  "responseSla": {
+    "value": "one business day",
+    "status": "pending",
+    "note": "REQUIRES CLIENT APPROVAL — thank-you page promises a response window; confirm the real SLA."
+  }
+}
