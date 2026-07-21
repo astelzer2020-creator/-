@@ -14,7 +14,8 @@
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
-    "format": "pnpm -r format"
+    "format": "pnpm -r format",
+    "dashboard": "node tools/founder-dashboard/generate.mjs"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

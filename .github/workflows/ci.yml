@@ -38,6 +38,12 @@ jobs:
       - name: Mypy strict (analytics)
         working-directory: services/analytics
         run: uv run mypy src
+      - name: Founder dashboard freshness (ATL-021 / DL-013)
+        # The dashboard is generated-only and deterministic (timestamp from git, not wall
+        # clock), so a diff here means coordination/docs changed without `pnpm dashboard`.
+        run: |
+          pnpm dashboard
+          git diff --exit-code FOUNDER_DASHBOARD.md FOUNDER_DASHBOARD.html
 
   test:
     runs-on: ubuntu-latest

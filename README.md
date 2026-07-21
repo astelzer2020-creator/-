@@ -4,6 +4,7 @@
 > platform. Start at [`CLAUDE.md`](CLAUDE.md) (repo constitution) and [`docs/README.md`](docs/README.md)
 > (documentation index). The new code lives in `apps/`, `services/`, `packages/`; everything described
 > below is the **frozen legacy prototype** (see `docs/adr/0007`), kept as reference until milestone M2.
+> Founder homepage: [`FOUNDER_DASHBOARD.md`](FOUNDER_DASHBOARD.md) — generated status dashboard (`pnpm dashboard`, ATL-021).
 
 Full-stack web app for Israeli urban renewal simulation — React + Node.js + Python FastAPI.
 
