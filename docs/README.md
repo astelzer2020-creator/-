@@ -22,7 +22,10 @@ Start with [`CLAUDE.md`](../CLAUDE.md) (the constitution), then:
 - [pilot/QA_PLAN.md](pilot/QA_PLAN.md) — launch bar, acceptance scenarios, encoding matrix, triage SLAs (QA)
 
 ## Live coordination state
-- [coordination/OPERATING_PROTOCOL.md](coordination/OPERATING_PROTOCOL.md) — execution flow + collision rules (binding)
+- [coordination/CURRENT_MISSION.md](coordination/CURRENT_MISSION.md) — what Atlas is doing right now (read first)
+- [coordination/OPERATING_PROTOCOL.md](coordination/OPERATING_PROTOCOL.md) — execution flow + collision rules (binding, five-agent system)
+- [coordination/EXECUTION_PROTOCOL.md](coordination/EXECUTION_PROTOCOL.md) — unified rules for ALL environments incl. VS Code workers (ADR-0010)
+- [coordination/FILE_LOCKS.md](coordination/FILE_LOCKS.md) — file-lock declarations (check before editing)
 - [coordination/MASTER_ROADMAP.md](coordination/MASTER_ROADMAP.md) — owned milestone status
 - [coordination/AGENT_WORKBOARD.md](coordination/AGENT_WORKBOARD.md) — tasks, owners, evidence
 - [coordination/DECISION_LOG.md](coordination/DECISION_LOG.md) · [coordination/RISK_REGISTER.md](coordination/RISK_REGISTER.md) · [coordination/HANDOFFS.md](coordination/HANDOFFS.md)

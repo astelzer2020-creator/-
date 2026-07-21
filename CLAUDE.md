@@ -17,7 +17,17 @@ they conflict with higher ones.
   reference. Never fix it, never import from it; port out of it with tests.
 - `docs/` — architecture, roadmap, standards, strategies, ADRs, pilot pack, coordination state.
 
-## The multi-agent operating model
+## The unified operating model (all environments)
+
+The Claude Code five-agent system is the **single authoritative Atlas operating system**. Agents in any
+other environment (VS Code: Codex, Claude Code VS, Grok) are **execution workers**: they take bounded
+tasks from the workboard, follow `docs/coordination/EXECUTION_PROTOCOL.md`, lock files via
+`docs/coordination/FILE_LOCKS.md`, and may move tasks only to IMPLEMENTED — never VERIFIED (QA only)
+or CLOSED (CEO only). Coordination across environments happens **only** through the shared repository
+(coordination files + Git); there is no automatic cross-platform communication. Hierarchy: **Founder**
+(final business authority) → atlas-ceo → atlas-product / atlas-cto / atlas-qa / atlas-growth →
+execution workers. Every agent reads, in order: this file → `docs/coordination/CURRENT_MISSION.md` →
+`AGENT_WORKBOARD.md` → `DECISION_LOG.md` → `FILE_LOCKS.md` before working. Unassigned work is frozen.
 
 Work is done by five custom subagents in `.claude/agents/` (ADR-0009). Domain ownership:
 

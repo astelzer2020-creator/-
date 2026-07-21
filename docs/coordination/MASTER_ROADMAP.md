@@ -10,7 +10,7 @@ stays in ROADMAP.md. Status values: `planned | in-progress | blocked | done | ve
 - **Owner:** atlas-ceo (orchestration) / atlas-cto (toolchain)
 - **Dependencies:** none
 - **Acceptance criteria:** new contributor clones → installs → lint/test green in <10 min; `/agents` lists all five Atlas agents; every structural decision has an ADR.
-- **Status:** in-progress (docs + agent system done; toolchain bootstrap ATL-007 open)
+- **Status:** done pending remote-CI observation (ATL-007 delivered + QA PASS-WITH-KNOWN-ISSUES via ATL-010, 2026-07-21; 48s local setup vs 10-min gate; `verified` when the first remote CI run is observed green — QA-M0-3)
 - **Risks:** R-01
 - **Release gate:** none (no user-facing release)
 
@@ -47,8 +47,11 @@ managed infrastructure. **Status:** planned (not decomposed).
 
 ## Current focus
 **MISSION-1: Prepare Atlas for its first pilot customer** — decomposed on
-[AGENT_WORKBOARD.md](AGENT_WORKBOARD.md) as ATL-001…ATL-010. **EXECUTING as of 2026-07-21** — human
-owner kickoff approved (DECISION_LOG DL-007). Constraint: legacy assets untouched until the ATL-009
-cleanup report is reviewed by the human owner; ATL-008 deletion stays blocked behind that review.
-Delegated today: ATL-007+ATL-009 → atlas-cto, ATL-002 → atlas-product, ATL-004 (bounded scope) →
-atlas-growth; ATL-010 (QA baseline verification) queued behind ATL-007 delivery.
+[AGENT_WORKBOARD.md](AGENT_WORKBOARD.md) as ATL-001…ATL-015. **First delivery cycle complete
+(2026-07-21):** ATL-002 done (reviewed), ATL-004 done (reviewed, ACCEPT-WITH-CHANGES applied),
+ATL-007 done (QA PASS-WITH-KNOWN-ISSUES), ATL-009 verified, ATL-010 done. M0 is done pending
+remote-CI observation (QA-M0-3). **ATL-003 is now UNBLOCKED** (ATL-007 delivered + QA-passed) and is
+the next engineering task, awaiting green-light per roadmap sequencing (MISSION-1 next phase, human
+owner). Open on the human owner: ATL-008 archive-deletion approval (DL-010) and the
+GITLEAKS_LICENSE/secrets-scan decision (DL-009). Gap tasks ATL-011…ATL-015 filed from ATL-002;
+ATL-013/ATL-014 (P1, Product-owned) can start immediately.

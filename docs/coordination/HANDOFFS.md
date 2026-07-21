@@ -27,6 +27,58 @@ results — "tests pass" without output is rejected by the receiver. STATUS is o
 ## Log
 
 TASK ID: ATL-010
+FROM: atlas-qa
+TO: atlas-ceo
+OBJECTIVE: Deliver the M0 independent-verification results and QA VERDICT for ATL-007 and ATL-009.
+CONTEXT: Executed 2026-07-21 after atlas-cto delivered ATL-007+ATL-009. Full results recorded in docs/pilot/QA_PLAN.md § "M0 Verification Results (ATL-010, 2026-07-21)".
+FILES: docs/pilot/QA_PLAN.md (results section only).
+CHANGES: QA_PLAN.md results section populated with executed commands, outputs, hash re-verification, defect list QA-M0-1…QA-M0-5, and verdicts.
+TESTS: Independently re-ran pnpm install/lint/typecheck/test/format (all green) and uv sync/ruff/pytest/mypy (all green); independently recomputed all 21 archive sha256 hashes and diffed against docs/CLEANUP_REPORT.md (match; 4 unique payloads; zero legacy modification proven via git status/diff).
+RISKS: QA-M0-2 (decorative secrets-scan job → false security confidence); QA-M0-3 (remote CI unproven until first push).
+OPEN QUESTIONS: GITLEAKS_LICENSE decision (human owner, DL-009); when will the first remote CI run be observed (gates ATL-007 → verified).
+ACCEPTANCE CRITERIA: Met — commands re-run with recorded output; inventory re-verified without modification; verdict published. VERDICT: ATL-007 PASS-WITH-KNOWN-ISSUES; ATL-009 PASS; M0 production-readiness 8/10.
+STATUS: delivered
+
+TASK ID: ATL-004
+FROM: atlas-growth
+TO: atlas-product
+OBJECTIVE: Deliver bounded-scope pilot commercial pack: offer structure, pipeline plan, demo outline.
+CONTEXT: Bounded scope per delegation (no capability claims; forward-looking items labeled "planned"). Claims audit deferred to ATL-006 as scoped.
+FILES: docs/growth/PILOT_OFFER.md, docs/growth/PIPELINE.md, docs/growth/DEMO_OUTLINE.md.
+CHANGES: Three new growth documents per DL-004 (ICP) and DL-005 (offer terms).
+TESTS: n/a (documentation). Reviewer atlas-product verdict: ACCEPT-WITH-CHANGES (C1–C4); all four fixes applied by atlas-growth in commit 68b466f; reviewer confirmed no re-review needed.
+RISKS: R-05; claims risk contained by "planned" labeling until ATL-006 capability matrix exists.
+OPEN QUESTIONS: Week-7 conversion pricing framing (revisit per DL-005 at week 6).
+ACCEPTANCE CRITERIA: Met within bounded scope; claims-audit portion explicitly deferred to post-ATL-006.
+STATUS: delivered
+
+TASK ID: ATL-002
+FROM: atlas-product
+TO: atlas-ceo
+OBJECTIVE: Deliver the onboarding/first-value journey and M2 acceptance criteria.
+CONTEXT: Delivered 2026-07-21. Product also flagged 4 scope inconsistencies (resolved by CEO in DL-008) and proposed 5 gap tasks (filed as ATL-011…ATL-015).
+FILES: docs/pilot/FIRST_VALUE_JOURNEY.md (new), docs/pilot/PILOT_SCOPE.md §9.
+CHANGES: 9-step first-value journey with a named owner per step; PILOT_SCOPE.md §9 with 20 given/when/then acceptance criteria (AC-IMP/SCN/RES/EXP/E2E); 5 labeled assumptions A1–A5.
+TESTS: n/a (documentation). Reviewer atlas-ceo verified: every step owned, criteria testable by atlas-qa, activation metrics dispositioned (instrumented-or-ticketed → ATL-011).
+RISKS: R-04 (journey gates on week-0 dry-run → ATL-013); R-05.
+OPEN QUESTIONS: Assumptions A1–A5 to be validated during M1/M2; instrumentation split resolved via ATL-011.
+ACCEPTANCE CRITERIA: Met — reviewed and accepted by atlas-ceo 2026-07-21.
+STATUS: delivered
+
+TASK ID: ATL-007 + ATL-009
+FROM: atlas-cto
+TO: atlas-qa
+OBJECTIVE: Deliver M0 toolchain bootstrap (ATL-007) and legacy asset cleanup report (ATL-009) for independent verification.
+CONTEXT: Delivered 2026-07-21. Filed by atlas-ceo on atlas-cto's behalf (CTO cannot write coordination files) to remedy QA defect QA-M0-1; content per the CTO delivery evidence verified by QA in ATL-010.
+FILES: package.json (additive-only, confirmed), pnpm-workspace.yaml, packages/config/**, apps/*/package.json, services/analytics/pyproject.toml, .github/workflows/ci.yml, docs/CLEANUP_REPORT.md (new).
+CHANGES: pnpm workspace + TS toolchain configured; Python analytics toolchain (uv/ruff/pytest/mypy) configured; CI workflow added; CLEANUP_REPORT.md inventories all root archives/executables with hashes and per-file recommendations (proposals only, no action taken).
+TESTS: pnpm install (226 lockfile resolutions), pnpm lint, pnpm typecheck, pnpm test, pnpm format — all green. uv sync, ruff, pytest, mypy — all green. Total wall time 48s vs the 10-minute M0 setup gate. ATL-009: 21 archives hashed → 4 unique sha256 payloads; read-only listings only; git status/diff shows zero legacy files touched.
+RISKS: Remote CI unproven until first push (QA-M0-3); secrets-scan job decorative pending GITLEAKS_LICENSE (QA-M0-2).
+OPEN QUESTIONS: GITLEAKS_LICENSE (human owner, DL-009); ATL-008 deletion approval (human owner, DL-010).
+ACCEPTANCE CRITERIA: ATL-007 local criteria met (CI-remote pending observation); ATL-009 criteria met in full. QA verdict via ATL-010: ATL-007 PASS-WITH-KNOWN-ISSUES; ATL-009 PASS.
+STATUS: delivered
+
+TASK ID: ATL-010
 FROM: atlas-ceo
 TO: atlas-qa
 OBJECTIVE: Independently verify the M0 baseline: re-run ATL-007 toolchain commands and re-verify the ATL-009 cleanup inventory; publish a QA VERDICT with evidence.

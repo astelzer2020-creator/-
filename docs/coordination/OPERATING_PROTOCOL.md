@@ -1,6 +1,8 @@
 # Atlas — Operating Protocol
 
-How the five-agent system works. Agents: `atlas-ceo`, `atlas-cto`, `atlas-product`, `atlas-growth`,
+How the five-agent system works. For agents in OTHER environments (VS Code: Codex, Claude Code VS,
+Grok) the binding document is [`EXECUTION_PROTOCOL.md`](EXECUTION_PROTOCOL.md) (ADR-0010) — this file
+governs the five Claude Code roles; workers take bounded tasks and follow the worker rules there. Agents: `atlas-ceo`, `atlas-cto`, `atlas-product`, `atlas-growth`,
 `atlas-qa` (defined in `.claude/agents/`). Rationale: [ADR-0009](../adr/0009-multi-agent-operating-model.md).
 
 ## Standard execution flow (every feature/milestone)
