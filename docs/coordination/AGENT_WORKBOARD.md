@@ -44,8 +44,8 @@ SHARED+API / WEB; locks in FILE_LOCKS.md). ATL-003-PLAN is CLOSED as superseded.
 | ATL-014 | atlas-product | atlas-qa | atlas-ceo | P1 | 0.5d | READY | Excel reconciliation worksheet spec (<1% divergence gate) |
 | ATL-018 | atlas-qa | atlas-ceo | atlas-ceo | P1 | 0.5d | READY | M1 verification plan for ATL-003 criteria + DL-008 QA_PLAN annotations |
 | ATL-019 | atlas-growth | atlas-product | Founder | P1 | 0.5d | READY | One-page pilot agreement draft text — material prep only, no external use |
-| ATL-020 | atlas-cto | atlas-qa | atlas-qa | P0 | 0.5d | IN PROGRESS | Read-only codebase verification audit → docs/CODEBASE_AUDIT.md |
-| ATL-021 | atlas-cto | atlas-qa | atlas-ceo | P0 | 0.5d | IN PROGRESS | Founder Control Center — dashboard generated from coordination files + CI freshness gate (DL-013) |
+| ATL-020 | atlas-cto | atlas-qa | atlas-qa | P0 | 0.5d | VERIFIED | Read-only codebase audit → docs/CODEBASE_AUDIT.md; QA PASS 2026-07-21 (6/6 spot-checks) |
+| ATL-021 | atlas-cto | atlas-qa | atlas-ceo | P0 | 0.5d | IMPLEMENTED | Founder Control Center (DL-013); held by QA-S1-1 (fix bc52714, re-verification in progress) |
 
 **Sprint-1 exit criteria (amended per DL-014):** all Sprint-1 tasks (incl. the three ATL-003 work
 packages) at IMPLEMENTED or VERIFIED with evidence, plus Founder rulings received on ATL-008 (archive
@@ -203,17 +203,20 @@ on ATL-003 delivery. ATL-002/004/007/009/010 keep their completed statuses.
 
 ### ATL-020 — Codebase verification audit (READ-ONLY)
 - **Owner:** atlas-cto · **Reviewer:** atlas-qa · **Approver:** atlas-qa · **Priority:** P0 · **Effort:** 0.5d
-- **Status:** IN PROGRESS (2026-07-21 — being executed in parallel with this planning pass) · **Dependencies:** none
+- **Status:** VERIFIED (atlas-qa, 2026-07-21 — verdict PASS, QA recommends promotion) · **Dependencies:** none
 - **Files affected:** docs/CODEBASE_AUDIT.md (new; NO code modified — read-only inspection)
 - **Acceptance criteria:** audit report covering duplicate work, dead code, conflicting implementations, unfinished features, and temporary fixes across the repo; every finding cites file paths and evidence; zero source files modified; recommendations filed as proposals (any resulting work needs new workboard tasks).
-- **Verification evidence:** —
+- **Verification evidence:** docs/pilot/QA_PLAN.md § "Sprint-1 Verification Results (ATL-020/ATL-021, 2026-07-21)" — adversarial spot-check of audit claims against source: 6/6 MATCH incl. all CRITICAL claims; verdict PASS. Minor nit QA-S1-3 (S4): C-1/T-6 cite ROIScreen.jsx:61, actual line 62 — no gate.
 
 ### ATL-021 — Founder Control Center — generated dashboard + freshness CI gate
 - **Owner:** atlas-cto · **Reviewer:** atlas-qa · **Approver:** atlas-ceo · **Priority:** P0 (Founder directive, DL-013) · **Effort:** 0.5d
-- **Status:** IN PROGRESS (2026-07-21 — delegated to atlas-cto by Founder directive, parallel to ATL-020) · **Dependencies:** none
+- **Status:** IMPLEMENTED (2026-07-21) — held at IMPLEMENTED by QA pending QA-S1-1 re-verification; NOT verified yet · **Dependencies:** none
 - **File scope:** tools/founder-dashboard/**, FOUNDER_DASHBOARD.md + FOUNDER_DASHBOARD.html (root, generated), package.json (additive script), .github/workflows/ci.yml (freshness step), README.md (one banner link line)
 - **Acceptance criteria:** (1) all six sections (EXECUTIVE / TEAM / ENGINEERING / PRODUCT / BUSINESS / RISKS) generated from coordination/docs sources or explicitly "n/a — source not yet in repo"; (2) deterministic output — same commit → byte-identical, timestamp from git not wall clock; (3) CI fails if coordination files change without regeneration; (4) zero hand-entered status constants; (5) QA verifies by re-running the generator and cross-checking values against sources.
-- **Verification evidence:** —
+- **Verification evidence:** docs/pilot/QA_PLAN.md § "Sprint-1 Verification Results (ATL-020/ATL-021, 2026-07-21)" — partial: generator determinism checks recorded; freshness gate FAILED under real CI conditions (see QA-S1-1).
+- **Open QA defects:**
+  - QA-S1-1 (S3) — CI freshness gate false-positives on shallow clone (depth-1 grafted HEAD stamps wrong source commit → gate fails on every remote run, fresh or stale). CTO fix delivered in commit bc52714; **QA re-verification IN PROGRESS** — VERIFIED gate.
+  - QA-S1-2 (S4) — commit e3f7e6d message overclaims "coordination updates" (commit touched no coordination file). Noted for history hygiene; no gate.
 
 ---
 

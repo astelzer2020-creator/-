@@ -2,18 +2,30 @@
   "name": "@atlas/shared",
   "version": "0.1.0",
   "private": true,
-  "description": "Atlas shared domain types, Zod schemas, taba mappings, i18n resources (placeholder until M1).",
+  "description": "Atlas shared domain contracts: Zod schemas, taba column mapping (Hebrew → English), money (integer agorot) helpers, i18n resources.",
   "type": "module",
-  "main": "src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "scripts": {
+    "build": "tsc -b tsconfig.build.json",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run",
     "format": "prettier --write ."
   },
   "prettier": "@atlas/config/prettier.config.mjs",
+  "dependencies": {
+    "zod": "^4.0.0"
+  },
   "devDependencies": {
     "@atlas/config": "workspace:*",
+    "@types/node": "^22.0.0",
     "eslint": "^9.31.0",
     "prettier": "^3.6.0",
     "typescript": "^5.8.0",

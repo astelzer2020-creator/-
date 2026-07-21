@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { AgorotSchema, IsoDateTimeSchema, RateFractionSchema } from "./primitives.js";
+import { SimulationResultSchema } from "./simulation.js";
 
 /** One line of the apartment mix (תמהיל דירות) in a scenario. */
 export const ApartmentMixEntrySchema = z.object({
@@ -29,6 +30,17 @@ export const ScenarioCreateSchema = z.object({
 export type ScenarioCreate = z.infer<typeof ScenarioCreateSchema>;
 
 /**
+ * Request body the API sends to the analytics service `POST /v1/simulate` —
+ * exactly the scenario's financial inputs.
+ */
+export const SimulationRequestSchema = ScenarioCreateSchema.pick({
+  apartmentMix: true,
+  costItems: true,
+  discountRate: true,
+});
+export type SimulationRequest = z.infer<typeof SimulationRequestSchema>;
+
+/**
  * A stored scenario. `result` is the last analytics simulation stored against
  * it, or null when it has never been (successfully) simulated.
  */
@@ -37,5 +49,6 @@ export const ScenarioSchema = ScenarioCreateSchema.extend({
   projectId: z.uuid(),
   createdAt: IsoDateTimeSchema,
   updatedAt: IsoDateTimeSchema,
-  result: z.lazy(() => import_placeholder).nullable(),
+  result: SimulationResultSchema.nullable(),
 });
+export type Scenario = z.infer<typeof ScenarioSchema>;

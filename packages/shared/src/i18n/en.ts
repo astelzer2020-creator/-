@@ -1,0 +1,75 @@
+import type { I18nKey } from "./he.js";
+
+/**
+ * English placeholders, keys mirrored 1:1 with `he.ts` (the `Record<I18nKey,
+ * string>` annotation makes a missing or extra key a compile error). The
+ * product is Hebrew-first; these exist for development and future locales.
+ */
+export const en: Record<I18nKey, string> = {
+  "nav.projects": "Projects",
+  "nav.scenarios": "Scenarios",
+  "nav.reports": "Reports",
+  "nav.logout": "Log out",
+
+  "auth.login.title": "Log in",
+  "auth.login.email": "Email",
+  "auth.login.password": "Password",
+  "auth.login.submit": "Log in",
+  "auth.login.invalidCredentials": "Incorrect email or password",
+
+  "projects.title": "Projects",
+  "projects.new": "New project",
+  "projects.import": "Import taba file",
+  "projects.fields.name": "Project name",
+  "projects.fields.caseNumber": "Case number",
+  "projects.fields.address": "Address",
+  "projects.fields.city": "City",
+  "projects.fields.neighborhood": "Neighborhood",
+  "projects.fields.planType": "Plan type",
+  "projects.fields.status": "Status",
+  "projects.fields.existingUnits": "Existing units",
+  "projects.fields.proposedUnits": "Proposed units",
+  "projects.fields.existingFloors": "Existing floors",
+  "projects.fields.proposedFloors": "Proposed floors",
+  "projects.fields.lotArea": "Lot area (sqm)",
+  "projects.empty": "No projects yet. Import a taba file or create a new project.",
+
+  "scenario.form.title": "Scenario setup",
+  "scenario.form.name": "Scenario name",
+  "scenario.form.apartmentMix": "Apartment mix",
+  "scenario.form.mixLabel": "Apartment type",
+  "scenario.form.units": "Number of units",
+  "scenario.form.areaSqm": "Average area (sqm)",
+  "scenario.form.salePricePerSqm": "Sale price (ILS per sqm)",
+  "scenario.form.costItems": "Cost items",
+  "scenario.form.costLabel": "Item",
+  "scenario.form.costAmount": "Amount (ILS)",
+  "scenario.form.discountRate": "Discount rate (decimal fraction, e.g. 0.07)",
+  "scenario.form.save": "Save scenario",
+  "scenario.form.simulate": "Run simulation",
+
+  "results.title": "Feasibility results",
+  "results.irr": "Internal rate of return (IRR)",
+  "results.irrUndefined": "No IRR exists for this scenario",
+  "results.npv": "Net present value (NPV)",
+  "results.profit": "Developer profit",
+  "results.roiOnCost": "Return on cost",
+  "results.paybackYears": "Payback period (years)",
+  "results.paybackNever": "No payback within the forecast horizon",
+  "results.sensitivity": "Sensitivity analysis",
+  "results.sensitivity.priceAxis": "Sale price change",
+  "results.sensitivity.costAxis": "Build cost change",
+
+  "states.loading": "Loading…",
+  "states.empty": "No data to display",
+  "states.error": "Something went wrong. Please try again.",
+  "states.retry": "Retry",
+  "states.analyticsUnavailable": "The calculation service is currently unavailable. Try again shortly.",
+
+  "validation.required": "Required field",
+  "validation.invalidNumber": "Enter a valid number",
+  "validation.positiveNumber": "Enter a number greater than zero",
+  "validation.invalidEmail": "Invalid email address",
+  "validation.passwordLength": "Password must be at least 8 characters",
+  "validation.rateFraction": "Discount rate must be a decimal fraction between 0 and 1",
+};
