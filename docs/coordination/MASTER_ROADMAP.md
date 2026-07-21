@@ -47,5 +47,8 @@ managed infrastructure. **Status:** planned (not decomposed).
 
 ## Current focus
 **MISSION-1: Prepare Atlas for its first pilot customer** — decomposed on
-[AGENT_WORKBOARD.md](AGENT_WORKBOARD.md) as ATL-001…ATL-008. Prepared, **not yet executing** —
-awaiting human owner kickoff.
+[AGENT_WORKBOARD.md](AGENT_WORKBOARD.md) as ATL-001…ATL-010. **EXECUTING as of 2026-07-21** — human
+owner kickoff approved (DECISION_LOG DL-007). Constraint: legacy assets untouched until the ATL-009
+cleanup report is reviewed by the human owner; ATL-008 deletion stays blocked behind that review.
+Delegated today: ATL-007+ATL-009 → atlas-cto, ATL-002 → atlas-product, ATL-004 (bounded scope) →
+atlas-growth; ATL-010 (QA baseline verification) queued behind ATL-007 delivery.

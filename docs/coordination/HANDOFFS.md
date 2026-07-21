@@ -26,6 +26,58 @@ results — "tests pass" without output is rejected by the receiver. STATUS is o
 
 ## Log
 
+TASK ID: ATL-010
+FROM: atlas-ceo
+TO: atlas-qa
+OBJECTIVE: Independently verify the M0 baseline: re-run ATL-007 toolchain commands and re-verify the ATL-009 cleanup inventory; publish a QA VERDICT with evidence.
+CONTEXT: MISSION-1 kickoff approved (DL-007). ATL-007 (toolchain) and ATL-009 (cleanup report) are delegated to atlas-cto today; QA verification begins when atlas-cto delivers ATL-007. Implementer ≠ verifier: nothing is marked done without this verdict.
+FILES: docs/pilot/QA_PLAN.md (results section) only. No source files; no legacy files are to be modified during inventory re-verification.
+CHANGES: QA_PLAN.md results section updated with executed commands + output; QA VERDICT issued; evidence links posted to AGENT_WORKBOARD.md ATL-007/ATL-009/ATL-010 entries via handoff.
+TESTS: QA independently re-runs pnpm install / lint / typecheck / test (recording exact commands and output); independently recomputes hashes and content listings of root archives/executables and diffs them against docs/CLEANUP_REPORT.md.
+RISKS: R-01 (toolchain stall delays this verification); R-07 (collision — QA claims only the QA_PLAN results section).
+OPEN QUESTIONS: None at delegation. If any toolchain command diverges from the CTO handoff, bounce ATL-007 with evidence rather than fixing.
+ACCEPTANCE CRITERIA: (1) install/lint/typecheck/test independently re-run with recorded output; (2) ATL-009 inventory (hashes, listings) independently re-verified with zero modifications to any legacy file; (3) QA VERDICT (pass/fail + blockers) published with evidence linked on the workboard.
+STATUS: accepted
+
+TASK ID: ATL-004
+FROM: atlas-ceo
+TO: atlas-growth
+OBJECTIVE: Produce pilot offer structure, pipeline plan, and demo OUTLINE — bounded scope, no capability claims.
+CONTEXT: MISSION-1 executing (DL-007). Pilot offer terms already decided (DL-005: free 8-week design-partner, hard end date, feedback commitment, case-study rights, week-7 conversion conversation). ATL-006 (verified capability matrix) does not exist yet, so the claims-bearing portion of ATL-004 stays blocked. BOUNDED SCOPE for this handoff: offer structure, pipeline plan, and demo outline only; any capability not yet QA-verified MUST be labeled "planned"; no external claims of any capability until ATL-006 exists and Growth's claims audit maps every statement to evidence.
+FILES: docs/growth/** (claimed by atlas-growth). PILOT_ONBOARDING.md edits deferred until the claims-audit phase.
+CHANGES: New/updated docs under docs/growth/ — pilot offer one-pager structure, pipeline plan (ICP per DL-004: small/mid יזם with active pinui-binui pipeline), demo outline with every planned item explicitly labeled "planned".
+TESTS: n/a (documentation) — reviewer atlas-product checks alignment with PILOT_SCOPE.md, PILOT_ONBOARDING.md, DL-004/DL-005, and verifies zero unverified capability claims.
+RISKS: R-05 (pilot wedge/engagement); premature capability claims (mitigated by bounded scope + "planned" labeling rule).
+OPEN QUESTIONS: Final pricing framing for the week-7 conversion conversation (revisit per DL-005 at pricing validation, week 6).
+ACCEPTANCE CRITERIA: Offer structure, pipeline plan, and demo outline drafted in docs/growth/**; zero capability claims beyond QA-verified facts; all forward-looking items labeled "planned"; ready for atlas-product review and later human owner review; claims audit explicitly deferred to post-ATL-006.
+STATUS: accepted
+
+TASK ID: ATL-002
+FROM: atlas-ceo
+TO: atlas-product
+OBJECTIVE: Define and validate the onboarding/first-value journey; deliver docs/pilot/FIRST_VALUE_JOURNEY.md plus M2 acceptance criteria.
+CONTEXT: MISSION-1 executing (DL-007). Pilot ICP fixed by DL-004; onboarding cadence and week-0 data dry-run defined in docs/pilot/PILOT_ONBOARDING.md. Product owns acceptance criteria for M2 (import → simulate → Hebrew PDF report).
+FILES: docs/pilot/FIRST_VALUE_JOURNEY.md (new) and docs/pilot/PILOT_SCOPE.md (claimed by atlas-product).
+CHANGES: New FIRST_VALUE_JOURNEY.md — week-by-week journey to first value; PILOT_SCOPE.md updated with M2 acceptance criteria; gaps filed as proposed workboard tasks (routed via CEO, not self-added).
+TESTS: n/a (documentation) — reviewer atlas-ceo checks every step of "raw data → trusted Hebrew PDF in <30 min" has a named owner (product feature or human process) and that criteria are testable by atlas-qa.
+RISKS: R-04 (messy real taba files break week-0 dry-run — journey must gate on the dry-run); R-05.
+OPEN QUESTIONS: Which activation metrics can be instrumented in M1 vs. ticketed for M2 (needs CTO input once ATL-007 lands).
+ACCEPTANCE CRITERIA: Week-by-week first-value journey validated against PILOT_ONBOARDING.md; every step has an owner; gaps filed as workboard tasks; activation metrics instrumented-or-ticketed; M2 acceptance criteria delivered for the roadmap.
+STATUS: accepted
+
+TASK ID: ATL-007 + ATL-009
+FROM: atlas-ceo
+TO: atlas-cto
+OBJECTIVE: (1) ATL-007: bootstrap the pnpm/TS/Python toolchain so lint/typecheck/test run green locally and in CI (M0 exit). (2) ATL-009: produce docs/CLEANUP_REPORT.md — a read-only inventory of every root archive/executable. REPORT ONLY: zero deletion or modification of any legacy file, archive, executable, or old asset.
+CONTEXT: MISSION-1 kickoff approved by human owner 2026-07-21 (DL-007) with an explicit constraint: legacy assets are untouchable until the human owner reviews the cleanup report and approves; ATL-008 stays blocked behind that review. ATL-007 is the M0 exit gate and unblocks ATL-003. Legacy prototype (frontend/, backend/, mobile/) remains frozen per ADR-0007 — read-only.
+FILES: package.json (additive changes only), pnpm-workspace.yaml, packages/**, apps/*/package.json, services/analytics/**, .github/workflows/ci.yml, docs/CLEANUP_REPORT.md (all claimed by atlas-cto).
+CHANGES: Workspace/toolchain config so pnpm workspaces resolve and lint/typecheck/test pass (empty suites allowed); CI workflow green; new docs/CLEANUP_REPORT.md listing every root *.zip/*.exe with size, date, read-only content listing (e.g., unzip -l), duplicate detection via hashes, and a per-file recommendation left as a proposal.
+TESTS: pnpm install, pnpm lint, pnpm typecheck, pnpm test — commands + output required in the delivery handoff; CI run link/output for ci.yml; <10-min contributor setup demonstrated with timing evidence. For ATL-009: hash + listing commands and their output included in the report.
+RISKS: R-01 (bootstrap stall blocks all engineering); R-08 (repo bloat — mitigated by report); accidental legacy modification (mitigation: read-only commands only; git status/diff must show no legacy file touched).
+OPEN QUESTIONS: None. If any archive cannot be listed without extraction, note it in the report and do not extract into the repo.
+ACCEPTANCE CRITERIA: ATL-007 — pnpm workspaces resolve; lint/typecheck/test green locally and in CI; M0 <10-min setup gate demonstrated. ATL-009 — every candidate file listed with evidence (size, date, listing, hash); zero files deleted or modified (git status proves it); recommendations are proposals only, decision reserved for the human owner. Both deliveries go to atlas-qa (ATL-010) for independent verification.
+STATUS: accepted
+
 TASK ID: ATL-000 (system setup)
 FROM: session orchestrator
 TO: atlas-ceo
