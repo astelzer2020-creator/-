@@ -17,11 +17,38 @@ requires it (ATL-008, pricing, external commitments).
 deletion/modification of legacy files, archives, or executables; cleanup report first (ATL-009), then
 human review before ATL-008 acts.
 
+## Sprint-1 (2026-07-21 → +1 week)
+
+Defined per Founder sprint-planning directive of 2026-07-21 (DL-012). **Scope rule: P0/P1 only.**
+Sprint-1 is planning + documentation + verification-prep — **NO feature implementation this mission**.
+ATL-003 advances only as a plan; code implementation starts only after the Founder approves
+`docs/plans/ATL-003-PLAN.md`. All P2/P3 tasks are frozen to BACKLOG for the sprint (ATL-011, ATL-012,
+ATL-015, ATL-016, ATL-017). Role assignments per Founder: CEO — roadmap/coordination; CTO — highest
+technical blocker (as a plan) + codebase audit; Product — onboarding/first-value; QA — verification
+plan; Growth — pilot material only (no outreach).
+
+| Task | Owner | Reviewer | Approver | Pri | Effort | Status | Goal (one line) |
+|---|---|---|---|---|---|---|---|
+| ATL-001 | atlas-ceo | human owner | Founder | P0 | 0.5d | IN PROGRESS | Sprint-1 sequencing + roadmap consistency; IMPLEMENTED when this sprint section is complete, Founder sign-off pending |
+| ATL-003-PLAN | atlas-cto | atlas-ceo | atlas-qa | P0 | 1d | READY | ATL-003 implementation plan (files, DB schema draft, contracts, test plan incl. golden fixtures, work packages) — no code |
+| ATL-013 | atlas-product | atlas-cto | atlas-ceo | P1 | 0.5d | READY | Week-0 customer data dry-run runbook |
+| ATL-014 | atlas-product | atlas-qa | atlas-ceo | P1 | 0.5d | READY | Excel reconciliation worksheet spec (<1% divergence gate) |
+| ATL-018 | atlas-qa | atlas-ceo | atlas-ceo | P1 | 0.5d | READY | M1 verification plan for ATL-003 criteria + DL-008 QA_PLAN annotations |
+| ATL-019 | atlas-growth | atlas-product | Founder | P1 | 0.5d | READY | One-page pilot agreement draft text — material prep only, no external use |
+| ATL-020 | atlas-cto | atlas-qa | atlas-qa | P0 | 0.5d | IN PROGRESS | Read-only codebase verification audit → docs/CODEBASE_AUDIT.md |
+
+**Sprint-1 exit criteria:** all 7 tasks at IMPLEMENTED or VERIFIED with evidence, plus Founder rulings
+received on ATL-008 (archive deletion, DL-010), GITLEAKS_LICENSE/secrets-scan (DL-009), and
+ATL-003-PLAN approval (the gate for M1 implementation).
+
+Blocked-on-Founder (unchanged): ATL-008 (DL-010), GITLEAKS/secrets-scan (DL-009). ATL-005/ATL-006
+remain BLOCKED on ATL-003 delivery. ATL-002/004/007/009/010 keep their completed statuses.
+
 ---
 
 ### ATL-001 — Finalize pilot milestone priorities and sequencing
-- **Owner:** atlas-ceo · **Reviewer:** human owner · **Priority:** P0
-- **Status:** ready · **Dependencies:** none
+- **Owner:** atlas-ceo · **Reviewer:** human owner · **Priority:** P0 · **Effort:** 0.5d
+- **Status:** IN PROGRESS (2026-07-21) — being satisfied by the Sprint-1 plan above (DL-012); moves to IMPLEMENTED when the sprint section is complete, Founder sign-off pending · **Dependencies:** none
 - **Files affected:** docs/coordination/MASTER_ROADMAP.md, docs/ROADMAP.md
 - **Acceptance criteria:** M1/M2/M3 decomposed into workboard tasks each with owner, reviewer, criteria; sequencing respects dependencies; human owner sign-off recorded in DECISION_LOG.
 - **Verification evidence:** —
@@ -40,6 +67,14 @@ human review before ATL-008 acts.
 - **Files affected:** apps/api/**, services/analytics/**, packages/shared/**, infra/**, .github/workflows/**
 - **Acceptance criteria:** the four P0-fatal gaps from docs/pilot/TECHNICAL_READINESS.md closed — Postgres persistence with migrations; auth with roles; analytics internal-only behind the single public API; CI green gate. Each closed gap has QA verification evidence.
 - **Verification evidence:** —
+- **Sprint-1 note (DL-012):** implementation remains GATED on Founder approval of docs/plans/ATL-003-PLAN.md; only ATL-003-PLAN (below) runs this sprint.
+
+### ATL-003-PLAN — ATL-003 implementation plan (sub-task of ATL-003; plan only, NO code)
+- **Owner:** atlas-cto · **Reviewer:** atlas-ceo · **Approver:** atlas-qa · **Priority:** P0 · **Effort:** 1d
+- **Status:** READY · **Dependencies:** none (ATL-003 prerequisites already satisfied)
+- **Files affected:** docs/plans/ATL-003-PLAN.md (new; no source code touched)
+- **Acceptance criteria:** plan covers (1) files/modules to be created or changed; (2) DB schema draft (Postgres, migrations); (3) API contract changes; (4) test plan incl. golden fixtures per ADR-0006; (5) work-package breakdown into bounded execution-worker tasks with file groups. ATL-003 implementation itself starts only after Founder approval of this plan (DL-012).
+- **Verification evidence:** —
 
 ### ATL-004 — Create pilot offer and demo materials
 - **Owner:** atlas-growth · **Reviewer:** atlas-product · **Priority:** P1
@@ -50,14 +85,14 @@ human review before ATL-008 acts.
 
 ### ATL-005 — Independent critical-journey and security verification
 - **Owner:** atlas-qa · **Reviewer:** atlas-ceo · **Priority:** P0
-- **Status:** ready (blocked on ATL-003 delivery) · **Dependencies:** ATL-003
+- **Status:** BLOCKED (on ATL-003 delivery; ATL-003 implementation itself gated on Founder approval of ATL-003-PLAN, DL-012) · **Dependencies:** ATL-003
 - **Files affected:** docs/pilot/QA_PLAN.md (results), docs/coordination/AGENT_WORKBOARD.md (evidence links)
 - **Acceptance criteria:** the 11 acceptance scenarios of QA_PLAN.md executed with recorded results; authZ probe of all endpoints incl. cross-tenant attempts; golden-file suite green; verdict + production-readiness score published.
 - **Verification evidence:** —
 
 ### ATL-006 — Verified capability matrix
 - **Owner:** atlas-qa · **Reviewer:** atlas-growth · **Priority:** P1
-- **Status:** ready · **Dependencies:** ATL-005
+- **Status:** BLOCKED (on ATL-005 → ATL-003 chain) · **Dependencies:** ATL-005
 - **Files affected:** docs/coordination/capability-matrix.md (new)
 - **Acceptance criteria:** every prototype-claimed feature classified verified / in-progress / planned with evidence links; Growth signs it as the sole source for external claims.
 - **Verification evidence:** —
@@ -104,37 +139,62 @@ human review before ATL-008 acts.
 
 ### ATL-011 — Activation-metric instrumentation spec
 - **Owner:** atlas-cto · **Reviewer:** atlas-product · **Priority:** P2
-- **Status:** ready · **Dependencies:** ATL-003
+- **Status:** BACKLOG — frozen per Sprint-1 rule (DL-012) · **Dependencies:** ATL-003
 - **Files affected:** apps/api/**, packages/shared/** (spec first; implementation scoped in the spec)
 - **Acceptance criteria:** each activation metric dispositioned in FIRST_VALUE_JOURNEY.md has an instrumentation spec (event, trigger point, storage, privacy note); Product signs off that the spec covers the journey's activation metrics; implementable within M1/M2 scope.
 - **Verification evidence:** —
 
 ### ATL-012 — Pilot account provisioning flow
 - **Owner:** atlas-cto · **Reviewer:** atlas-product · **Priority:** P2
-- **Status:** ready · **Dependencies:** ATL-003
+- **Status:** BACKLOG — frozen per Sprint-1 rule (DL-012) · **Dependencies:** ATL-003
 - **Files affected:** apps/api/**, infra/**
 - **Acceptance criteria:** documented, repeatable flow to provision the pilot customer's org + users (roles per SECURITY.md) on pilot-prod; no manual DB edits; dry-run executed and recorded; Product confirms it matches the week-0 onboarding steps.
 - **Verification evidence:** —
 
 ### ATL-013 — Week-0 data dry-run runbook
-- **Owner:** atlas-product · **Reviewer:** atlas-cto · **Priority:** P1
-- **Status:** ready · **Dependencies:** none
+- **Owner:** atlas-product · **Reviewer:** atlas-cto · **Approver:** atlas-ceo · **Priority:** P1 · **Effort:** 0.5d
+- **Status:** READY — Sprint-1 scope (DL-012) · **Dependencies:** none
 - **Files affected:** docs/pilot/** (runbook, new)
 - **Acceptance criteria:** step-by-step runbook for the week-0 customer data dry-run (inputs requested, formats accepted, failure triage, go/adjust decision rule per PILOT_ONBOARDING.md); CTO confirms technical steps are executable; directly mitigates R-04.
 - **Verification evidence:** —
 
 ### ATL-014 — Excel reconciliation worksheet
-- **Owner:** atlas-product · **Reviewer:** atlas-qa · **Priority:** P1
-- **Status:** ready · **Dependencies:** none
+- **Owner:** atlas-product · **Reviewer:** atlas-qa · **Approver:** atlas-ceo · **Priority:** P1 · **Effort:** 0.5d
+- **Status:** READY — Sprint-1 scope (DL-012) · **Dependencies:** none
 - **Files affected:** docs/pilot/** (worksheet spec, new)
 - **Acceptance criteria:** reconciliation worksheet mapping Atlas outputs to the customer's Excel line items with the <1% divergence target (PILOT_SCOPE.md); QA confirms it is executable as the M2 reconciliation gate; synthetic fixtures only (no customer data in repo).
 - **Verification evidence:** —
 
 ### ATL-015 — Hebrew UI copy pack
 - **Owner:** atlas-product · **Reviewer:** atlas-growth · **Priority:** P2
-- **Status:** ready · **Dependencies:** none
+- **Status:** BACKLOG — frozen per Sprint-1 rule (DL-012) · **Dependencies:** none
 - **Files affected:** docs/pilot/** or packages/shared i18n key inventory (copy pack doc; code changes belong to atlas-cto)
 - **Acceptance criteria:** Hebrew copy for the pilot journey's user-facing strings delivered as i18n key → text pairs (CODING_STANDARDS.md: i18n keys, RTL-safe); Growth reviews tone against positioning; no unverified capability claims in-product.
+- **Verification evidence:** —
+
+---
+
+## Sprint-1 new tasks (DL-012)
+
+### ATL-018 — M1 verification plan (QA readiness for ATL-003) + DL-008 QA_PLAN annotations
+- **Owner:** atlas-qa · **Reviewer:** atlas-ceo · **Approver:** atlas-ceo · **Priority:** P1 · **Effort:** 0.5d
+- **Status:** READY — Sprint-1 scope (DL-012) · **Dependencies:** none (informed by ATL-003-PLAN when available, not blocked on it)
+- **Files affected:** docs/pilot/QA_PLAN.md
+- **Acceptance criteria:** (1) a written verification plan stating how QA will independently verify each ATL-003 acceptance criterion — Postgres persistence with migrations, auth with roles incl. cross-tenant probes, analytics internal-only behind the single public API, CI green gate; (2) DL-008's pending action executed — QA_PLAN.md scenarios 3 and 6 annotated as deferred-to-post-pilot; (3) no verification claims about unbuilt features.
+- **Verification evidence:** —
+
+### ATL-019 — Pilot agreement draft text (material preparation ONLY)
+- **Owner:** atlas-growth · **Reviewer:** atlas-product · **Approver:** Founder · **Priority:** P1 · **Effort:** 0.5d
+- **Status:** READY — Sprint-1 scope (DL-012) · **Dependencies:** none (source: docs/growth/PILOT_OFFER.md terms per DL-005)
+- **Files affected:** docs/growth/PILOT_AGREEMENT_DRAFT.md (new)
+- **Acceptance criteria:** one-page pilot agreement draft text derived from PILOT_OFFER.md terms (free 8-week design-partner, hard end date, feedback commitment, case-study rights, week-7 conversion conversation), delivered for Founder review. **NO outreach, NO external use pre-ATL-006** — capability claims stay gated on the verified capability matrix.
+- **Verification evidence:** —
+
+### ATL-020 — Codebase verification audit (READ-ONLY)
+- **Owner:** atlas-cto · **Reviewer:** atlas-qa · **Approver:** atlas-qa · **Priority:** P0 · **Effort:** 0.5d
+- **Status:** IN PROGRESS (2026-07-21 — being executed in parallel with this planning pass) · **Dependencies:** none
+- **Files affected:** docs/CODEBASE_AUDIT.md (new; NO code modified — read-only inspection)
+- **Acceptance criteria:** audit report covering duplicate work, dead code, conflicting implementations, unfinished features, and temporary fixes across the repo; every finding cites file paths and evidence; zero source files modified; recommendations filed as proposals (any resulting work needs new workboard tasks).
 - **Verification evidence:** —
 
 ---
@@ -146,7 +206,7 @@ evidence after, status ceiling IMPLEMENTED. Never two workers on one task.
 
 ### ATL-016 — Independent assumption challenge of the pilot pack
 - **Owner:** Grok (execution worker) · **Reviewer:** atlas-product · **Approver:** atlas-ceo · **Priority:** P2
-- **Status:** READY · **Dependencies:** none
+- **Status:** BACKLOG — frozen per Sprint-1 rule (DL-012) · **Dependencies:** none
 - **File scope:** docs/reviews/ATL-016-pilot-pack-critique.md (new file ONLY; read-only everywhere else)
 - **Acceptance criteria:** adversarial critique of docs/pilot/* — challenge assumptions A1–A5, the ICP choice (DL-004), the <30-min first-value claim, and the ≥5-projects success metric; each challenge states the evidence that would settle it; no edits to the challenged documents.
 - **Required tests:** n/a (review document).
@@ -154,7 +214,7 @@ evidence after, status ceiling IMPLEMENTED. Never two workers on one task.
 
 ### ATL-017 — CI polish: prettier --check gate (QA-M0-4)
 - **Owner:** Codex (execution worker) · **Reviewer:** atlas-cto · **Approver:** atlas-qa · **Priority:** P2
-- **Status:** READY · **Dependencies:** none (the gitleaks part of QA-M0-2 is NOT in scope — blocked on DL-009 Founder decision)
+- **Status:** BACKLOG — frozen per Sprint-1 rule (DL-012) · **Dependencies:** none (the gitleaks part of QA-M0-2 is NOT in scope — blocked on DL-009 Founder decision)
 - **File scope:** .github/workflows/ci.yml, root package.json scripts (additive) ONLY
 - **Acceptance criteria:** CI lint job fails on unformatted files via `prettier --check` (or `pnpm format:check`); local run evidence included; prototype scripts untouched; secrets-scan job NOT modified.
 - **Required tests:** run the new check locally clean, then demonstrate it fails on a deliberately misformatted scratch file (reverted), outputs in handoff.

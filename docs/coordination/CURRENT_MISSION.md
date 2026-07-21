@@ -18,6 +18,22 @@ demo docs — all reviewed). The legacy prototype and 21 root archives are inven
 (login → project → one simulation → number on staging), which starts with ATL-003 once the CEO
 green-lights sequencing.
 
+## Sprint-1 (2026-07-21 → +1 week, DL-012)
+
+Planning + documentation + verification-prep only — **no feature implementation this mission**.
+**Gate: code implementation starts on Founder approval of docs/plans/ATL-003-PLAN.md.**
+
+- **ATL-001** (atlas-ceo) — Sprint-1 sequencing and roadmap/workboard consistency. IN PROGRESS.
+- **ATL-003-PLAN** (atlas-cto) — ATL-003 implementation plan: files, DB schema draft, contract changes, test plan incl. golden fixtures, work-package breakdown. READY.
+- **ATL-013** (atlas-product) — week-0 customer data dry-run runbook. READY.
+- **ATL-014** (atlas-product) — Excel reconciliation worksheet spec (<1% divergence gate). READY.
+- **ATL-018** (atlas-qa) — M1 verification plan for ATL-003 criteria + DL-008 QA_PLAN annotations (scenarios 3, 6 deferred-to-post-pilot). READY.
+- **ATL-019** (atlas-growth) — one-page pilot agreement draft for Founder review; material prep ONLY, no outreach, no external use pre-ATL-006. READY.
+- **ATL-020** (atlas-cto) — read-only codebase verification audit → docs/CODEBASE_AUDIT.md. IN PROGRESS.
+
+**Freeze:** all P2/P3 tasks (ATL-011, ATL-012, ATL-015, ATL-016, ATL-017) are BACKLOG for Sprint-1
+(DL-012). Unassigned work remains frozen as always.
+
 ## Governance (summary — full rules in EXECUTION_PROTOCOL.md)
 
 - One management system: the Claude Code five-agent system (atlas-ceo/cto/product/growth/qa).
