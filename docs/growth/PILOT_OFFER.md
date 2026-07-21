@@ -56,7 +56,7 @@ Scope per PILOT_SCOPE.md §4–5. **Readiness labels are mandatory in every exte
 **Partner commits to:**
 1. Named champion + economic sponsor present at kickoff; sponsor attends weeks 1 and 4.
 2. 1 hour/week champion session; second trained user by week 3.
-3. Real projects and real data (minimum 3, target 5) — not staged samples.
+3. Real projects and real data: **≥5 real projects imported, of which ≥3 fully modeled** — not staged samples. (Matches PILOT_SCOPE.md §6 success metric: ≥5 real projects loaded per account.)
 4. Use of Atlas output in at least one live decision setting (go/no-go, bank deck, or שמאי review) by around week 5, data permitting.
 5. Written feedback, anonymized case-study approval, week-7 conversion conversation, and (if success criteria are met) testimonial + 2 reference calls.
 
@@ -73,7 +73,7 @@ To be stated verbatim in the one-pager, since the partner's feasibility data is 
 
 1. Processing under the Israeli **Privacy Protection Law (חוק הגנת הפרטיות)** incl. Amendment 13: defined data region (EU/Israel), documented processing purpose.
 2. **Deletion at pilot end** (or on request at any time), verified — including expiry of backups.
-3. Customer data never appears in logs, analytics events, or test fixtures.
+3. Customer file contents and business values never appear in logs, analytics events, or test fixtures; event metadata is limited to opaque ids and timestamps.
 4. Encryption in transit (TLS 1.2+) and at rest (disk/volume and backup encryption).
 5. Single-tenant deployment for the pilot; all access scoped by organization; analytics service and database never internet-facing.
 

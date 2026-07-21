@@ -50,7 +50,7 @@ pricing interviews (PILOT_ONBOARDING.md §5).
 
 ## 3. Demo flow outline (every step gated on QA verification)
 
-Total target length: 25 minutes + Q&A, mirroring the "<30 minutes" promise of the core workflow.
+Total target length: 27 minutes + Q&A, mirroring the "<30 minutes" promise of the core workflow.
 
 | # | Step | What is shown / said | Readiness label (today) |
 |---|---|---|---|
@@ -78,7 +78,7 @@ Leaflet portfolio map (planned — Should).
 
 ## 5. Path from outline to script (ATL-006 gate)
 
-1. atlas-qa verifies each step 1–5 on the production platform against product acceptance criteria; evidence linked on the workboard.
+1. atlas-qa verifies each step 1–5 on the production platform against the PILOT_SCOPE.md §9 acceptance criteria groups (AC-IMP, AC-SCN, AC-RES, AC-EXP, AC-E2E); evidence linked on the workboard.
 2. ATL-006 capability matrix published (verified / in-progress / planned).
 3. atlas-growth writes the full script with exact talk track, upgrades each row's label to its matrix status, and attaches the claims audit (statement → evidence link).
 4. Dry-run of the demo on synthetic fixture data (never real customer data in the repo — TESTING_STRATEGY rule), then on the prospect's dry-run file.
