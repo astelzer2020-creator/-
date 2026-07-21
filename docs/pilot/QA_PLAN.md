@@ -189,3 +189,63 @@ occurs on next push (known gap); (b) `secrets-scan` job is a **placeholder that 
   remains unproven until the first push.
 - **ATL-009: PASS** (with QA-M0-1 process note). Every inventory claim independently reproduced;
   zero legacy files modified; recommendations correctly left as proposals for the human owner.
+
+## Sprint-1 Verification Results (ATL-020/ATL-021, 2026-07-21)
+
+Independent verification of ATL-020 (docs/CODEBASE_AUDIT.md) and ATL-021 (Founder Control Center)
+by atlas-qa. HEAD moved mid-verification from `6800f71` to `ecbcdef` — the ATL-021 owner landed the
+two-commit train (`e3f7e6d` sources, `ecbcdef` regenerated dashboard) while checks ran; all ATL-021
+results below were re-executed against `ecbcdef`. Toolchain: node v22, pnpm 10.33.0.
+
+### ATL-020 — audit claims spot-checked (adversarial, against source)
+
+| Check | Claim (audit ref) | Verification | Result |
+|---|---|---|---|
+| A20-a | Four financial engines exist and disagree (D-3, C-1, C-2) | Read all four files in full. `frontend/src/utils/calculations.js` = 259 lines (`wc -l`), demolition `landArea * 250` (line 77), cost model includes permits 3.5% / levy 2.5% / marketing 2% / overhead 8% (lines 117–121). `backend/python/api/roi.py` `compute_roi` lines 24–71: demolition `landArea * 200` (line 30), cost = construction+tenant+demolition+permits+finance only (line 33), fake NPV `profit / (1+r)^years` (line 43), IRR clamped to 0 outside (-1,10) (line 21). `backend/node/routes/roi.js` lines 12–25: third model, demolition triggers only on `פינוי` (line 19, misses `הריסה`), `\|\|`-defaults fabricate inputs (lines 16–21). `mobile/src/screens/ROIScreen.jsx` lines 57–71: fourth model, land area hardcoded `1000 * 200` (line 62), fake IRR = annualized ROI (line 69), fake NPV copied (line 68). Formulas genuinely pairwise divergent (250 vs 200 rate, trigger sets, cost-line composition, revenue basis) | **MATCH** |
+| A20-b | Silent numeric fallback, roi.js:11–26 (T-1) | `catch (err)` at line 11 discards the error, recomputes with the local model, responds via `res.json` at line 25 with keys `construction`/`tenant`/`demolition`/`finance` (vs python's `constructionCost`/`tenantCost`/…), no `irr`/`npv`/`paybackYears`, no fallback flag. Confirmed by full read | **MATCH** |
+| A20-c | ImportScreen.jsx:23 strips gershayim → יח"ד columns unmappable (C-7) | Line 23: `headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''))`. Fixture header (`head -1 data/sample/sample-taba-projects.csv`) contains `יח"ד קיים,יח"ד מוצע` with ASCII quote; after strip → `יחד קיים`, not a FIELD_MAP key (line 14) → `existingUnits`/`proposedUnits` undefined → roi guard (lines 85–87) yields 0. Value-side `תמ"א 38/2` also broken (line 25) | **MATCH** |
+| A20-d | Frontend performs zero network calls (DC-1) | `grep -rn "axios\|fetch(" frontend/src` → 0 hits; `axios` nonetheless declared at frontend/package.json line 20 | **MATCH** |
+| A20-e | Plaintext password storage + backdoor (C-8) | `frontend/src/store/authStore.js` lines 58–59: `saveUsers([...users, user])` persists the full `{name,email,password,company}` object to localStorage; backdoor `demo@urc.app`/`demo1234` at line 37; credentials pre-filled at `Login.jsx` lines 15–16. Mobile: `mobile/src/store/` contains only `projectStore.js`, no auth/password hit in `mobile/src` — matches "no auth concept at all" | **MATCH** |
+| A20-f | Read-only: audit modified nothing | `git log --stat 9489194` → exactly one file, `docs/CODEBASE_AUDIT.md`, 400 insertions, 0 other paths | **MATCH** |
+
+Nit (QA-S1-3, S4): C-1 and T-6 cite `ROIScreen.jsx:61` for the hardcoded `1000 * 200`; actual line
+is 62 (line 61 is the tenant-cost line). Substance unaffected. No other citation drift found in the
+~30 line references exercised above.
+
+### ATL-021 — checks executed
+
+| Check | Verification | Result |
+|---|---|---|
+| A21-determinism | `sha256sum` of delivered FOUNDER_DASHBOARD.md/html, then `pnpm dashboard` twice, re-hash after each: `8a2e0b2caac3…5cd3` (md) / `fe85a7df59d5…5e30` (html) all three times — byte-identical, and identical to the files committed in `ecbcdef` (`git diff --stat` empty). Timestamp source is `git log -1 --format=%cs -- docs/coordination`, not wall clock | **PASS** |
+| A21-accuracy-1 | Open P0/P1/P2 vs workboard: hand-recount of all 22 task blocks → open P0 = {ATL-001, 003, 003-PLAN, 005, 020, 021} = 6; P1 = {006, 013, 014, 018, 019} = 5; P2 = {008, 011, 012, 015, 016, 017} = 6. Dashboard: 6/5/6, same IDs | **MATCH** |
+| A21-accuracy-2 | TEAM rows recomputed from task blocks: CTO 9 total / 1 blocked (008) / 2 backlog (011, 012) / 2 completed (007, 009); QA 4/2/0/1; Product 4/0/1/1; Growth 2/0/0/1; CEO 1/0/0/0; sprint-task cells and Active/Ready labels consistent with sprint-table statuses | **MATCH** |
+| A21-accuracy-3 | Risk grouping: RISK_REGISTER.md has exactly R-01…R-09; dashboard renders all 9 exactly once (Technical 3, Security 2, Product 1, Business 2, Process 1); severities/probabilities/statuses verbatim incl. `Mitigated (residual: remote CI observation)` and `Low / High (already true)` | **MATCH** |
+| A21-accuracy-4 | Frozen tasks: DL-012 freeze list {011, 012, 015, 016, 017} fully accounted — backlog counts CTO 2 + Product 1 + worker line "ATL-016 (Grok, BACKLOG), ATL-017 (Codex, BACKLOG)" | **MATCH** |
+| A21-accuracy-5 | Doc counts vs filesystem (`ls \| wc -l`): docs/*.md = 11, docs/adr = 10, docs/pilot = 5, docs/coordination = 9, docs/growth = 3 — dashboard line identical | **MATCH** |
+| A21-accuracy-6 | Founder-blocker list vs CURRENT_MISSION.md standing constraint 4: exactly the same 3 items (ATL-008 archive deletion, GITLEAKS/DL-009, M1 kickoff green-light), plus sprint-progress recount (0 of 8; IN PROGRESS 3, READY 5) matches sprint table | **MATCH** |
+| A21-no-hand-status | Full read of tools/founder-dashboard/generate.mjs (980 lines): hardcoded content limited to the permitted presentation mappings — ADR-0010 status-vocabulary normalizer, AGENTS display names, RISK_CATEGORY map, n/a placeholder strings. Team Active/Ready/Waiting, pilot-readiness line, and prospects=0 are derived from parsed sources (heuristics, not constants). No hand-entered status values found | **PASS** |
+| A21-freshness-local | ci.yml lint job contains the "Founder dashboard freshness" step (`pnpm dashboard` + `git diff --exit-code FOUNDER_DASHBOARD.*`); two-commit workflow respected (`e3f7e6d` = 4 source files, no dashboard; `ecbcdef` = dashboard only); local regeneration at HEAD leaves zero diff | **PASS** |
+| A21-freshness-remote | Simulated the actual CI checkout (`git clone --depth 1`, matching actions/checkout@v4 default fetch-depth 1) into scratchpad and ran the generator: it stamped source commit `ecbcdef` (grafted HEAD) instead of `e3f7e6d`, producing a 4-line diff in each output → `git diff --exit-code` fails. **The freshness gate will fail on every remote CI run even when the dashboard is fresh** (defect QA-S1-1) | **FAIL** |
+| A21-toolchain | `pnpm lint` PASS (eslint api/web/shared Done) · `pnpm typecheck` PASS (tsc Done ×3) · `pnpm test` PASS (vitest "1 passed (1)" ×3). No regression from the ATL-021 package.json/ci.yml changes | **PASS** |
+
+### Defects filed
+
+| ID | Sev | Finding | Return to |
+|---|---|---|---|
+| QA-S1-1 | S3 | CI freshness gate false-positives under the default shallow checkout: `actions/checkout@v4` fetches depth 1, the grafted HEAD "introduces" every path, so the generator's `git log -1 -- . :(exclude)FOUNDER_DASHBOARD.*` resolves to HEAD (e.g. the dashboard-only commit `ecbcdef`) instead of the true last source commit — regenerated output differs from committed output and the lint job goes red on every push/PR regardless of freshness. Reproduced with `git clone --depth 1`. Consequence: QA-M0-3 (first remote CI run green) is unachievable until fixed. Fix direction (CTO's choice): `fetch-depth: 0` on the lint-job checkout, or stamp from a source that survives shallow clones; PR-event merge-commit behavior must be re-verified after the fix | atlas-cto |
+| QA-S1-2 | S4 | Commit `e3f7e6d` message says "…; coordination updates" but the commit touches only ci.yml, README.md, package.json, tools/founder-dashboard/generate.mjs — no coordination file. Misleading history | atlas-cto |
+| QA-S1-3 | S4 | CODEBASE_AUDIT.md C-1/T-6 cite ROIScreen.jsx:61 for the hardcoded land area; actual line 62 | atlas-cto |
+
+### Verdicts
+
+- **ATL-020: PASS.** 6/6 spot-checks MATCH, including all CRITICAL claims (four divergent engines,
+  silent fallback, gershayim import bug verified against the shipped fixture); read-only constraint
+  proven at commit level. One S4 citation nit (QA-S1-3). QA recommends promotion to VERIFIED.
+- **ATL-021: PASS-WITH-KNOWN-ISSUES.** Dashboard is deterministic, honest (every value traced to a
+  source or explicit n/a), and 6/6 accuracy cross-checks MATCH; two-commit workflow respected;
+  toolchain regression green. However the CI freshness gate — acceptance criterion 3 — is broken in
+  the real CI environment (QA-S1-1): it fails closed on *every* remote run, fresh or stale. Hold at
+  IMPLEMENTED; VERIFIED only after QA-S1-1 is fixed by atlas-cto and independently re-verified
+  (which also unblocks QA-M0-3). Note: this QA_PLAN.md append is itself a dashboard source change —
+  the committing session must run `pnpm dashboard` in the follow-up commit per the two-commit rule
+  (content is expected to be unchanged by this section; verify with `git diff`).
