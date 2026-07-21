@@ -1,0 +1,23 @@
+{
+  "name": "no_sign_change_all_costs",
+  "kind": "cashflows",
+  "verifier": "hand-derived, closed-form, atlas-cto 2026-07-21",
+  "derivation": [
+    "All-outflow project (costs only, revenue zero): cf = [-500,000, -100,000, -50,000] agorot.",
+    "No sign change => NPV(r) < 0 for every r > -1, so no IRR root can exist => irr must be null.",
+    "NPV @ 5%: -500,000 - 100,000/1.05 - 50,000/1.05^2",
+    "  = -500,000 - 95,238.0952... - 45,351.4739...  = -640,589.5691... agorot",
+    "  (exact fraction -282,500,000/441); half-even to integer agorot => -640,590.",
+    "Payback: cumulative never reaches 0 => null (simple and discounted)."
+  ],
+  "input": {
+    "cashflows": [-500000, -100000, -50000],
+    "discount_rate_per_period": "0.05"
+  },
+  "expected": {
+    "irr": null,
+    "npv_agorot": -640590,
+    "payback_periods": null,
+    "discounted_payback_periods": null
+  }
+}

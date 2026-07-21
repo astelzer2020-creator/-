@@ -1,0 +1,25 @@
+{
+  "name": "two_period_double",
+  "kind": "cashflows",
+  "verifier": "hand-derived, closed-form, atlas-cto 2026-07-21",
+  "derivation": [
+    "Invest 1,000,000 agorot at t=0, receive 2,000,000 at t=1.",
+    "IRR: -1,000,000 + 2,000,000/(1+r) = 0  =>  1+r = 2  =>  r = 1 (100% per period), exact.",
+    "NPV @ 10%: -1,000,000 + 2,000,000/1.1 = -1,000,000 + 1,818,181.8181... = 818,181.8181... agorot;",
+    "  half-even to integer agorot => 818,182.",
+    "Simple payback: cumulative -1,000,000 then +1,000,000; recovery inside period 1:",
+    "  0 + 1,000,000/2,000,000 = 0.5 periods, exact.",
+    "Discounted payback @ 10%: discounted cf1 = 2,000,000/1.1; payback = 1,000,000/(2,000,000/1.1)",
+    "  = 1,000,000 * 1.1 / 2,000,000 = 0.55 periods, exact."
+  ],
+  "input": {
+    "cashflows": [-1000000, 2000000],
+    "discount_rate_per_period": "0.10"
+  },
+  "expected": {
+    "irr": "1",
+    "npv_agorot": 818182,
+    "payback_periods": "0.5",
+    "discounted_payback_periods": "0.55"
+  }
+}

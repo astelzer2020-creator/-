@@ -1,7 +1,9 @@
 """Atlas analytics service package.
 
-Placeholder for ATL-007 (toolchain bootstrap). The FastAPI app (main.py, api/) and the
-pure computation engine (engine/irr.py, engine/npv.py, engine/sensitivity.py) land in M1.
+- ``engine/`` — pure financial computation (cashflow, NPV, IRR, payback, sensitivity),
+  golden-file tested per ADR-0006. No I/O.
+- ``api/`` — FastAPI boundary (``atlas_analytics.api.main:app``): POST /v1/simulate,
+  /healthz, /readyz. Internal-only; reached exclusively via apps/api.
 """
 
 __version__ = "0.1.0"

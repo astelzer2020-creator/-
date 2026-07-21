@@ -1,0 +1,24 @@
+{
+  "name": "loss_making_negative_irr",
+  "kind": "cashflows",
+  "verifier": "hand-derived, closed-form, atlas-cto 2026-07-21",
+  "derivation": [
+    "Loss-making project: invest 1,000,000 agorot at t=0, recover only 900,000 at t=1.",
+    "IRR: -1,000,000 + 900,000/(1+r) = 0  =>  1+r = 0.9  =>  r = -0.1 exact (negative IRR).",
+    "Root policy check: the only root is negative and inside (-0.99, 10) => it is returned",
+    "  (honest IRR of a losing deal), not clamped to 0 like the audited prototype solver (D-4).",
+    "NPV @ 10%: -1,000,000 + 900,000/1.1 = -1,000,000 + 818,181.8181... = -181,818.1818...",
+    "  agorot (exact fraction -2,000,000/11); half-even => -181,818.",
+    "Payback: cumulative -1,000,000 then -100,000, never reaches 0 => null."
+  ],
+  "input": {
+    "cashflows": [-1000000, 900000],
+    "discount_rate_per_period": "0.10"
+  },
+  "expected": {
+    "irr": "-0.1",
+    "npv_agorot": -181818,
+    "payback_periods": null,
+    "discounted_payback_periods": null
+  }
+}

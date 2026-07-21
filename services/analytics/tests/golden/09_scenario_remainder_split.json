@@ -1,0 +1,45 @@
+{
+  "name": "scenario_remainder_split",
+  "kind": "scenario",
+  "verifier": "hand-derived, closed-form, atlas-cto 2026-07-21",
+  "derivation": [
+    "Pins exact integer phasing with a remainder, plus the IRR window policy.",
+    "Revenue 1,000,001 agorot phased over periods 1-3: floor(1,000,001/3) = 333,333 each,",
+    "  remainder 2 distributed one agora to the two EARLIEST periods of the window",
+    "  => [333,334, 333,334, 333,333]; sum is exactly 1,000,001 (lossless split rule).",
+    "One planning cost of 2 agorot at period 0. Expected cashflows:",
+    "  [-2, 333,334, 333,334, 333,333].",
+    "NPV @ 0%: plain sum = 1,000,001 - 2 = 999,999 agorot = profit.",
+    "roi_on_cost = 999,999/2 = 499,999.5 exact.",
+    "Simple payback: cumulative -2 then +333,332; recovery inside period 1:",
+    "  2/333,334 = 0.000005999988000024 (expansion of exact fraction; asserted to 12 sig figs).",
+    "IRR: cashflows do change sign, but NPV stays positive across the whole policy window:",
+    "  even at r = 10, NPV = -2 + 333,334/11 + 333,334/121 + 333,333/1331 > 30,000 > 0, and",
+    "  NPV -> +inf as r -> -0.99. The true root (~166,666 per period) lies far outside",
+    "  (-0.99, 10), so by the documented window policy irr = null."
+  ],
+  "input": {
+    "scenario": {
+      "num_periods": 3,
+      "total_revenue_agorot": 1000001,
+      "revenue_phasing": { "start_period": 1, "end_period": 3 },
+      "cost_items": [
+        {
+          "name": "planning",
+          "category": "planning",
+          "amount_agorot": 2,
+          "phasing": { "start_period": 0, "end_period": 0 }
+        }
+      ]
+    },
+    "discount_rate_per_period": "0"
+  },
+  "expected": {
+    "cashflows_agorot": [-2, 333334, 333334, 333333],
+    "npv_agorot": 999999,
+    "profit_agorot": 999999,
+    "roi_on_cost": "499999.5",
+    "payback_periods": "0.000005999988",
+    "irr": null
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "multi_root_smallest_positive",
+  "kind": "cashflows",
+  "verifier": "hand-derived, closed-form, atlas-cto 2026-07-21",
+  "derivation": [
+    "cf = [-100,000, +250,000, -156,000] agorot: two sign changes => up to two IRR roots.",
+    "NPV(r)*(1+r)^2 = -100,000(1+r)^2 + 250,000(1+r) - 156,000 = 0; divide by -1,000:",
+    "  100x^2 - 250x + 156 = 0 with x = 1+r; discriminant = 250^2 - 4*100*156 = 62,500 - 62,400 = 100.",
+    "  x = (250 +/- 10)/200 = 1.3 or 1.2  =>  roots r = 0.3 and r = 0.2. BOTH are genuine IRRs.",
+    "Root policy: smallest positive root in (-0.99, 10) => expected irr = 0.2.",
+    "NPV @ 0%: plain sum = -100,000 + 250,000 - 156,000 = -6,000 agorot.",
+    "Simple payback (first-crossing convention): cumulative -100,000 then +150,000; recovery",
+    "  inside period 1: 100,000/250,000 = 0.4 periods. The later dip to -6,000 at t=2 is ignored",
+    "  by the documented first-crossing rule — this fixture pins that convention.",
+    "Discounted payback @ 0% equals simple payback."
+  ],
+  "input": {
+    "cashflows": [-100000, 250000, -156000],
+    "discount_rate_per_period": "0"
+  },
+  "expected": {
+    "irr": "0.2",
+    "npv_agorot": -6000,
+    "payback_periods": "0.4",
+    "discounted_payback_periods": "0.4"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "exact_tenth_irr_zero_rate",
+  "kind": "cashflows",
+  "verifier": "hand-derived, closed-form, atlas-cto 2026-07-21",
+  "derivation": [
+    "cf = [-40,000, +22,000, +24,200] agorot, constructed so r = 0.1 is an exact root:",
+    "  22,000/1.1 = 20,000 and 24,200/1.21 = 20,000, so NPV(0.1) = -40,000 + 20,000 + 20,000 = 0.",
+    "IRR = 0.1 exact. Single sign change => unique root (Descartes).",
+    "NPV @ 0% (zero-discount-rate edge): plain sum = -40,000 + 22,000 + 24,200 = 6,200 agorot.",
+    "Simple payback: cumulative -40,000, -18,000, +6,200; recovery inside period 2:",
+    "  1 + 18,000/24,200 = 1 + 90/121 = 1.743801652892562 (decimal expansion of exact fraction).",
+    "Discounted payback @ 0% equals simple payback."
+  ],
+  "input": {
+    "cashflows": [-40000, 22000, 24200],
+    "discount_rate_per_period": "0"
+  },
+  "expected": {
+    "irr": "0.1",
+    "npv_agorot": 6200,
+    "payback_periods": "1.743801652892562",
+    "discounted_payback_periods": "1.743801652892562"
+  }
+}

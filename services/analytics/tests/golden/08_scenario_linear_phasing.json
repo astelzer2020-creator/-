@@ -1,0 +1,43 @@
+{
+  "name": "scenario_linear_phasing",
+  "kind": "scenario",
+  "verifier": "hand-derived, closed-form, atlas-cto 2026-07-21",
+  "derivation": [
+    "Full scenario through build_cashflow: 5 periods (0..4). Construction 2,000,000 agorot",
+    "phased linearly over periods 0-1 => 1,000,000 per period. Revenue 3,000,000 agorot phased",
+    "linearly over periods 3-4 => 1,500,000 per period. Both splits are exact (no remainder).",
+    "Expected cashflows: [-1,000,000, -1,000,000, 0, +1,500,000, +1,500,000].",
+    "NPV @ 0% (zero-discount-rate edge): plain sum = 3,000,000 - 2,000,000 = 1,000,000 agorot.",
+    "Profit = revenue - costs = 1,000,000 agorot (same as zero-rate NPV, by definition).",
+    "roi_on_cost = profit/total cost = 1,000,000/2,000,000 = 0.5 exact.",
+    "Simple payback: cumulative -1M, -2M, -2M, -0.5M, +1M; recovery inside period 4:",
+    "  3 + 500,000/1,500,000 = 3 + 1/3 = 3.333333333333333 (expansion of exact fraction).",
+    "Discounted payback @ 0% equals simple payback.",
+    "IRR is deliberately NOT pinned here: no closed form exists for this shape; the",
+    "NPV(IRR) ~ 0 property test covers it (ADR-0006 — never pin a value no human derived)."
+  ],
+  "input": {
+    "scenario": {
+      "num_periods": 4,
+      "total_revenue_agorot": 3000000,
+      "revenue_phasing": { "start_period": 3, "end_period": 4 },
+      "cost_items": [
+        {
+          "name": "construction",
+          "category": "construction",
+          "amount_agorot": 2000000,
+          "phasing": { "start_period": 0, "end_period": 1 }
+        }
+      ]
+    },
+    "discount_rate_per_period": "0"
+  },
+  "expected": {
+    "cashflows_agorot": [-1000000, -1000000, 0, 1500000, 1500000],
+    "npv_agorot": 1000000,
+    "profit_agorot": 1000000,
+    "roi_on_cost": "0.5",
+    "payback_periods": "3.333333333333333",
+    "discounted_payback_periods": "3.333333333333333"
+  }
+}

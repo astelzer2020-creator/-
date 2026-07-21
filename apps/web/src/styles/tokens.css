@@ -1,0 +1,141 @@
+/*
+ * Atlas design tokens — the single source of truth for the hand-rolled design system.
+ * Light + dark via prefers-color-scheme. Contrast choices (WCAG AA, ≥4.5:1 for text):
+ *   light: --color-text #1a2233 on #ffffff ≈ 15.9:1; --color-text-muted #4b5768 on #ffffff ≈ 7.2:1;
+ *          white on --color-primary #1d4ed8 ≈ 6.3:1; --color-danger-text #b42318 on #ffffff ≈ 6.0:1.
+ *   dark:  --color-text #e8ecf4 on #161d2b ≈ 13.5:1; --color-text-muted #a3b0c2 on #161d2b ≈ 7.4:1.
+ */
+:root {
+  /* Typography — system stack with Hebrew-capable fallbacks. */
+  --font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Heebo",
+    "Assistant",
+    "Arial Hebrew",
+    "Noto Sans Hebrew",
+    Arial,
+    sans-serif;
+  --font-family-mono: ui-monospace, "Cascadia Mono", "Fira Code", Consolas, monospace;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.375rem;
+  --font-size-2xl: 1.75rem;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --line-height: 1.55;
+
+  /* Spacing scale (4px base). */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* Radii + shadows. */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-sm: 0 1px 2px rgb(16 24 40 / 8%);
+  --shadow-md: 0 4px 12px rgb(16 24 40 / 12%);
+  --shadow-lg: 0 12px 32px rgb(16 24 40 / 18%);
+
+  /* Motion. */
+  --transition-fast: 150ms ease;
+  --transition-medium: 200ms ease;
+
+  /* Layout. */
+  --sidebar-width: 15rem;
+  --topbar-height: 3.5rem;
+
+  /* Light theme colors. */
+  --color-bg: #f5f6f8;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f0f2f5;
+  --color-border: #d5dae2;
+  --color-border-strong: #aab3c0;
+  --color-text: #1a2233;
+  --color-text-muted: #4b5768;
+  --color-primary: #1d4ed8;
+  --color-primary-hover: #1e40af;
+  --color-primary-active: #1c3a9e;
+  --color-on-primary: #ffffff;
+  --color-primary-soft: #e8eefc;
+  --color-danger: #b42318;
+  --color-danger-hover: #912018;
+  --color-on-danger: #ffffff;
+  --color-danger-soft: #fdecea;
+  --color-danger-text: #b42318;
+  --color-success-text: #166534;
+  --color-success-soft: #e5f3e9;
+  --color-warning-text: #92400e;
+  --color-warning-soft: #fdf1dc;
+  --color-info-soft: #e8eefc;
+  --color-info-text: #1d4ed8;
+  --color-focus-ring: #1d4ed8;
+  --color-backdrop: rgb(16 24 40 / 55%);
+  --color-skeleton: #e4e7ec;
+  --color-skeleton-highlight: #f2f4f7;
+
+  /* Sensitivity-grid scale (text on these tints stays --color-text: all tints ≥ 4.5:1 with #1a2233). */
+  --sens-pos-1: #eaf6ee;
+  --sens-pos-2: #d2ecdb;
+  --sens-pos-3: #b3dfc4;
+  --sens-neg-1: #fdeeec;
+  --sens-neg-2: #fad9d5;
+  --sens-neg-3: #f5bcb6;
+  --sens-zero: #eef0f3;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0f141f;
+    --color-surface: #161d2b;
+    --color-surface-hover: #1d2637;
+    --color-border: #2c3648;
+    --color-border-strong: #46536a;
+    --color-text: #e8ecf4;
+    --color-text-muted: #a3b0c2;
+    --color-primary: #2563eb;
+    --color-primary-hover: #3b76f0;
+    --color-primary-active: #1d4ed8;
+    --color-on-primary: #ffffff;
+    --color-primary-soft: #1b2a4a;
+    --color-danger: #d92d20;
+    --color-danger-hover: #f04438;
+    --color-on-danger: #ffffff;
+    --color-danger-soft: #3b1a17;
+    --color-danger-text: #f97066;
+    --color-success-text: #75e0a7;
+    --color-success-soft: #14291c;
+    --color-warning-text: #fec84b;
+    --color-warning-soft: #33250d;
+    --color-info-soft: #1b2a4a;
+    --color-info-text: #9cbcf5;
+    --color-focus-ring: #7ca4f5;
+    --color-backdrop: rgb(0 0 0 / 65%);
+    --color-skeleton: #232d40;
+    --color-skeleton-highlight: #2c3850;
+
+    /* Dark sensitivity tints keep --color-text #e8ecf4 ≥ 4.5:1. */
+    --sens-pos-1: #16261c;
+    --sens-pos-2: #1b3826;
+    --sens-pos-3: #214a30;
+    --sens-neg-1: #2b1715;
+    --sens-neg-2: #3d1d19;
+    --sens-neg-3: #50241e;
+    --sens-zero: #1c2434;
+
+    color-scheme: dark;
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "npv_zero_at_irr",
+  "kind": "cashflows",
+  "verifier": "hand-derived, closed-form, atlas-cto 2026-07-21",
+  "derivation": [
+    "cf = [-1,000,000, 0, +1,440,000] agorot. Two-cashflow IRR over 2 periods:",
+    "  IRR = (1,440,000/1,000,000)^(1/2) - 1 = sqrt(1.44) - 1 = 1.2 - 1 = 0.2 exact.",
+    "NPV @ 20% (rate == IRR): -1,000,000 + 1,440,000/1.2^2 = -1,000,000 + 1,440,000/1.44",
+    "  = -1,000,000 + 1,000,000 = 0 agorot exactly — pins the NPV(IRR) = 0 invariant on a",
+    "  golden case, not just in property tests.",
+    "Simple payback: cumulative -1,000,000, -1,000,000, +440,000; recovery inside period 2:",
+    "  1 + 1,000,000/1,440,000 = 1 + 25/36 = 1.694444444444444 (expansion of exact fraction).",
+    "Discounted payback @ 20%: discounted flows -1,000,000, 0, 1,440,000/1.44 = +1,000,000;",
+    "  cumulative reaches exactly 0 at t=2: 1 + 1,000,000/1,000,000 = 2 periods exact."
+  ],
+  "input": {
+    "cashflows": [-1000000, 0, 1440000],
+    "discount_rate_per_period": "0.20"
+  },
+  "expected": {
+    "irr": "0.2",
+    "npv_agorot": 0,
+    "payback_periods": "1.694444444444444",
+    "discounted_payback_periods": "2"
+  }
+}
