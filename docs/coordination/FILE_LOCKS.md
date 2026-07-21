@@ -26,7 +26,38 @@ STATUS: active | released | expired-escalated
 
 ## Active locks
 
-*(none — no implementation task is currently in progress)*
+```
+TASK ID: ATL-003 (work package WEB)
+OWNER: atlas-cto
+FILES OR DIRECTORIES: apps/web/**
+START TIME: 2026-07-21
+EXPECTED COMPLETION: 2026-07-21 (same day)
+STATUS: active
+NOTE: filed by atlas-ceo to regularize in-flight DL-014 work. The ATL-021 CTO's "unclaimed
+foreign edits" flag was procedurally correct — this lock was missing when work started.
+```
+
+```
+TASK ID: ATL-003 (work package SHARED+API)
+OWNER: atlas-cto
+FILES OR DIRECTORIES: packages/shared/**, apps/api/**
+START TIME: 2026-07-21
+EXPECTED COMPLETION: 2026-07-21 (same day)
+STATUS: active
+NOTE: filed by atlas-ceo to regularize in-flight DL-014 work. The ATL-021 CTO's "unclaimed
+foreign edits" flag was procedurally correct — this lock was missing when work started.
+```
+
+```
+TASK ID: ATL-003 (work package ENGINE)
+OWNER: atlas-cto
+FILES OR DIRECTORIES: services/analytics/**
+START TIME: 2026-07-21
+EXPECTED COMPLETION: 2026-07-21 (same day)
+STATUS: active
+NOTE: filed by atlas-ceo to regularize in-flight DL-014 work. The ATL-021 CTO's "unclaimed
+foreign edits" flag was procedurally correct — this lock was missing when work started.
+```
 
 ## Released locks
 

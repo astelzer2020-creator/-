@@ -20,20 +20,26 @@ human review before ATL-008 acts.
 ## Sprint-1 (2026-07-21 → +1 week)
 
 Defined per Founder sprint-planning directive of 2026-07-21 (DL-012). **Scope rule: P0/P1 only.**
-Sprint-1 is planning + documentation + verification-prep — **NO feature implementation this mission**.
-ATL-003 advances only as a plan; code implementation starts only after the Founder approves
-`docs/plans/ATL-003-PLAN.md`. All P2/P3 tasks are frozen to BACKLOG for the sprint (ATL-011, ATL-012,
-ATL-015, ATL-016, ATL-017). Role assignments per Founder: CEO — roadmap/coordination; CTO — highest
-technical blocker (as a plan) + codebase audit; Product — onboarding/first-value; QA — verification
-plan; Growth — pilot material only (no outreach).
+~~Sprint-1 is planning + documentation + verification-prep — NO feature implementation this mission;
+ATL-003 advances only as a plan, gated on Founder approval of docs/plans/ATL-003-PLAN.md~~ —
+**superseded by DL-014** (see amendment below). All P2/P3 tasks remain frozen to BACKLOG for the
+sprint (ATL-011, ATL-012, ATL-015, ATL-016, ATL-017). Role assignments per Founder: CEO —
+roadmap/coordination; CTO — highest technical blocker + codebase audit; Product —
+onboarding/first-value; QA — verification plan; Growth — pilot material only (no outreach).
 
 **Scope amendment (2026-07-21, DL-013):** ATL-021 (Founder Control Center) added by Founder directive
 — Sprint-1 grows to **8 tasks**. ATL-021 is P0, so the P0/P1-only rule holds.
 
+**Scope amendment (2026-07-21, DL-014):** Founder direct green-light superseded the DL-012 plan gate —
+**ATL-003 implementation joined the sprint** (P0) as three bounded atlas-cto work packages (ENGINE /
+SHARED+API / WEB; locks in FILE_LOCKS.md). ATL-003-PLAN is CLOSED as superseded. Legacy freeze
+(DL-007) and all QA verification gates remain fully in force.
+
 | Task | Owner | Reviewer | Approver | Pri | Effort | Status | Goal (one line) |
 |---|---|---|---|---|---|---|---|
 | ATL-001 | atlas-ceo | human owner | Founder | P0 | 0.5d | IN PROGRESS | Sprint-1 sequencing + roadmap consistency; IMPLEMENTED when this sprint section is complete, Founder sign-off pending |
-| ATL-003-PLAN | atlas-cto | atlas-ceo | atlas-qa | P0 | 1d | READY | ATL-003 implementation plan (files, DB schema draft, contracts, test plan incl. golden fixtures, work packages) — no code |
+| ATL-003-PLAN | atlas-cto | atlas-ceo | atlas-qa | P0 | 1d | CLOSED | Superseded by DL-014 Founder direct green-light; plan content embedded in the three ATL-003 work-package delegations |
+| ATL-003 | atlas-cto | atlas-qa | atlas-qa | P0 | — | IN PROGRESS | M1 implementation joined the sprint per DL-014: three work packages — ENGINE, SHARED+API, WEB |
 | ATL-013 | atlas-product | atlas-cto | atlas-ceo | P1 | 0.5d | READY | Week-0 customer data dry-run runbook |
 | ATL-014 | atlas-product | atlas-qa | atlas-ceo | P1 | 0.5d | READY | Excel reconciliation worksheet spec (<1% divergence gate) |
 | ATL-018 | atlas-qa | atlas-ceo | atlas-ceo | P1 | 0.5d | READY | M1 verification plan for ATL-003 criteria + DL-008 QA_PLAN annotations |
@@ -41,12 +47,13 @@ plan; Growth — pilot material only (no outreach).
 | ATL-020 | atlas-cto | atlas-qa | atlas-qa | P0 | 0.5d | IN PROGRESS | Read-only codebase verification audit → docs/CODEBASE_AUDIT.md |
 | ATL-021 | atlas-cto | atlas-qa | atlas-ceo | P0 | 0.5d | IN PROGRESS | Founder Control Center — dashboard generated from coordination files + CI freshness gate (DL-013) |
 
-**Sprint-1 exit criteria:** all 8 tasks at IMPLEMENTED or VERIFIED with evidence, plus Founder rulings
-received on ATL-008 (archive deletion, DL-010), GITLEAKS_LICENSE/secrets-scan (DL-009), and
-ATL-003-PLAN approval (the gate for M1 implementation).
+**Sprint-1 exit criteria (amended per DL-014):** all Sprint-1 tasks (incl. the three ATL-003 work
+packages) at IMPLEMENTED or VERIFIED with evidence, plus Founder rulings received on ATL-008 (archive
+deletion, DL-010) and GITLEAKS_LICENSE/secrets-scan (DL-009). The former ATL-003-PLAN approval gate is
+satisfied by the DL-014 direct green-light.
 
-Blocked-on-Founder (unchanged): ATL-008 (DL-010), GITLEAKS/secrets-scan (DL-009). ATL-005/ATL-006
-remain BLOCKED on ATL-003 delivery. ATL-002/004/007/009/010 keep their completed statuses.
+Blocked-on-Founder: ATL-008 (DL-010), GITLEAKS/secrets-scan (DL-009). ATL-005/ATL-006 remain BLOCKED
+on ATL-003 delivery. ATL-002/004/007/009/010 keep their completed statuses.
 
 ---
 
@@ -67,15 +74,15 @@ remain BLOCKED on ATL-003 delivery. ATL-002/004/007/009/010 keep their completed
 
 ### ATL-003 — Resolve P0/P1 production issues (persistence, auth, single API, CI)
 - **Owner:** atlas-cto · **Reviewer:** atlas-qa · **Priority:** P0
-- **Status:** ready — UNBLOCKED 2026-07-21 (ATL-007 delivered + QA PASS-WITH-KNOWN-ISSUES via ATL-010); next engineering task; start on MISSION-1 next-phase green-light (human owner) · **Dependencies:** ATL-001, ATL-007 (satisfied)
+- **Status:** IN PROGRESS (2026-07-21, DL-014 Founder direct green-light) — executing as three bounded atlas-cto work packages: ENGINE (services/analytics/**), SHARED+API (packages/shared/** + apps/api/**), WEB (apps/web/**); locks filed in FILE_LOCKS.md · **Dependencies:** ATL-001, ATL-007 (satisfied)
 - **Files affected:** apps/api/**, services/analytics/**, packages/shared/**, infra/**, .github/workflows/**
 - **Acceptance criteria:** the four P0-fatal gaps from docs/pilot/TECHNICAL_READINESS.md closed — Postgres persistence with migrations; auth with roles; analytics internal-only behind the single public API; CI green gate. Each closed gap has QA verification evidence.
 - **Verification evidence:** —
-- **Sprint-1 note (DL-012):** implementation remains GATED on Founder approval of docs/plans/ATL-003-PLAN.md; only ATL-003-PLAN (below) runs this sprint.
+- **Sprint-1 note:** the DL-012 gate (implementation only after Founder approval of ATL-003-PLAN.md) was SUPERSEDED by DL-014 — Founder pre-approved implementation directly. QA gates unchanged.
 
 ### ATL-003-PLAN — ATL-003 implementation plan (sub-task of ATL-003; plan only, NO code)
 - **Owner:** atlas-cto · **Reviewer:** atlas-ceo · **Approver:** atlas-qa · **Priority:** P0 · **Effort:** 1d
-- **Status:** READY · **Dependencies:** none (ATL-003 prerequisites already satisfied)
+- **Status:** CLOSED (2026-07-21, atlas-ceo) — superseded by DL-014 Founder direct green-light; plan content embedded in the three ATL-003 work-package delegations (ENGINE / SHARED+API / WEB). Sequencing deviation (plan-then-approve skipped by Founder instruction) recorded in DL-014 · **Dependencies:** none (ATL-003 prerequisites already satisfied)
 - **Files affected:** docs/plans/ATL-003-PLAN.md (new; no source code touched)
 - **Acceptance criteria:** plan covers (1) files/modules to be created or changed; (2) DB schema draft (Postgres, migrations); (3) API contract changes; (4) test plan incl. golden fixtures per ADR-0006; (5) work-package breakdown into bounded execution-worker tasks with file groups. ATL-003 implementation itself starts only after Founder approval of this plan (DL-012).
 - **Verification evidence:** —
@@ -89,7 +96,7 @@ remain BLOCKED on ATL-003 delivery. ATL-002/004/007/009/010 keep their completed
 
 ### ATL-005 — Independent critical-journey and security verification
 - **Owner:** atlas-qa · **Reviewer:** atlas-ceo · **Priority:** P0
-- **Status:** BLOCKED (on ATL-003 delivery; ATL-003 implementation itself gated on Founder approval of ATL-003-PLAN, DL-012) · **Dependencies:** ATL-003
+- **Status:** BLOCKED (on ATL-003 delivery — now IN PROGRESS per DL-014; unblocks when the three work packages reach IMPLEMENTED with handoffs) · **Dependencies:** ATL-003
 - **Files affected:** docs/pilot/QA_PLAN.md (results), docs/coordination/AGENT_WORKBOARD.md (evidence links)
 - **Acceptance criteria:** the 11 acceptance scenarios of QA_PLAN.md executed with recorded results; authZ probe of all endpoints incl. cross-tenant attempts; golden-file suite green; verdict + production-readiness score published.
 - **Verification evidence:** —
