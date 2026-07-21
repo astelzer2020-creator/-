@@ -42,6 +42,8 @@ files is not coordinated, no matter what it believes.
 8. Never change product scope, priorities, architecture decisions (ADRs), or coordination rules.
 9. Legacy prototype (`frontend/`, `backend/`, `mobile/`) and root archives are READ-ONLY (ADR-0007/0008, DL-007).
 10. Uncertain about anything → stop, write the question into your handoff entry, set task BLOCKED.
+11. After a handoff that changed coordination files, run `pnpm dashboard` and include the regenerated
+    dashboard files in your commit (DL-013; applies once ATL-021 lands).
 
 ## Task lifecycle (single status vocabulary, all environments)
 

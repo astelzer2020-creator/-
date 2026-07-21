@@ -56,9 +56,9 @@ owner). Open on the human owner: ATL-008 archive-deletion approval (DL-010) and 
 GITLEAKS_LICENSE/secrets-scan decision (DL-009). Gap tasks ATL-011…ATL-015 filed from ATL-002;
 ATL-013/ATL-014 (P1, Product-owned) can start immediately.
 
-**Sprint-1 defined (2026-07-21, DL-012):** 7 P0/P1 tasks — ATL-001, ATL-003-PLAN, ATL-013, ATL-014,
-ATL-018, ATL-019, ATL-020; all P2/P3 work frozen for the sprint; no feature implementation this
-mission — ATL-003 advances as a plan, implementation gated on Founder approval of
-docs/plans/ATL-003-PLAN.md. **Sprint-1 exit condition:** all 7 tasks IMPLEMENTED/VERIFIED with
-evidence, plus Founder rulings received on ATL-008 (DL-010), GITLEAKS/secrets-scan (DL-009), and
-ATL-003-PLAN approval.
+**Sprint-1 defined (2026-07-21, DL-012; amended by DL-013):** 8 P0/P1 tasks — ATL-001, ATL-003-PLAN,
+ATL-013, ATL-014, ATL-018, ATL-019, ATL-020, ATL-021 (Founder Control Center, added by Founder
+directive); all P2/P3 work frozen for the sprint; no feature implementation this mission — ATL-003
+advances as a plan, implementation gated on Founder approval of docs/plans/ATL-003-PLAN.md.
+**Sprint-1 exit condition:** all 8 tasks IMPLEMENTED/VERIFIED with evidence, plus Founder rulings
+received on ATL-008 (DL-010), GITLEAKS/secrets-scan (DL-009), and ATL-003-PLAN approval.

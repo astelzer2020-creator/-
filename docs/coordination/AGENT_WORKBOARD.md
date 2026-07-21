@@ -27,6 +27,9 @@ ATL-015, ATL-016, ATL-017). Role assignments per Founder: CEO — roadmap/coordi
 technical blocker (as a plan) + codebase audit; Product — onboarding/first-value; QA — verification
 plan; Growth — pilot material only (no outreach).
 
+**Scope amendment (2026-07-21, DL-013):** ATL-021 (Founder Control Center) added by Founder directive
+— Sprint-1 grows to **8 tasks**. ATL-021 is P0, so the P0/P1-only rule holds.
+
 | Task | Owner | Reviewer | Approver | Pri | Effort | Status | Goal (one line) |
 |---|---|---|---|---|---|---|---|
 | ATL-001 | atlas-ceo | human owner | Founder | P0 | 0.5d | IN PROGRESS | Sprint-1 sequencing + roadmap consistency; IMPLEMENTED when this sprint section is complete, Founder sign-off pending |
@@ -36,8 +39,9 @@ plan; Growth — pilot material only (no outreach).
 | ATL-018 | atlas-qa | atlas-ceo | atlas-ceo | P1 | 0.5d | READY | M1 verification plan for ATL-003 criteria + DL-008 QA_PLAN annotations |
 | ATL-019 | atlas-growth | atlas-product | Founder | P1 | 0.5d | READY | One-page pilot agreement draft text — material prep only, no external use |
 | ATL-020 | atlas-cto | atlas-qa | atlas-qa | P0 | 0.5d | IN PROGRESS | Read-only codebase verification audit → docs/CODEBASE_AUDIT.md |
+| ATL-021 | atlas-cto | atlas-qa | atlas-ceo | P0 | 0.5d | IN PROGRESS | Founder Control Center — dashboard generated from coordination files + CI freshness gate (DL-013) |
 
-**Sprint-1 exit criteria:** all 7 tasks at IMPLEMENTED or VERIFIED with evidence, plus Founder rulings
+**Sprint-1 exit criteria:** all 8 tasks at IMPLEMENTED or VERIFIED with evidence, plus Founder rulings
 received on ATL-008 (archive deletion, DL-010), GITLEAKS_LICENSE/secrets-scan (DL-009), and
 ATL-003-PLAN approval (the gate for M1 implementation).
 
@@ -174,7 +178,7 @@ remain BLOCKED on ATL-003 delivery. ATL-002/004/007/009/010 keep their completed
 
 ---
 
-## Sprint-1 new tasks (DL-012)
+## Sprint-1 new tasks (DL-012 / DL-013)
 
 ### ATL-018 — M1 verification plan (QA readiness for ATL-003) + DL-008 QA_PLAN annotations
 - **Owner:** atlas-qa · **Reviewer:** atlas-ceo · **Approver:** atlas-ceo · **Priority:** P1 · **Effort:** 0.5d
@@ -195,6 +199,13 @@ remain BLOCKED on ATL-003 delivery. ATL-002/004/007/009/010 keep their completed
 - **Status:** IN PROGRESS (2026-07-21 — being executed in parallel with this planning pass) · **Dependencies:** none
 - **Files affected:** docs/CODEBASE_AUDIT.md (new; NO code modified — read-only inspection)
 - **Acceptance criteria:** audit report covering duplicate work, dead code, conflicting implementations, unfinished features, and temporary fixes across the repo; every finding cites file paths and evidence; zero source files modified; recommendations filed as proposals (any resulting work needs new workboard tasks).
+- **Verification evidence:** —
+
+### ATL-021 — Founder Control Center — generated dashboard + freshness CI gate
+- **Owner:** atlas-cto · **Reviewer:** atlas-qa · **Approver:** atlas-ceo · **Priority:** P0 (Founder directive, DL-013) · **Effort:** 0.5d
+- **Status:** IN PROGRESS (2026-07-21 — delegated to atlas-cto by Founder directive, parallel to ATL-020) · **Dependencies:** none
+- **File scope:** tools/founder-dashboard/**, FOUNDER_DASHBOARD.md + FOUNDER_DASHBOARD.html (root, generated), package.json (additive script), .github/workflows/ci.yml (freshness step), README.md (one banner link line)
+- **Acceptance criteria:** (1) all six sections (EXECUTIVE / TEAM / ENGINEERING / PRODUCT / BUSINESS / RISKS) generated from coordination/docs sources or explicitly "n/a — source not yet in repo"; (2) deterministic output — same commit → byte-identical, timestamp from git not wall clock; (3) CI fails if coordination files change without regeneration; (4) zero hand-entered status constants; (5) QA verifies by re-running the generator and cross-checking values against sources.
 - **Verification evidence:** —
 
 ---

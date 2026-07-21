@@ -30,6 +30,7 @@ Planning + documentation + verification-prep only — **no feature implementatio
 - **ATL-018** (atlas-qa) — M1 verification plan for ATL-003 criteria + DL-008 QA_PLAN annotations (scenarios 3, 6 deferred-to-post-pilot). READY.
 - **ATL-019** (atlas-growth) — one-page pilot agreement draft for Founder review; material prep ONLY, no outreach, no external use pre-ATL-006. READY.
 - **ATL-020** (atlas-cto) — read-only codebase verification audit → docs/CODEBASE_AUDIT.md. IN PROGRESS.
+- **ATL-021** (atlas-cto) — Founder Control Center: dashboard generated from coordination files + CI freshness gate (DL-013; Sprint-1 grew 7 → 8 tasks). IN PROGRESS.
 
 **Freeze:** all P2/P3 tasks (ATL-011, ATL-012, ATL-015, ATL-016, ATL-017) are BACKLOG for Sprint-1
 (DL-012). Unassigned work remains frozen as always.
@@ -44,6 +45,8 @@ Planning + documentation + verification-prep only — **no feature implementatio
   Workers stop at IMPLEMENTED; only QA sets VERIFIED; only CEO sets CLOSED.
 - **Unassigned development is FROZEN.** If a piece of work has no task ID and owner on the
   workboard, it does not happen. Propose it via a HANDOFFS.md entry to atlas-ceo instead.
+- After any coordination-file change, run `pnpm dashboard` and commit the regenerated
+  FOUNDER_DASHBOARD.* — CI enforces freshness (DL-013; applies once ATL-021 lands).
 
 ## Standing constraints
 

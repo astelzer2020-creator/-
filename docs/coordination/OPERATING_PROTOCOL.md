@@ -49,6 +49,8 @@ governs the five Claude Code roles; workers take bounded tasks and follow the wo
 - No agent approves its own work. CEO never self-approves orchestration-level technical calls either —
   cross-checked by the relevant specialist.
 - QA may not fix product code and approve it in the same cycle (see atlas-qa.md rule 2).
+- After any coordination-file change, run `pnpm dashboard` and commit the regenerated
+  FOUNDER_DASHBOARD.* — CI enforces freshness (DL-013; applies once ATL-021 lands).
 
 ## Conflict resolution
 
