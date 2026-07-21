@@ -103,3 +103,124 @@ Every design, bug-triage, and cut decision during the pilot is judged against th
 - Numbers can't earn trust without full שמאי-grade methodology — meaning the real buyer is the appraiser market and this wedge is wrong.
 
 A kill verdict kills the *developer-first wedge*, not necessarily the platform — findings feed a deliberate re-aim (e.g., שמאי tooling or municipal portfolio view) with a new pilot scope document.
+
+## 9. M2 Acceptance Criteria (pilot workflow features)
+
+Added 2026-07-21 under ATL-002. These criteria define "done" for the ROADMAP M2 items that serve the §5
+core workflow. They are written to be executed by atlas-qa as-is; where they overlap the QA_PLAN.md §2
+scenarios they **reference** them rather than restate them. Expected-value sources for every numeric
+criterion: **(a)** golden fixtures in `services/analytics/tests/golden/` with their hand-verified
+spreadsheets (QA_PLAN.md §3 — the spreadsheet next to the fixture is the source of truth), **(b)** the
+synthetic sample file `data/sample/sample-taba-projects.csv`, **(c)** the pilot customer's own
+spreadsheet in the week-2/week-6 reconciliation sessions. Real customer data never enters the repo
+(TESTING_STRATEGY rule); customer-sourced expectations live only in reconciliation session records.
+
+Scope note: GeoJSON import and the 3D results view are **out of M2 acceptance scope** per §3–§4 of this
+document. QA_PLAN.md scenarios 3 and 6 (their GeoJSON/3D portions) and the ROADMAP M2 GeoJSON mention
+conflict with this scope — flagged in FIRST_VALUE_JOURNEY.md (INCONSISTENCY-1/-2) for atlas-ceo
+decision; this section deliberately does not test them.
+
+Cross-cutting criterion (applies to every AC below, per CLAUDE.md rule 5-equivalent for product):
+**Hebrew/RTL correctness is part of each criterion, not a separate pass** — any user-facing string on
+the tested screen must render in Hebrew from i18n keys, laid out RTL, with numbers/dates LTR-embedded
+(QA_PLAN.md §4 E8).
+
+### AC-IMP — Taba/PIO import (CSV/XLSX incl. cp1255, column mapping, validation, dedup)
+
+- **AC-IMP-1 (cp1255 CSV):** Given `data/sample/sample-taba-projects.csv` saved as Windows-1255 with
+  the standard 17 Hebrew columns, When the user uploads it, Then all Hebrew renders intact (no
+  mojibake), the mapping preview shows each Hebrew header mapped to its canonical field (מספר תיק →
+  caseNumber, …), and the imported row count equals the file's data-row count. Executes QA_PLAN.md
+  §2.1; encoding behavior per QA_PLAN.md §4 E1.
+- **AC-IMP-2 (encoding equivalence):** Given the same data as UTF-8 CSV (with and without BOM) and as
+  XLSX, When each is uploaded, Then the normalized rows persisted are identical to AC-IMP-1's
+  (field-by-field diff is empty). Executes QA_PLAN.md §2.2 and §4 E2–E3.
+- **AC-IMP-3 (validation report):** Given a copy of the sample file with 3 seeded defects (one
+  non-numeric value in a numeric column, one empty mid-file row, one missing-optional-column cell),
+  When uploaded, Then the good rows import, and a per-row Hebrew error report lists exactly the 3
+  seeded defects with row numbers and reasons — never a silent partial import. Behavior per QA_PLAN.md
+  §5.1–§5.3; seeded-defect fixture committed under `apps/api/test/fixtures/imports/`.
+- **AC-IMP-4 (dedup by מספר תיק):** Given a file containing a מספר תיק that already exists in the
+  account, When uploaded, Then the user is warned and chooses skip/overwrite, and re-importing the
+  identical file creates zero new rows. Executes QA_PLAN.md §2.10 and §5.5.
+- **AC-IMP-5 (geresh/gershayim mapping):** Given headers written with ASCII quotes (`יח"ד`) and with
+  U+05F4 gershayim, When uploaded, Then both map to the same canonical fields. Per QA_PLAN.md §4 E6.
+- **AC-IMP-6 (time budget):** Given a well-formed file of ≤500 rows on staging, When uploaded, Then
+  import completes and the summary renders in ≤60 seconds (source of budget: FIRST_VALUE_JOURNEY.md §1
+  step-2 allocation of 5 min including human review; QA_PLAN.md §5.4 covers the 50k-row upper bound
+  separately).
+
+### AC-SCN — Scenario builder + compare
+
+- **AC-SCN-1 (create & persist):** Given an imported project, When the user sets existing/proposed
+  units, apartment mix, עלות בנייה, מחיר מכירה, and timeline, saves, and reloads the page, Then all
+  values persist exactly, and validation rejects negative numbers and blank required fields with
+  Hebrew messages naming the field. Executes QA_PLAN.md §2.4.
+- **AC-SCN-2 (lifecycle):** Given an existing scenario, When it is duplicated, edited, and deleted,
+  Then behavior follows QA_PLAN.md §2.9 (confirmation before delete, no orphaned results).
+- **AC-SCN-3 (compare — §4 Must):** Given two saved scenarios of one project with computed results,
+  When the user opens scenario compare, Then IRR, NPV, and payback for both are shown side by side and
+  each figure equals that scenario's own results screen exactly (source: golden fixture values where a
+  fixture scenario is used; otherwise internal consistency — compare view vs. results view vs. API
+  response must be identical).
+
+### AC-RES — Results (IRR, NPV, payback, sensitivity)
+
+- **AC-RES-1 (golden correctness):** Given a scenario whose inputs replicate a golden fixture from
+  `services/analytics/tests/golden/`, When the simulation runs, Then displayed IRR, NPV, and payback
+  match the fixture's hand-verified spreadsheet values under the QA_PLAN.md §3 tolerance policy
+  (display comparison after rounding: IRR to 0.1 pp, ₪ to whole shekels; never float equality).
+  Executes QA_PLAN.md §2.5; the §3 contract test guards API↔engine drift (e.g., percent vs. fraction).
+- **AC-RES-2 (edge fixtures surfaced honestly):** Given the no-IRR golden fixture (all-negative
+  cashflows) and the negative-NPV fixture, When simulated, Then the UI states in Hebrew that IRR is
+  undefined (no fabricated number, no crash) and renders the negative NPV with correct sign and RTL
+  number formatting. Expected values: those fixtures' spreadsheets.
+- **AC-RES-3 (sensitivity):** Given a golden-fixture scenario, When the sensitivity table renders,
+  Then the grid axes are מחיר מכירה ± and עלות בנייה ± as configured, NPV moves monotonically in the
+  correct direction along each axis, and the one hand-verified grid cell per fixture (QA_PLAN.md §3)
+  matches its spreadsheet value.
+- **AC-RES-4 (customer reconciliation — the "trusted" gate):** Given a joint week-2 (and week-6)
+  session on ≥3 of the customer's real projects, When Atlas results are compared to the customer's own
+  spreadsheet using the ATL-014 reconciliation worksheet (proposed; FIRST_VALUE_JOURNEY.md §3), Then
+  each of IRR/NPV/payback agrees within 1% (threshold source: §6 numeric-trust metric) or the
+  discrepancy has a written, customer-acknowledged resolution. Expected-value source: the customer's
+  spreadsheet — this criterion is executed manually and documented; it cannot be closed from repo
+  fixtures alone.
+- **AC-RES-5 (latency):** Given a saved scenario, When simulation is triggered on staging, Then
+  results render in ≤10 s (source: QA_PLAN.md §2.5).
+
+### AC-EXP — Hebrew report export (PDF + XLSX)
+
+- **AC-EXP-1 (PDF correctness):** Given computed results for a golden-fixture scenario, When the
+  executive-summary PDF is exported, Then Hebrew is shaped correctly (RTL, not reversed, embedded font
+  — no tofu), mixed Hebrew/Latin lines follow QA_PLAN.md §4 E5/E9, every number in the PDF equals the
+  on-screen value (which AC-RES-1 ties to the golden spreadsheet), and the file opens in Adobe Reader
+  and Chrome's viewer. Executes QA_PLAN.md §2.7 + §4 E9.
+- **AC-EXP-2 (PDF completeness):** Given the same export, Then the PDF contains at minimum: project
+  identity (שם + מספר תיק), scenario parameters (mix, costs, prices, timeline), IRR/NPV/payback, the
+  sensitivity table, and an export date — the §5 definition of a bank-forwardable artifact. (Content
+  list is the product spec; values' source remains the golden fixture.)
+- **AC-EXP-3 (XLSX):** Given computed results, When XLSX is exported, Then numeric cells are numbers
+  (not text), sheet direction is RTL, Hebrew headers are intact in Excel 365 and LibreOffice, and
+  totals recompute in-sheet to the exported values. Executes QA_PLAN.md §2.8 + §4 E10.
+- **AC-EXP-4 (cashflow — §4 Should):** If the cashflow report ships in the pilot window, its PDF/XLSX
+  outputs meet AC-EXP-1/-3 verbatim, with per-period rows matching the golden fixture's cashflow
+  schedule. If it does not ship by week 3, it moves to the post-pilot backlog per §4 — this criterion
+  then reads "not shipped, not claimed" (relevant to the ATL-004/ATL-006 claims rule).
+
+### AC-E2E — The <30-minute gate (M2 exit)
+
+- **AC-E2E-1:** Given a fresh analyst-role account on staging and the week-0-validated file format
+  (synthetic stand-in: the AC-IMP-1 cp1255 file), When atlas-qa performs login → import → scenario →
+  simulate → compare two scenarios → export PDF following FIRST_VALUE_JOURNEY.md §1 without developer
+  assistance, Then wall-clock time from login to a saved PDF is ≤30 minutes, zero manual interventions
+  (matching the ROADMAP M2 exit gate), and the produced PDF passes AC-EXP-1/-2. Numeric values in the
+  run: golden fixture inputs, so outputs are checkable against source (a).
+- **AC-E2E-2 (auth boundary carried into the workflow):** Given two accounts, When user B requests
+  user A's project, scenario, results, or export artifact by id/URL, Then access is denied with no
+  data leakage. Executes QA_PLAN.md §2.11 across all four M2 surfaces.
+
+**Verification protocol:** atlas-qa executes these independently (implementer ≠ verifier); any failed
+numeric criterion is S1 per QA_PLAN.md §1. Golden-fixture changes require written justification in the
+same PR (TESTING_STRATEGY rule). AC-RES-4 evidence is the documented reconciliation record, filed with
+the workboard entry.
