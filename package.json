@@ -15,7 +15,8 @@
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
     "format": "pnpm -r format",
-    "dashboard": "node tools/founder-dashboard/generate.mjs"
+    "dashboard": "node tools/founder-dashboard/generate.mjs",
+    "build:atlas": "pnpm -r build"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
