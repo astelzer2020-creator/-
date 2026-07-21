@@ -1,0 +1,32 @@
+# Atlas CI skeleton (M0).
+# Jobs are placeholders that become real in ATL-007 (toolchain bootstrap);
+# the pipeline shape is fixed now so branch protection can point at it from day one.
+# Target shape (docs/DEPLOYMENT.md): lint → typecheck → unit+integration → golden → e2e → build images.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint (placeholder until ATL-007)
+        run: echo "ATL-007 will wire pnpm eslint/prettier + ruff here" && exit 0
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tests incl. golden files (placeholder until ATL-007)
+        run: echo "ATL-007 will wire vitest + pytest (golden suite blocking) here" && exit 0
+
+  secrets-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Gitleaks (placeholder until ATL-007)
+        run: echo "ATL-007 will wire gitleaks here" && exit 0

@@ -8,3 +8,9 @@ __pycache__/
 venv/
 .DS_Store
 *.log
+
+# No binaries/archives in git (ADR-0008)
+*.zip
+*.exe
+*.dmg
+*.msi

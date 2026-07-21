@@ -1,4 +1,9 @@
-# סימולטור התחדשות עירונית ישראל
+# Atlas — סימולטור התחדשות עירונית ישראל
+
+> **Production rebuild in progress.** This repository is being rebuilt as **Atlas**, a production-grade
+> platform. Start at [`CLAUDE.md`](CLAUDE.md) (repo constitution) and [`docs/README.md`](docs/README.md)
+> (documentation index). The new code lives in `apps/`, `services/`, `packages/`; everything described
+> below is the **frozen legacy prototype** (see `docs/adr/0007`), kept as reference until milestone M2.
 
 Full-stack web app for Israeli urban renewal simulation — React + Node.js + Python FastAPI.
 
