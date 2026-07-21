@@ -16,7 +16,6 @@ function envelope(code: string, message: string, details?: unknown): ErrorBody {
  * every non-2xx response is `{ error: { code, message, details? } }`.
  */
 export const errorEnvelopePlugin = fp(
-  // eslint-disable-next-line @typescript-eslint/require-await
   async (app) => {
     app.setNotFoundHandler(async (request, reply) => {
       return reply

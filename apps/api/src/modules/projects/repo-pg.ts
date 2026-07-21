@@ -1,0 +1,44 @@
+import type { Project, ProjectCreate, ProjectUpdate } from "@atlas/shared";
+
+import { notImplemented } from "../../lib/errors.js";
+import type { ProjectsRepo } from "./repo.js";
+
+const MESSAGE =
+  "PgProjectsRepo is not implemented yet — schema written in migrations/0001_init.sql, " +
+  "wired when the Postgres task lands (M1)";
+
+/**
+ * Postgres projects repository — STUB.
+ *
+ * TODO(M1/Postgres): implement against `migrations/0001_init.sql` (projects
+ * table, org-scoped queries with parameterized SQL only) once a database is
+ * provisioned. Until then every method throws 501 NOT_IMPLEMENTED so wiring
+ * it by mistake is loud, never silent.
+ */
+export class PgProjectsRepo implements ProjectsRepo {
+  constructor(private readonly databaseUrl: string) {
+    if (databaseUrl.length === 0) {
+      throw new Error("PgProjectsRepo requires DATABASE_URL");
+    }
+  }
+
+  create(_orgId: string, _input: ProjectCreate): Promise<Project> {
+    return Promise.reject(notImplemented(MESSAGE));
+  }
+
+  list(_orgId: string): Promise<Project[]> {
+    return Promise.reject(notImplemented(MESSAGE));
+  }
+
+  getById(_orgId: string, _projectId: string): Promise<Project | null> {
+    return Promise.reject(notImplemented(MESSAGE));
+  }
+
+  update(_orgId: string, _projectId: string, _patch: ProjectUpdate): Promise<Project | null> {
+    return Promise.reject(notImplemented(MESSAGE));
+  }
+
+  remove(_orgId: string, _projectId: string): Promise<boolean> {
+    return Promise.reject(notImplemented(MESSAGE));
+  }
+}
