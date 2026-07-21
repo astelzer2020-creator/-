@@ -15,6 +15,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history + tags for the founder-dashboard freshness gate (QA-S1-1):
+          # the generator stamps the last commit touching docs/**, which a shallow
+          # clone misreports as the grafted boundary commit.
+          fetch-depth: 0
+          fetch-tags: true
       - uses: pnpm/action-setup@v4 # version comes from root package.json "packageManager"
       - uses: actions/setup-node@v4
         with:

@@ -243,19 +243,50 @@ for (const r of sprint.rows) {
 
 // IMPORTANT (CI freshness gate): never embed HEAD's sha — the commit that carries the
 // regenerated dashboard would change HEAD, so CI regeneration could never match the committed
-// file. Instead stamp the last commit that touched anything EXCEPT the dashboard outputs.
+// file. Instead stamp the last commit that touched the dashboard's parse sources (docs/**).
+// Robustness (QA-S1-1):
+//   - `--no-merges` so a synthetic PR merge commit (actions/checkout on pull_request) can
+//     never become the stamp — only real source commits can.
+//   - Shallow-clone fallback: under `git clone --depth N` the path-filtered log bottoms out
+//     at the grafted boundary commit and lies. In that case reuse the git-derived strings
+//     from the committed FOUNDER_DASHBOARD.md — content values are still re-parsed fresh,
+//     so a stale dashboard still fails the gate on its data, never on a phantom stamp.
 // Workflow: commit source changes first, then regenerate and commit the dashboard (CI reminds
 // you via the freshness gate if you forget).
-const srcCommit =
-  git('log -1 --format=%h -- . ":(exclude)FOUNDER_DASHBOARD.md" ":(exclude)FOUNDER_DASHBOARD.html"') ||
-  parseFailed("git", "source commit");
-const latestTag = git("describe --tags --abbrev=0");
-const currentVersion = latestTag
-  ? `${latestTag} @ ${srcCommit}`
-  : `pre-release @ ${srcCommit} (last source commit; no git tags yet)`;
-
-const coordLastUpdated =
-  git("log -1 --format=%cs -- docs/coordination") || parseFailed("git", "log docs/coordination");
+function gitStamps() {
+  const isShallow = git("rev-parse --is-shallow-repository") === "true";
+  if (isShallow) {
+    let committedMd = null;
+    try {
+      committedMd = fs.readFileSync(path.join(ROOT, "FOUNDER_DASHBOARD.md"), "utf8");
+    } catch {
+      /* no committed dashboard — fall through to best-effort git */
+    }
+    if (committedMd) {
+      const commit = committedMd.match(/repo sources at commit `([^`]+)`/);
+      const date = committedMd.match(/coordination data as of \*\*(\d{4}-\d{2}-\d{2})\*\*/);
+      const version = committedMd.match(/^\| Current version \| (.+) \|$/m);
+      if (commit && date && version) {
+        return {
+          srcCommit: commit[1],
+          coordLastUpdated: date[1],
+          currentVersion: version[1],
+        };
+      }
+    }
+  }
+  const srcCommit =
+    git("log -1 --no-merges --format=%h -- docs") || parseFailed("git", "source commit");
+  const coordLastUpdated =
+    git("log -1 --no-merges --format=%cs -- docs/coordination") ||
+    parseFailed("git", "log docs/coordination");
+  const latestTag = git("describe --tags --abbrev=0");
+  const currentVersion = latestTag
+    ? `${latestTag} @ ${srcCommit}`
+    : `pre-release @ ${srcCommit} (last source commit; no git tags yet)`;
+  return { srcCommit, coordLastUpdated, currentVersion };
+}
+const { srcCommit, coordLastUpdated, currentVersion } = gitStamps();
 
 const m1 = milestones.find((m) => m.id === "M1");
 const m2 = milestones.find((m) => m.id === "M2");
