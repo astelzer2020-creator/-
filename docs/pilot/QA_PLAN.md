@@ -111,3 +111,81 @@ Priority order for automation after launch (each pilot bug fixed must land with 
 5. Deferred until post-pilot: visual-regression screenshots for RTL layout, cross-browser automation, load testing beyond the §5.4 import benchmark.
 
 Release rule during pilot: no deploy without green CI on layers 1–2 and a manual pass of the §2 core-loop scenarios touched by the change.
+
+## M0 Verification Results (ATL-010, 2026-07-21)
+
+Independent re-verification of ATL-007 (toolchain) and ATL-009 (cleanup report) by atlas-qa.
+Environment: node v22.22.2, pnpm 10.33.0, uv 0.8.17, Python 3.11.15 (CI pins 3.12 — divergence
+documented in `services/analytics/pyproject.toml` header). HEAD = `4038cfa`; baseline = `cbbdedd`.
+
+### ATL-007 — commands executed and results
+
+| # | Command | Result | Key output |
+|---|---|---|---|
+| 1 | `pnpm install` (working tree) | PASS | "Scope: all 6 workspace projects … Done in 641ms" (warm) |
+| 2 | `pnpm install --store-dir <fresh>` (cold clone, isolated store) | PASS | "Packages: +176 … downloaded 176 … Done in 1.7s"; lockfile holds exactly 226 resolved packages (`grep -c "resolution:" pnpm-lock.yaml` = 226) — reconciles the "~226 packages" claim |
+| 3 | `CI=true pnpm install --frozen-lockfile` (clone, as CI runs it) | PASS | "Done in 916ms" |
+| 4 | `pnpm lint` | PASS | api/web/shared `eslint .` Done; mobile stub echo |
+| 5 | `pnpm typecheck` | PASS | api/web/shared `tsc --noEmit` Done |
+| 6 | `pnpm test` | PASS | 3× vitest "1 passed (1)" (api, web, shared) |
+| 7 | `pnpm format` (cold clone only — `prettier --write` is a mutator) | PASS | exit 0; `git status --porcelain` empty afterward → formatting idempotent at HEAD |
+| 8 | `uv sync` (services/analytics) | PASS | "Resolved 14 packages"; cold clone: installs pytest 9.1.1, ruff 0.15.22, mypy |
+| 9 | `uv run ruff check .` | PASS | "All checks passed!" |
+| 10 | `uv run ruff format --check .` | PASS | "2 files already formatted" |
+| 11 | `uv run pytest` | PASS | "1 passed in 0.00s" (tests/test_placeholder.py) |
+| 12 | `uv run mypy src` (strict) | PASS | "Success: no issues found in 1 source file" |
+
+**M0 <10-min setup gate:** cold clone + cold install (isolated pnpm store) + full TS suite + full
+Python suite = **~12 seconds total** (install 1.8s, lint/typecheck/test/format 8s, uv suite 2s).
+Gate passed with wide margin.
+
+**package.json additive check:** `git diff cbbdedd..HEAD -- package.json` shows only additions
+(`private`, `packageManager: pnpm@10.33.0`, scripts `lint`/`typecheck`/`test`/`format`). All six
+prototype scripts (`dev`, `dev:node`, `dev:python`, `dev:react`, `install:all`, `build`) unchanged
+in value. Confirmed ADDITIVE.
+
+**CI review (`.github/workflows/ci.yml`):** lint job = install --frozen-lockfile, pnpm lint,
+pnpm typecheck, uv sync + ruff check + ruff format --check + mypy src; test job = pnpm test +
+pytest — same commands QA ran. Divergences noted: (a) CI has **never run remotely** — first run
+occurs on next push (known gap); (b) `secrets-scan` job is a **placeholder that always exits 0**
+(gitleaks pending GITLEAKS_LICENSE decision) — a green job name with no scan behind it;
+(c) CI does not enforce formatting (no `prettier --check` step; the `format` script is write-mode);
+(d) CI pins Python 3.12, local dev runs 3.11 (documented in pyproject.toml).
+
+### ATL-009 — inventory re-verification
+
+- `sha256sum *.zip "Codex Installer (7).exe"` recomputed: **21 files, 4 unique digests** —
+  13× `0d6b8994f911ff86…a1084a` (Group B), 6× `b0ee11606da774ee…62de2f` (Group C),
+  1× `fecff00a63ab4e43…9864db` (Group A), 1× `af718c66f9028d51…f13bf8` (Group D).
+  All four full digests byte-identical to the report. Sizes match (251,662 / 125,765 / 68,751 /
+  1,315,384 B). `file` confirms Group D is "PE32 executable (GUI) Intel 80386 Mono/.Net assembly".
+- Read-only listing spot-check (`python3 -m zipfile` API, zero extraction):
+  Group B = 96 entries / 362,913 B uncompressed / internal dates 2026-06-26→29 /
+  `data/sample/sample-taba-projects.csv` 1,411 B — all match. Group A = 97 entries / 488,678 B,
+  extra entry `urbanrenewalcomplete (2).zip` at exactly 125,765 B (the Group B payload size) —
+  matches "zip nested inside itself". Group C = 94 entries / 145,806 B, rooted at `-/`,
+  dates 2026-06-25→29 — matches. Section-3 size cross-checks reproduce exactly:
+  `backend/node/index.js` 615 B (tree = zip), `routes/import.js` 2,347 B (tree = zip),
+  `ROICalculator.jsx` 24,042 B tree vs 10,390 B (B) vs 10,386 B (C); commit `f91e18e` exists.
+- **Zero legacy modification:** `git diff cbbdedd..HEAD -- frontend/ backend/ mobile/ data/
+  README.md docker-compose.yml | wc -c` = **0**; `git status --porcelain` = empty; changed-file
+  list since baseline contains no legacy path, no `*.zip`, no `*.exe`. `.gitignore` lines 13–14
+  block `*.zip`/`*.exe` recurrence as claimed.
+
+### Discrepancies / defects filed
+
+| ID | Sev | Finding |
+|---|---|---|
+| QA-M0-1 | S3 | No delivery handoff entry for ATL-007/ATL-009 exists in HANDOFFS.md (status still `accepted`; the ATL-007 commit is labeled "wip … UNVERIFIED"). CLEANUP_REPORT.md Appendix B cites "the ATL-007/ATL-009 delivery handoff" for its verbatim `git status` output — that handoff is absent. Violates the handoff rule ("TESTS lists actual commands and results"). QA reproduced all results independently, so this is a process defect, not a technical one. |
+| QA-M0-2 | S3 | CI `secrets-scan` job is a no-op that reports green. Disclosed in comments, but branch protection pointing at it would show a passing secrets gate with zero scanning. Must be wired (gitleaks or equivalent) or renamed before any release gate relies on it. |
+| QA-M0-3 | S4 | CI never executed remotely yet; first run on next push. lint/typecheck/test/pytest verified locally by QA only. |
+| QA-M0-4 | S4 | No `prettier --check` in CI; `pnpm format` is write-mode, so formatting drift will not fail CI. |
+| QA-M0-5 | S4 (note) | "~226 packages" claim refers to lockfile resolutions (exactly 226); a cold install adds 176 physical packages after dedup. Not a defect; recorded to prevent future confusion. |
+
+### Verdicts
+
+- **ATL-007: PASS-WITH-KNOWN-ISSUES** (QA-M0-1..4). All toolchain acceptance criteria executed
+  and green locally; <10-min gate passed at ~12s; package.json additive confirmed. CI-green-remote
+  remains unproven until the first push.
+- **ATL-009: PASS** (with QA-M0-1 process note). Every inventory claim independently reproduced;
+  zero legacy files modified; recommendations correctly left as proposals for the human owner.
