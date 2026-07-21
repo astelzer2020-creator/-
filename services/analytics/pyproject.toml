@@ -1,0 +1,39 @@
+# Atlas analytics service — internal financial engine (never internet-facing, docs/SECURITY.md).
+# Target runtime is Python 3.12 (docs/ARCHITECTURE.md); requires-python allows 3.11 so the
+# current dev container can run the suite. CI pins 3.12.
+
+[project]
+name = "atlas-analytics"
+version = "0.1.0"
+description = "Atlas financial analytics service: IRR, NPV, payback, sensitivity (FastAPI in M1)."
+requires-python = ">=3.11"
+dependencies = []
+
+[dependency-groups]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.5",
+  "mypy>=1.10",
+]
+
+# Not an installable distribution yet — pytest imports via pythonpath below.
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.mypy]
+# strict from day one so the future engine/ (pure computation, golden-file tested)
+# is born under mypy --strict rather than migrated to it.
+strict = true
+python_version = "3.11"
+mypy_path = "src"

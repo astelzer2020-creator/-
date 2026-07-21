@@ -1,0 +1,21 @@
+{
+  "name": "@atlas/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Atlas web SPA (React + Vite, RTL Hebrew-first) — placeholder until M1 porting begins.",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "format": "prettier --write ."
+  },
+  "prettier": "@atlas/config/prettier.config.mjs",
+  "devDependencies": {
+    "@atlas/config": "workspace:*",
+    "eslint": "^9.31.0",
+    "prettier": "^3.6.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.2.0"
+  }
+}

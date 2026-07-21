@@ -1,7 +1,8 @@
-# Atlas CI skeleton (M0).
-# Jobs are placeholders that become real in ATL-007 (toolchain bootstrap);
-# the pipeline shape is fixed now so branch protection can point at it from day one.
+# Atlas CI (ATL-007).
+# Job ids (lint, test, secrets-scan) are kept from the M0 skeleton so branch protection
+# rules pointing at them stay valid.
 # Target shape (docs/DEPLOYMENT.md): lint → typecheck → unit+integration → golden → e2e → build images.
+# Golden/e2e/image stages are added when the corresponding surfaces exist (M1+).
 name: ci
 
 on:
@@ -14,19 +15,58 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Lint (placeholder until ATL-007)
-        run: echo "ATL-007 will wire pnpm eslint/prettier + ruff here" && exit 0
+      - uses: pnpm/action-setup@v4 # version comes from root package.json "packageManager"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install (TS workspaces)
+        run: pnpm install --frozen-lockfile
+      - name: Lint (eslint, all workspaces)
+        run: pnpm lint
+      - name: Typecheck (tsc --noEmit, all workspaces)
+        run: pnpm typecheck
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - name: Ruff (analytics)
+        working-directory: services/analytics
+        run: |
+          uv sync
+          uv run ruff check .
+          uv run ruff format --check .
+      - name: Mypy strict (analytics)
+        working-directory: services/analytics
+        run: uv run mypy src
 
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Tests incl. golden files (placeholder until ATL-007)
-        run: echo "ATL-007 will wire vitest + pytest (golden suite blocking) here" && exit 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install (TS workspaces)
+        run: pnpm install --frozen-lockfile
+      - name: Tests (vitest, all workspaces)
+        run: pnpm test
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - name: Tests (pytest, analytics — golden suite joins here in M1, blocking)
+        working-directory: services/analytics
+        run: |
+          uv sync
+          uv run pytest
 
   secrets-scan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Gitleaks (placeholder until ATL-007)
-        run: echo "ATL-007 will wire gitleaks here" && exit 0
+      # Placeholder kept deliberately: gitleaks/gitleaks-action@v2 requires a GITLEAKS_LICENSE
+      # secret for organization repos; wiring it needs a repo-settings/secret decision (human
+      # owner / CEO). Tracked as an ATL-007 follow-up in the handoff.
+      - name: Gitleaks (placeholder — needs GITLEAKS_LICENSE decision)
+        run: echo "gitleaks wiring pending license/secret decision; see ATL-007 handoff" && exit 0

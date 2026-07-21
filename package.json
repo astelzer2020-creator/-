@@ -2,13 +2,19 @@
   "name": "urban-renewal-israel",
   "version": "1.0.0",
   "description": "Israeli Urban Renewal Simulation Platform",
+  "private": true,
+  "packageManager": "pnpm@10.33.0",
   "scripts": {
     "dev": "concurrently \"npm run dev:node\" \"npm run dev:python\" \"npm run dev:react\"",
     "dev:node": "cd backend/node && npm run dev",
     "dev:python": "cd backend/python && uvicorn main:app --reload --port 8001",
     "dev:react": "cd frontend && npm run dev",
     "install:all": "npm install && cd frontend && npm install && cd ../backend/node && npm install",
-    "build": "cd frontend && npm run build"
+    "build": "cd frontend && npm run build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "format": "pnpm -r format"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

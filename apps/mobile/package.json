@@ -1,0 +1,11 @@
+{
+  "name": "@atlas/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Atlas mobile app (Expo) — stub workspace; revived post-pilot per docs/ROADMAP and ADR-0007.",
+  "scripts": {
+    "lint": "echo '@atlas/mobile: stub workspace (revived post-pilot) — lint skipped'",
+    "typecheck": "echo '@atlas/mobile: stub workspace (revived post-pilot) — typecheck skipped'",
+    "test": "echo '@atlas/mobile: stub workspace (revived post-pilot) — tests skipped'"
+  }
+}
