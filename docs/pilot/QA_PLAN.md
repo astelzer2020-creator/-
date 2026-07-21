@@ -249,3 +249,42 @@ is 62 (line 61 is the tenant-cost line). Substance unaffected. No other citation
   (which also unblocks QA-M0-3). Note: this QA_PLAN.md append is itself a dashboard source change —
   the committing session must run `pnpm dashboard` in the follow-up commit per the two-commit rule
   (content is expected to be unchanged by this section; verify with `git diff`).
+
+### Addendum — QA-S1-1 re-verification (fix commit bc52714, 2026-07-21)
+
+Independent adversarial re-verification of the atlas-cto layered fix (ci.yml `fetch-depth: 0` +
+`fetch-tags`; generator stamp `--no-merges`, docs/**-scoped, shallow-repo fallback). All tests ran
+in scratch clones pinned to `bc52714` — NOT the working tree, which carries in-flight M1 work
+(`079e8e8`, out of scope). Generator invoked as `node tools/founder-dashboard/generate.mjs`
+(what `pnpm dashboard` wraps).
+
+| Test | Setup | Result |
+|---|---|---|
+| RV-1 | `git clone --depth 1` (CI-default shallow) + fresh dashboard → generate + `git diff --exit-code FOUNDER_DASHBOARD.*` | Gate PASSES — shallow fallback reuses committed stamp `0d58c3b`, zero diff (the QA-S1-1 false positive is gone) |
+| RV-2 | Shallow + stale: RISK_REGISTER.md R-02 probability edited, no regen | Gate FAILS as required — data values are re-parsed fresh under the fallback (R-02 row diff observed) |
+| RV-3 | Full clone + committed edit to a parsed docs source, no regen | Gate FAILS as required (stamp `0d58c3b`→`c7cf85e` plus content diff, 6 changed lines) |
+| RV-4 | Full clone + committed edit to a NON-parsed docs file (ARCHITECTURE.md), no regen | Gate FAILS as required — docs/** scope moves the stamp (`0d58c3b`→`f45ca44`) |
+| RV-5 | Synthetic merge commit carrying a docs change (side `1b1cf93`, merge `8fd026e`) | Stamp resolves to `1b1cf93` (the real source commit), never the merge — `--no-merges` effective |
+| RV-6 | Full-clone determinism at bc52714: generator run twice | Byte-identical both runs (`sha256` md `54bafb47…e086a4`, html `f7d81848…76de4ba`) and identical to the committed bc52714 outputs (`git diff --exit-code` clean) |
+| RV-7 | Code-only commit outside docs/** (README edit), no regen | Stamp unmoved (`0d58c3b`), output identical, gate green — intended new behavior, no false positive |
+| RV-8 | Code-only commit that changes derived content: add `apps/web/src/Probe.tsx`, no regen | Gate FAILS as required — UX-status line is re-derived from the tree (`pre-build…` → `1 UI component file(s)…`), so the docs/** stamp scope creates no content blind spot |
+| RV-9 | Re-read of generate.mjs at bc52714 (diff = one `gitStamps()` hunk + ci.yml checkout config) | No new hand-entered status values — fallback strings are parsed from the committed FOUNDER_DASHBOARD.md, all data values still source-parsed |
+
+Residual notes (non-blocking):
+
+- RN-1 (S4) — in SHALLOW clones only, the fallback reuses the committed stamp, so a docs commit
+  that changes no parsed value passes the gate there (reproduced with an ARCHITECTURE.md-only edit
+  in the shallow clone). The enforced gate runs in CI on a full clone (`fetch-depth: 0`), where the
+  identical case fails (RV-4). Accepted with this note.
+- RN-2 (S4) — the rendered label "last source commit" now semantically means "last docs/** commit";
+  values derived outside docs/** (UX status from apps/web/src, future git tags) can postdate the
+  stamp. Cosmetic label drift; content staleness is still caught (RV-8).
+- RN-3 (observation, for atlas-cto) — at the in-flight tip `079e8e8` the committed dashboard is
+  already stale by 2 lines (UX status; M1 web files landed without regeneration). The repaired gate
+  will correctly fail the next remote CI run until the M1 committer runs `pnpm dashboard`. Working
+  as designed — regenerate with the M1 commit train.
+
+**QA-S1-1: CONFIRMED-FIXED at bc52714.** ATL-021 acceptance criterion 3 now holds under adversarial
+testing (fresh passes, stale fails, merge commits excluded, determinism intact). QA recommends
+promoting ATL-021 to VERIFIED. QA-M0-3 (first remote CI run observed green) remains open — it gates
+ATL-007's `verified`, not ATL-021, and per RN-3 that first run will exercise this gate for real.
