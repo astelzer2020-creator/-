@@ -1,7 +1,2 @@
-/**
- * Placeholder module for ATL-007 (toolchain bootstrap).
- * The real Fastify app (src/app.ts + src/server.ts per docs/FOLDER_STRUCTURE.md) lands in M1.
- */
-export function workspaceName(): string {
-  return "@atlas/api";
-}
+export { buildApp, type BuildAppOptions } from "./app.js";
+export { loadConfig, type AppConfig } from "./config/env.js";

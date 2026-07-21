@@ -10,7 +10,10 @@ function BrandMark() {
   return (
     <svg width="24" height="24" viewBox="0 0 32 32" aria-hidden="true">
       <rect width="32" height="32" rx="6" fill="var(--color-primary)" />
-      <path d="M8 24V13l5-3v14zM14 24V9l5-3v18zM20 24V14l4 2v8z" fill="var(--color-on-primary)" />
+      <path
+        d="M8 24V13l5-3v14zM14 24V9l5-3v18zM20 24V14l4 2v8z"
+        fill="var(--color-on-primary)"
+      />
     </svg>
   );
 }
@@ -84,7 +87,12 @@ export function AppShell() {
           />
         ) : null}
 
-        <div id="sidebar" className={["sidebar", drawerOpen ? "is-open" : ""].filter(Boolean).join(" ")}>
+        <div
+          id="sidebar"
+          className={["sidebar", drawerOpen ? "is-open" : ""]
+            .filter(Boolean)
+            .join(" ")}
+        >
           <div className="sidebar-brand">
             <BrandMark />
             <span>

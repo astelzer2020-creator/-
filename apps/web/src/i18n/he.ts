@@ -21,7 +21,8 @@ export const he = {
   "auth.submit": "כניסה",
   "auth.submitting": "מתחבר…",
   "auth.logout": "יציאה",
-  "auth.demoHint": "מצב הדגמה: כל אימייל תקין וסיסמה באורך 8 תווים ומעלה יתקבלו.",
+  "auth.demoHint":
+    "מצב הדגמה: כל אימייל תקין וסיסמה באורך 8 תווים ומעלה יתקבלו.",
   "auth.errors.emailInvalid": "יש להזין כתובת אימייל תקינה",
   "auth.errors.passwordMin": "הסיסמה חייבת להכיל לפחות 8 תווים",
   "auth.errors.loginFailed": "הכניסה נכשלה — בדקו אימייל וסיסמה ונסו שוב",
@@ -44,7 +45,8 @@ export const he = {
   "projects.columns.status": "סטטוס",
   "projects.columns.units": "יח״ד קיים ← מוצע",
   "projects.empty.title": "עדיין אין פרויקטים",
-  "projects.empty.description": "ייבאו קובץ תב״ע או צרו פרויקט ראשון כדי להתחיל בסימולציה.",
+  "projects.empty.description":
+    "ייבאו קובץ תב״ע או צרו פרויקט ראשון כדי להתחיל בסימולציה.",
   "projects.empty.cta": "יצירת פרויקט ראשון",
   "projects.error.title": "טעינת הפרויקטים נכשלה",
   "projects.form.title": "פרויקט חדש",
@@ -77,7 +79,8 @@ export const he = {
   "project.scenarios.columns.results": "תוצאות",
   "project.scenarios.viewResults": "הצגת תוצאות",
   "project.scenarios.empty.title": "אין עדיין תרחישים",
-  "project.scenarios.empty.description": "צרו תרחיש ראשון — תמהיל דירות, עלויות ומחירים — כדי להריץ סימולציה.",
+  "project.scenarios.empty.description":
+    "צרו תרחיש ראשון — תמהיל דירות, עלויות ומחירים — כדי להריץ סימולציה.",
   "project.error.title": "טעינת הפרויקט נכשלה",
 
   "scenario.form.title": "תרחיש חדש",
@@ -106,10 +109,12 @@ export const he = {
   "scenario.errors.areaPositive": "השטח חייב להיות מספר חיובי",
   "scenario.errors.pricePositive": "מחיר המכירה חייב להיות גדול מאפס",
   "scenario.errors.buildCostPositive": "עלות הבנייה חייבת להיות גדולה מאפס",
-  "scenario.errors.otherCostsNonNegative": "עלויות נוספות אינן יכולות להיות שליליות",
+  "scenario.errors.otherCostsNonNegative":
+    "עלויות נוספות אינן יכולות להיות שליליות",
   "scenario.errors.discountRateRange": "שיעור ההיוון חייב להיות בין 0% ל‑50%",
   "scenario.errors.monthsRange": "משך הביצוע חייב להיות בין חודש ל‑120 חודשים",
-  "scenario.errors.duplicateRooms": "קיימות שתי שורות תמהיל לאותו מספר חדרים — אחדו אותן לשורה אחת",
+  "scenario.errors.duplicateRooms":
+    "קיימות שתי שורות תמהיל לאותו מספר חדרים — אחדו אותן לשורה אחת",
   "scenario.errors.numberInvalid": "יש להזין מספר תקין",
 
   "results.title": "תוצאות סימולציה",
@@ -117,7 +122,8 @@ export const he = {
   "results.error.title": "הרצת הסימולציה נכשלה",
   "results.kpi.irr": "שיעור תשואה פנימי (IRR)",
   "results.kpi.irrUndefined": "לא מוגדר",
-  "results.kpi.irrUndefinedHint": "לתזרים אין שיעור תשואה פנימי (כל התזרימים שליליים)",
+  "results.kpi.irrUndefinedHint":
+    "לתזרים אין שיעור תשואה פנימי (כל התזרימים שליליים)",
   "results.kpi.npv": "ערך נוכחי נקי (NPV)",
   "results.kpi.profit": "רווח יזמי",
   "results.kpi.roiOnCost": "תשואה על העלות",
@@ -125,7 +131,8 @@ export const he = {
   "results.kpi.paybackMonths": "{months} חודשים",
   "results.kpi.paybackNone": "אין החזר בטווח התחזית",
   "results.sensitivity.title": "ניתוח רגישות",
-  "results.sensitivity.caption": "NPV (₪) לפי שינוי במחיר המכירה (עמודות) ובעלות הבנייה (שורות)",
+  "results.sensitivity.caption":
+    "NPV (₪) לפי שינוי במחיר המכירה (עמודות) ובעלות הבנייה (שורות)",
   "results.sensitivity.salePriceAxis": "מחיר מכירה",
   "results.sensitivity.buildCostAxis": "עלות בנייה",
   "results.sensitivity.baseCase": "בסיס",

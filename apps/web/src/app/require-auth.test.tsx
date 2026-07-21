@@ -30,6 +30,8 @@ describe("RequireAuth route guard", () => {
   it("renders the guarded shell when a token is present", async () => {
     authStore.setToken("test-token");
     renderAt("/projects");
-    expect(await screen.findByRole("heading", { name: t("projects.title") })).toBeTruthy();
+    expect(
+      await screen.findByRole("heading", { name: t("projects.title") }),
+    ).toBeTruthy();
   });
 });

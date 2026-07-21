@@ -37,7 +37,13 @@ interface ScenarioDraft {
 let nextRowKey = 1;
 
 function emptyRow(): MixRowDraft {
-  return { key: nextRowKey++, rooms: "", count: "", areaSqm: "", salePriceShekels: "" };
+  return {
+    key: nextRowKey++,
+    rooms: "",
+    count: "",
+    areaSqm: "",
+    salePriceShekels: "",
+  };
 }
 
 const INVALID = Number.NaN; // zod reports NaN as invalid_type → Hebrew "invalid number" message
@@ -56,7 +62,8 @@ function draftToInput(draft: ScenarioDraft): ScenarioInput {
       areaSqm: parseDecimalInput(row.areaSqm) ?? INVALID,
       salePricePerUnitAgorot: parseShekelInput(row.salePriceShekels) ?? INVALID,
     })),
-    buildCostPerSqmAgorot: parseShekelInput(draft.buildCostPerSqmShekels) ?? INVALID,
+    buildCostPerSqmAgorot:
+      parseShekelInput(draft.buildCostPerSqmShekels) ?? INVALID,
     otherCostsAgorot: parseShekelInput(draft.otherCostsShekels) ?? INVALID,
     discountRate: parsePercentInput(draft.discountRatePercent) ?? INVALID,
     constructionMonths: parseIntegerInput(draft.constructionMonths) ?? INVALID,
@@ -83,7 +90,9 @@ export function ScenarioFormPage() {
   function updateRow(key: number, patch: Partial<MixRowDraft>) {
     setDraft((current) => ({
       ...current,
-      mix: current.mix.map((row) => (row.key === key ? { ...row, ...patch } : row)),
+      mix: current.mix.map((row) =>
+        row.key === key ? { ...row, ...patch } : row,
+      ),
     }));
   }
 
@@ -98,7 +107,9 @@ export function ScenarioFormPage() {
     createScenario.mutate(parsed.data, {
       onSuccess: (scenario) => {
         showToast(t("scenario.created"), "success");
-        void navigate(`/projects/${projectId}/scenarios/${scenario.id}/results`);
+        void navigate(
+          `/projects/${projectId}/scenarios/${scenario.id}/results`,
+        );
       },
     });
   }
@@ -175,19 +186,29 @@ export function ScenarioFormPage() {
                   numeric
                   value={row.salePriceShekels}
                   onChange={(event) => {
-                    updateRow(row.key, { salePriceShekels: event.target.value });
+                    updateRow(row.key, {
+                      salePriceShekels: event.target.value,
+                    });
                   }}
-                  error={fieldErrors[`apartmentMix.${String(index)}.salePricePerUnitAgorot`]}
+                  error={
+                    fieldErrors[
+                      `apartmentMix.${String(index)}.salePricePerUnitAgorot`
+                    ]
+                  }
                 />
                 <Button
                   variant="ghost"
                   size="sm"
                   disabled={draft.mix.length === 1}
-                  aria-label={t("scenario.form.mix.removeRow", { row: index + 1 })}
+                  aria-label={t("scenario.form.mix.removeRow", {
+                    row: index + 1,
+                  })}
                   onClick={() => {
                     setDraft((current) => ({
                       ...current,
-                      mix: current.mix.filter((candidate) => candidate.key !== row.key),
+                      mix: current.mix.filter(
+                        (candidate) => candidate.key !== row.key,
+                      ),
                     }));
                   }}
                 >
@@ -200,7 +221,10 @@ export function ScenarioFormPage() {
                 variant="secondary"
                 size="sm"
                 onClick={() => {
-                  setDraft((current) => ({ ...current, mix: [...current.mix, emptyRow()] }));
+                  setDraft((current) => ({
+                    ...current,
+                    mix: [...current.mix, emptyRow()],
+                  }));
                 }}
               >
                 {t("scenario.form.mix.addRow")}
@@ -216,7 +240,10 @@ export function ScenarioFormPage() {
                 numeric
                 value={draft.buildCostPerSqmShekels}
                 onChange={(event) => {
-                  setDraft((current) => ({ ...current, buildCostPerSqmShekels: event.target.value }));
+                  setDraft((current) => ({
+                    ...current,
+                    buildCostPerSqmShekels: event.target.value,
+                  }));
                 }}
                 error={fieldErrors.buildCostPerSqmAgorot}
               />
@@ -225,7 +252,10 @@ export function ScenarioFormPage() {
                 numeric
                 value={draft.otherCostsShekels}
                 onChange={(event) => {
-                  setDraft((current) => ({ ...current, otherCostsShekels: event.target.value }));
+                  setDraft((current) => ({
+                    ...current,
+                    otherCostsShekels: event.target.value,
+                  }));
                 }}
                 error={fieldErrors.otherCostsAgorot}
               />
@@ -234,7 +264,10 @@ export function ScenarioFormPage() {
                 numeric
                 value={draft.discountRatePercent}
                 onChange={(event) => {
-                  setDraft((current) => ({ ...current, discountRatePercent: event.target.value }));
+                  setDraft((current) => ({
+                    ...current,
+                    discountRatePercent: event.target.value,
+                  }));
                 }}
                 error={fieldErrors.discountRate}
               />
@@ -243,7 +276,10 @@ export function ScenarioFormPage() {
                 numeric
                 value={draft.constructionMonths}
                 onChange={(event) => {
-                  setDraft((current) => ({ ...current, constructionMonths: event.target.value }));
+                  setDraft((current) => ({
+                    ...current,
+                    constructionMonths: event.target.value,
+                  }));
                 }}
                 error={fieldErrors.constructionMonths}
               />
@@ -258,7 +294,9 @@ export function ScenarioFormPage() {
 
           <div className="form-actions">
             <Button type="submit" isLoading={createScenario.isPending}>
-              {createScenario.isPending ? t("scenario.form.submitting") : t("scenario.form.submit")}
+              {createScenario.isPending
+                ? t("scenario.form.submitting")
+                : t("scenario.form.submit")}
             </Button>
           </div>
         </form>

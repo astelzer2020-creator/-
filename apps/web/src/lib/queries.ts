@@ -38,7 +38,9 @@ export function useCreateScenario(projectId: string) {
   return useMutation({
     mutationFn: (input: ScenarioInput) => api.createScenario(projectId, input),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["projects", projectId] });
+      await queryClient.invalidateQueries({
+        queryKey: ["projects", projectId],
+      });
     },
   });
 }

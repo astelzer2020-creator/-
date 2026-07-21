@@ -2,17 +2,30 @@
   "name": "@atlas/api",
   "version": "0.1.0",
   "private": true,
-  "description": "Atlas public API (Fastify) — placeholder until M1 porting begins.",
+  "description": "Atlas public API — Fastify 5, JWT auth (roles, fail-closed routes), project/scenario CRUD, analytics orchestration.",
   "type": "module",
+  "main": "./src/index.ts",
   "scripts": {
+    "build": "tsc -b tsconfig.build.json",
+    "start": "node dist/server.js",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run",
     "format": "prettier --write ."
   },
   "prettier": "@atlas/config/prettier.config.mjs",
+  "dependencies": {
+    "@atlas/shared": "workspace:*",
+    "@fastify/jwt": "^10.0.0",
+    "@node-rs/argon2": "^2.0.2",
+    "fastify": "^5.10.0",
+    "fastify-plugin": "^5.0.0",
+    "undici": "^7.16.0",
+    "zod": "^4.0.0"
+  },
   "devDependencies": {
     "@atlas/config": "workspace:*",
+    "@types/node": "^22.0.0",
     "eslint": "^9.31.0",
     "prettier": "^3.6.0",
     "typescript": "^5.8.0",

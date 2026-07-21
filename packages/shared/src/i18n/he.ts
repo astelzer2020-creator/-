@@ -62,7 +62,8 @@ export const he = {
   "states.empty": "אין נתונים להצגה",
   "states.error": "אירעה שגיאה. נסו שוב.",
   "states.retry": "ניסיון חוזר",
-  "states.analyticsUnavailable": "שירות החישוב אינו זמין כעת. נסו שוב בעוד רגע.",
+  "states.analyticsUnavailable":
+    "שירות החישוב אינו זמין כעת. נסו שוב בעוד רגע.",
 
   "validation.required": "שדה חובה",
   "validation.invalidNumber": "יש להזין מספר תקין",

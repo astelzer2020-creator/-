@@ -4,7 +4,11 @@ import type { Dispatcher } from "undici";
 import type { AppConfig } from "./config/env.js";
 import { AnalyticsClient } from "./lib/analytics-client.js";
 import { authRoutes } from "./modules/auth/routes.js";
-import { InMemoryUserStore, type SeedUser, type UserStore } from "./modules/auth/user-store.js";
+import {
+  InMemoryUserStore,
+  type SeedUser,
+  type UserStore,
+} from "./modules/auth/user-store.js";
 import { InMemoryProjectsRepo } from "./modules/projects/repo-memory.js";
 import type { ProjectsRepo } from "./modules/projects/repo.js";
 import { projectsRoutes } from "./modules/projects/routes.js";
@@ -35,7 +39,9 @@ export interface BuildAppOptions {
 }
 
 /** Builds the Fastify app without listening — the testable unit. */
-export async function buildApp(options: BuildAppOptions): Promise<FastifyInstance> {
+export async function buildApp(
+  options: BuildAppOptions,
+): Promise<FastifyInstance> {
   const { config } = options;
   const app = Fastify({
     logger: config.nodeEnv === "test" ? false : { level: "info" },
@@ -44,12 +50,16 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
   await app.register(errorEnvelopePlugin);
 
   const userStore =
-    options.userStore ?? (await InMemoryUserStore.fromSeeds(options.seedUsers ?? []));
+    options.userStore ??
+    (await InMemoryUserStore.fromSeeds(options.seedUsers ?? []));
   await app.register(authPlugin, { jwtSecret: config.jwtSecret, userStore });
 
   const projectsRepo = options.projectsRepo ?? new InMemoryProjectsRepo();
   const scenariosRepo = options.scenariosRepo ?? new InMemoryScenariosRepo();
-  const analytics = new AnalyticsClient(config.analyticsUrl, options.analyticsDispatcher);
+  const analytics = new AnalyticsClient(
+    config.analyticsUrl,
+    options.analyticsDispatcher,
+  );
   const projects = new ProjectsService(projectsRepo);
   const scenarios = new ScenariosService(scenariosRepo, projects, analytics);
   app.decorate("projects", projects);
@@ -61,8 +71,12 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
 
   // Health endpoints (docs/ARCHITECTURE.md observability). Liveness only for
   // now: there is no DB yet and analytics is checked per call, not here.
-  app.get("/healthz", { config: { auth: { public: true } } }, async () => ({ status: "ok" }));
-  app.get("/readyz", { config: { auth: { public: true } } }, async () => ({ status: "ok" }));
+  app.get("/healthz", { config: { auth: { public: true } } }, async () => ({
+    status: "ok",
+  }));
+  app.get("/readyz", { config: { auth: { public: true } } }, async () => ({
+    status: "ok",
+  }));
 
   return app;
 }

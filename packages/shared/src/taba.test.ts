@@ -2,9 +2,17 @@ import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
-import { mapTabaHeader, normalizeTabaHeader, TABA_COLUMN_MAP, type TabaField } from "./taba.js";
+import {
+  mapTabaHeader,
+  normalizeTabaHeader,
+  TABA_COLUMN_MAP,
+  type TabaField,
+} from "./taba.js";
 
-const SAMPLE_CSV_URL = new URL("../../../data/sample/sample-taba-projects.csv", import.meta.url);
+const SAMPLE_CSV_URL = new URL(
+  "../../../data/sample/sample-taba-projects.csv",
+  import.meta.url,
+);
 
 describe("normalizeTabaHeader", () => {
   it("strips a leading BOM and trims/collapses whitespace", () => {
@@ -22,7 +30,7 @@ describe("normalizeTabaHeader", () => {
 });
 
 describe("mapTabaHeader", () => {
-  it("maps ASCII-quote and U+05F4-gershayim יח\"ד headers to the same fields", () => {
+  it('maps ASCII-quote and U+05F4-gershayim יח"ד headers to the same fields', () => {
     expect(mapTabaHeader('יח"ד קיים')).toBe("existingUnits");
     expect(mapTabaHeader("יח״ד קיים")).toBe("existingUnits");
     expect(mapTabaHeader('יח"ד מוצע')).toBe("proposedUnits");

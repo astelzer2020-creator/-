@@ -19,7 +19,9 @@ export type RateFraction = number;
  */
 export function asAgorot(value: number): Agorot {
   if (!Number.isSafeInteger(value)) {
-    throw new RangeError(`agorot amounts must be safe integers, got ${String(value)}`);
+    throw new RangeError(
+      `agorot amounts must be safe integers, got ${String(value)}`,
+    );
   }
   return value as Agorot;
 }
@@ -31,7 +33,9 @@ export function asAgorot(value: number): Agorot {
  */
 export function fromShekel(shekels: number): Agorot {
   if (!Number.isFinite(shekels)) {
-    throw new RangeError(`shekel amount must be finite, got ${String(shekels)}`);
+    throw new RangeError(
+      `shekel amount must be finite, got ${String(shekels)}`,
+    );
   }
   return asAgorot(Math.round(shekels * 100));
 }
@@ -46,7 +50,10 @@ export function toShekel(amount: Agorot): number {
  * "₪1,234.56"-style display). Display only — never parse this back.
  */
 export function formatILS(amount: Agorot): string {
-  return new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS" }).format(amount / 100);
+  return new Intl.NumberFormat("he-IL", {
+    style: "currency",
+    currency: "ILS",
+  }).format(amount / 100);
 }
 
 /**

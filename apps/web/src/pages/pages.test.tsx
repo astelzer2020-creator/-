@@ -30,8 +30,12 @@ describe("LoginPage", () => {
   it("renders the form and shows Hebrew validation errors on bad input", async () => {
     authStore.clear();
     renderAt("/login");
-    fireEvent.change(screen.getByLabelText(t("auth.email")), { target: { value: "nope" } });
-    fireEvent.change(screen.getByLabelText(t("auth.password")), { target: { value: "123" } });
+    fireEvent.change(screen.getByLabelText(t("auth.email")), {
+      target: { value: "nope" },
+    });
+    fireEvent.change(screen.getByLabelText(t("auth.password")), {
+      target: { value: "123" },
+    });
     fireEvent.click(screen.getByRole("button", { name: t("auth.submit") }));
     expect(await screen.findByText(t("auth.errors.emailInvalid"))).toBeTruthy();
     expect(screen.getByText(t("auth.errors.passwordMin"))).toBeTruthy();
@@ -47,7 +51,9 @@ describe("LoginPage", () => {
       target: { value: "password123" },
     });
     fireEvent.click(screen.getByRole("button", { name: t("auth.submit") }));
-    expect(await screen.findByRole("heading", { name: t("projects.title") })).toBeTruthy();
+    expect(
+      await screen.findByRole("heading", { name: t("projects.title") }),
+    ).toBeTruthy();
     expect(authStore.getToken()).not.toBeNull();
   });
 });
@@ -66,7 +72,9 @@ describe("ProjectsPage", () => {
 describe("ProjectDetailPage", () => {
   it("shows project metadata and its saved scenario", async () => {
     renderAt("/projects/p-1");
-    expect(await screen.findByRole("heading", { name: "רח' רוטשילד 45" })).toBeTruthy();
+    expect(
+      await screen.findByRole("heading", { name: "רח' רוטשילד 45" }),
+    ).toBeTruthy();
     expect(screen.getByText(t("project.meta.caseNumber"))).toBeTruthy();
     expect(await screen.findByText("תרחיש בסיס")).toBeTruthy();
     expect(screen.getByText(t("project.scenarios.viewResults"))).toBeTruthy();
@@ -76,10 +84,16 @@ describe("ProjectDetailPage", () => {
 describe("ScenarioFormPage", () => {
   it("renders the mix fieldset and blocks submit with Hebrew errors on empty input", async () => {
     renderAt("/projects/p-1/scenarios/new");
-    expect(await screen.findByRole("heading", { name: t("scenario.form.title") })).toBeTruthy();
+    expect(
+      await screen.findByRole("heading", { name: t("scenario.form.title") }),
+    ).toBeTruthy();
     expect(screen.getByText(t("scenario.form.mixLegend"))).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: t("scenario.form.submit") }));
-    expect(await screen.findByText(t("scenario.form.errorSummary"))).toBeTruthy();
+    fireEvent.click(
+      screen.getByRole("button", { name: t("scenario.form.submit") }),
+    );
+    expect(
+      await screen.findByText(t("scenario.form.errorSummary")),
+    ).toBeTruthy();
     expect(screen.getByText(t("scenario.errors.nameRequired"))).toBeTruthy();
   });
 
@@ -102,13 +116,20 @@ describe("ScenarioFormPage", () => {
     fireEvent.change(screen.getByLabelText(t("scenario.form.mix.salePrice")), {
       target: { value: "2,500,000" },
     });
-    fireEvent.change(screen.getByLabelText(t("scenario.form.buildCostPerSqm")), {
-      target: { value: "9800" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: t("scenario.form.submit") }));
+    fireEvent.change(
+      screen.getByLabelText(t("scenario.form.buildCostPerSqm")),
+      {
+        target: { value: "9800" },
+      },
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: t("scenario.form.submit") }),
+    );
 
     await waitFor(() => {
-      expect(screen.getByRole("heading", { name: t("results.title") })).toBeTruthy();
+      expect(
+        screen.getByRole("heading", { name: t("results.title") }),
+      ).toBeTruthy();
     });
   });
 });

@@ -9,6 +9,10 @@ export interface ProjectsRepo {
   create(orgId: string, input: ProjectCreate): Promise<Project>;
   list(orgId: string): Promise<Project[]>;
   getById(orgId: string, projectId: string): Promise<Project | null>;
-  update(orgId: string, projectId: string, patch: ProjectUpdate): Promise<Project | null>;
+  update(
+    orgId: string,
+    projectId: string,
+    patch: ProjectUpdate,
+  ): Promise<Project | null>;
   remove(orgId: string, projectId: string): Promise<boolean>;
 }

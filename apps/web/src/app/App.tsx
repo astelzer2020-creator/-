@@ -28,8 +28,14 @@ export function AppRoutes() {
         <Route index element={<Navigate to="/projects" replace />} />
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
-        <Route path="/projects/:projectId/scenarios/new" element={<ScenarioFormPage />} />
-        <Route path="/projects/:projectId/scenarios/:scenarioId/results" element={<ResultsPage />} />
+        <Route
+          path="/projects/:projectId/scenarios/new"
+          element={<ScenarioFormPage />}
+        />
+        <Route
+          path="/projects/:projectId/scenarios/:scenarioId/results"
+          element={<ResultsPage />}
+        />
       </Route>
       <Route path="*" element={<Navigate to="/projects" replace />} />
     </Routes>

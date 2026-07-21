@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-import { AgorotSchema, IsoDateTimeSchema, RateFractionSchema } from "./primitives.js";
+import {
+  AgorotSchema,
+  IsoDateTimeSchema,
+  RateFractionSchema,
+} from "./primitives.js";
 import { SimulationResultSchema } from "./simulation.js";
 
 /** One line of the apartment mix (תמהיל דירות) in a scenario. */

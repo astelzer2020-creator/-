@@ -32,7 +32,8 @@ export const en: Record<I18nKey, string> = {
   "projects.fields.existingFloors": "Existing floors",
   "projects.fields.proposedFloors": "Proposed floors",
   "projects.fields.lotArea": "Lot area (sqm)",
-  "projects.empty": "No projects yet. Import a taba file or create a new project.",
+  "projects.empty":
+    "No projects yet. Import a taba file or create a new project.",
 
   "scenario.form.title": "Scenario setup",
   "scenario.form.name": "Scenario name",
@@ -64,12 +65,14 @@ export const en: Record<I18nKey, string> = {
   "states.empty": "No data to display",
   "states.error": "Something went wrong. Please try again.",
   "states.retry": "Retry",
-  "states.analyticsUnavailable": "The calculation service is currently unavailable. Try again shortly.",
+  "states.analyticsUnavailable":
+    "The calculation service is currently unavailable. Try again shortly.",
 
   "validation.required": "Required field",
   "validation.invalidNumber": "Enter a valid number",
   "validation.positiveNumber": "Enter a number greater than zero",
   "validation.invalidEmail": "Invalid email address",
   "validation.passwordLength": "Password must be at least 8 characters",
-  "validation.rateFraction": "Discount rate must be a decimal fraction between 0 and 1",
+  "validation.rateFraction":
+    "Discount rate must be a decimal fraction between 0 and 1",
 };

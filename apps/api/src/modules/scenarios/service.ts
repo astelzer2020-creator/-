@@ -1,4 +1,8 @@
-import type { Scenario, ScenarioCreate, SimulationRequest } from "@atlas/shared";
+import type {
+  Scenario,
+  ScenarioCreate,
+  SimulationRequest,
+} from "@atlas/shared";
 
 import type { AnalyticsClient } from "../../lib/analytics-client.js";
 import { notFound } from "../../lib/errors.js";
@@ -12,7 +16,11 @@ export class ScenariosService {
     private readonly analytics: AnalyticsClient,
   ) {}
 
-  async create(orgId: string, projectId: string, input: ScenarioCreate): Promise<Scenario> {
+  async create(
+    orgId: string,
+    projectId: string,
+    input: ScenarioCreate,
+  ): Promise<Scenario> {
     await this.projects.get(orgId, projectId); // 404 when the project is not in this org
     return this.repo.create(orgId, projectId, input);
   }
@@ -22,7 +30,11 @@ export class ScenariosService {
     return this.repo.listByProject(orgId, projectId);
   }
 
-  async get(orgId: string, projectId: string, scenarioId: string): Promise<Scenario> {
+  async get(
+    orgId: string,
+    projectId: string,
+    scenarioId: string,
+  ): Promise<Scenario> {
     const scenario = await this.repo.getById(orgId, projectId, scenarioId);
     if (scenario === null) {
       throw notFound("Scenario");
@@ -37,7 +49,11 @@ export class ScenariosService {
    * local fallback computation, ever (CODEBASE_AUDIT: the legacy silent
    * fallback is banned).
    */
-  async simulate(orgId: string, projectId: string, scenarioId: string): Promise<Scenario> {
+  async simulate(
+    orgId: string,
+    projectId: string,
+    scenarioId: string,
+  ): Promise<Scenario> {
     const scenario = await this.get(orgId, projectId, scenarioId);
     const request: SimulationRequest = {
       apartmentMix: scenario.apartmentMix,
@@ -45,7 +61,12 @@ export class ScenariosService {
       discountRate: scenario.discountRate,
     };
     const result = await this.analytics.simulate(request);
-    const updated = await this.repo.saveResult(orgId, projectId, scenarioId, result);
+    const updated = await this.repo.saveResult(
+      orgId,
+      projectId,
+      scenarioId,
+      result,
+    );
     if (updated === null) {
       throw notFound("Scenario");
     }

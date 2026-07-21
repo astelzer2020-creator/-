@@ -1,4 +1,4 @@
-import type { Scenario, ScenarioCreate, SimulationResult } from "@atlas/shared";
+import type { Scenario } from "@atlas/shared";
 
 import { notImplemented } from "../../lib/errors.js";
 import type { ScenariosRepo } from "./repo.js";
@@ -13,7 +13,8 @@ const MESSAGE =
  * TODO(M1/Postgres): implement against `migrations/0001_init.sql` (scenarios
  * table; apartment_mix/cost_items/result as JSONB validated by the shared
  * schemas at the boundary). Every method throws 501 NOT_IMPLEMENTED until
- * then.
+ * then. Parameters are intentionally omitted (TS allows fewer params in
+ * implementations) until the real queries exist.
  */
 export class PgScenariosRepo implements ScenariosRepo {
   constructor(private readonly databaseUrl: string) {
@@ -22,24 +23,19 @@ export class PgScenariosRepo implements ScenariosRepo {
     }
   }
 
-  create(_orgId: string, _projectId: string, _input: ScenarioCreate): Promise<Scenario> {
+  create(): Promise<Scenario> {
     return Promise.reject(notImplemented(MESSAGE));
   }
 
-  listByProject(_orgId: string, _projectId: string): Promise<Scenario[]> {
+  listByProject(): Promise<Scenario[]> {
     return Promise.reject(notImplemented(MESSAGE));
   }
 
-  getById(_orgId: string, _projectId: string, _scenarioId: string): Promise<Scenario | null> {
+  getById(): Promise<Scenario | null> {
     return Promise.reject(notImplemented(MESSAGE));
   }
 
-  saveResult(
-    _orgId: string,
-    _projectId: string,
-    _scenarioId: string,
-    _result: SimulationResult,
-  ): Promise<Scenario | null> {
+  saveResult(): Promise<Scenario | null> {
     return Promise.reject(notImplemented(MESSAGE));
   }
 }

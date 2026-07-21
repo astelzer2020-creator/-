@@ -7,7 +7,10 @@ export type { MessageKey };
  * catalog; `{param}` placeholders are interpolated from `params`.
  * TODO(shared): swap the catalog import to @atlas/shared/i18n when it ships.
  */
-export function t(key: MessageKey, params?: Record<string, string | number>): string {
+export function t(
+  key: MessageKey,
+  params?: Record<string, string | number>,
+): string {
   const template = he[key];
   if (!params) {
     return template;

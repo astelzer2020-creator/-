@@ -46,7 +46,9 @@ export function LoginPage() {
       <Card className="login-card">
         <div className="stack">
           <h1>{t("auth.title")}</h1>
-          {isDemoMode() ? <p className="text-muted text-sm">{t("auth.demoHint")}</p> : null}
+          {isDemoMode() ? (
+            <p className="text-muted text-sm">{t("auth.demoHint")}</p>
+          ) : null}
           <form className="form" onSubmit={onSubmit} noValidate>
             <Input
               label={t("auth.email")}

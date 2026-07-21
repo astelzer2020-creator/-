@@ -7,7 +7,11 @@ export interface SkeletonProps {
 }
 
 /** Loading placeholder — purely decorative, hidden from assistive tech. */
-export function Skeleton({ width = "100%", height = "1rem", className }: SkeletonProps) {
+export function Skeleton({
+  width = "100%",
+  height = "1rem",
+  className,
+}: SkeletonProps) {
   return (
     <span
       className={["skeleton", className ?? ""].filter(Boolean).join(" ")}

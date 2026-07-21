@@ -1,5 +1,9 @@
 import { fetch, type Dispatcher } from "undici";
-import { SimulationResultSchema, type SimulationRequest, type SimulationResult } from "@atlas/shared";
+import {
+  SimulationResultSchema,
+  type SimulationRequest,
+  type SimulationResult,
+} from "@atlas/shared";
 
 import { AppError } from "./errors.js";
 
@@ -28,10 +32,16 @@ export class AnalyticsClient {
         headers: { "content-type": "application/json" },
         body: JSON.stringify(input),
         signal: AbortSignal.timeout(SIMULATE_TIMEOUT_MS),
-        ...(this.dispatcher === undefined ? {} : { dispatcher: this.dispatcher }),
+        ...(this.dispatcher === undefined
+          ? {}
+          : { dispatcher: this.dispatcher }),
       });
     } catch {
-      throw new AppError(503, "ANALYTICS_UNAVAILABLE", "Analytics service is unreachable");
+      throw new AppError(
+        503,
+        "ANALYTICS_UNAVAILABLE",
+        "Analytics service is unreachable",
+      );
     }
     if (!response.ok) {
       throw new AppError(
@@ -44,7 +54,11 @@ export class AnalyticsClient {
     try {
       body = await response.json();
     } catch {
-      throw new AppError(502, "ANALYTICS_ERROR", "Analytics service returned invalid JSON");
+      throw new AppError(
+        502,
+        "ANALYTICS_ERROR",
+        "Analytics service returned invalid JSON",
+      );
     }
     const parsed = SimulationResultSchema.safeParse(body);
     if (!parsed.success) {

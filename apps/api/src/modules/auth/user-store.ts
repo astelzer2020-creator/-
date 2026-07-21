@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { Algorithm, hash, verify } from "@node-rs/argon2";
+import { hash, verify } from "@node-rs/argon2";
 import type { Role } from "@atlas/shared";
 
 export interface StoredUser {
@@ -34,16 +34,26 @@ export interface UserStore {
 export class InMemoryUserStore implements UserStore {
   private constructor(private readonly byEmail: Map<string, StoredUser>) {}
 
-  static async fromSeeds(seeds: readonly SeedUser[]): Promise<InMemoryUserStore> {
+  static async fromSeeds(
+    seeds: readonly SeedUser[],
+  ): Promise<InMemoryUserStore> {
     const byEmail = new Map<string, StoredUser>();
     for (const seed of seeds) {
       const email = seed.email.toLowerCase();
+      // @node-rs/argon2 defaults to argon2id; the assertion makes the
+      // SECURITY.md requirement fail loudly if that default ever changes.
+      const passwordHash = await hash(seed.password);
+      if (!passwordHash.startsWith("$argon2id$")) {
+        throw new Error(
+          "password hashing must use argon2id (docs/SECURITY.md)",
+        );
+      }
       byEmail.set(email, {
         id: seed.id ?? randomUUID(),
         email,
         role: seed.role,
         orgId: seed.orgId,
-        passwordHash: await hash(seed.password, { algorithm: Algorithm.Argon2id }),
+        passwordHash,
       });
     }
     return new InMemoryUserStore(byEmail);
@@ -54,6 +64,6 @@ export class InMemoryUserStore implements UserStore {
   }
 
   verifyPassword(user: StoredUser, password: string): Promise<boolean> {
-    return verify(user.passwordHash, password, { algorithm: Algorithm.Argon2id });
+    return verify(user.passwordHash, password);
   }
 }

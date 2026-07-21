@@ -10,26 +10,42 @@ const ParamsSchema = z.object({ projectId: z.uuid() });
  * never from client input.
  */
 export const projectsRoutes: FastifyPluginAsync = async (app) => {
-  app.get("/projects", { config: { auth: { role: "viewer" } } }, async (request) => {
-    return app.projects.list(request.user.orgId);
-  });
+  app.get(
+    "/projects",
+    { config: { auth: { role: "viewer" } } },
+    async (request) => {
+      return app.projects.list(request.user.orgId);
+    },
+  );
 
-  app.post("/projects", { config: { auth: { role: "analyst" } } }, async (request, reply) => {
-    const input = ProjectCreateSchema.parse(request.body);
-    const project = await app.projects.create(request.user.orgId, input);
-    return reply.status(201).send(project);
-  });
+  app.post(
+    "/projects",
+    { config: { auth: { role: "analyst" } } },
+    async (request, reply) => {
+      const input = ProjectCreateSchema.parse(request.body);
+      const project = await app.projects.create(request.user.orgId, input);
+      return reply.status(201).send(project);
+    },
+  );
 
-  app.get("/projects/:projectId", { config: { auth: { role: "viewer" } } }, async (request) => {
-    const { projectId } = ParamsSchema.parse(request.params);
-    return app.projects.get(request.user.orgId, projectId);
-  });
+  app.get(
+    "/projects/:projectId",
+    { config: { auth: { role: "viewer" } } },
+    async (request) => {
+      const { projectId } = ParamsSchema.parse(request.params);
+      return app.projects.get(request.user.orgId, projectId);
+    },
+  );
 
-  app.patch("/projects/:projectId", { config: { auth: { role: "analyst" } } }, async (request) => {
-    const { projectId } = ParamsSchema.parse(request.params);
-    const patch = ProjectUpdateSchema.parse(request.body);
-    return app.projects.update(request.user.orgId, projectId, patch);
-  });
+  app.patch(
+    "/projects/:projectId",
+    { config: { auth: { role: "analyst" } } },
+    async (request) => {
+      const { projectId } = ParamsSchema.parse(request.params);
+      const patch = ProjectUpdateSchema.parse(request.body);
+      return app.projects.update(request.user.orgId, projectId, patch);
+    },
+  );
 
   app.delete(
     "/projects/:projectId",

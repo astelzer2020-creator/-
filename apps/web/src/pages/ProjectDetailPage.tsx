@@ -51,7 +51,10 @@ function DetailContent({ detail }: { detail: ProjectDetail }) {
         <div className="page-header">
           <h2 id="scenarios-heading">{t("project.scenarios.title")}</h2>
           {/* Navigation actions are links styled as buttons — semantics stay honest for a11y. */}
-          <Link className="btn btn--primary" to={`/projects/${project.id}/scenarios/new`}>
+          <Link
+            className="btn btn--primary"
+            to={`/projects/${project.id}/scenarios/new`}
+          >
             {t("project.scenarios.new")}
           </Link>
         </div>
@@ -61,7 +64,10 @@ function DetailContent({ detail }: { detail: ProjectDetail }) {
             title={t("project.scenarios.empty.title")}
             description={t("project.scenarios.empty.description")}
             action={
-              <Link className="btn btn--primary" to={`/projects/${project.id}/scenarios/new`}>
+              <Link
+                className="btn btn--primary"
+                to={`/projects/${project.id}/scenarios/new`}
+              >
                 {t("project.scenarios.new")}
               </Link>
             }
@@ -82,14 +88,21 @@ function DetailContent({ detail }: { detail: ProjectDetail }) {
             </thead>
             <tbody>
               {scenarios.map((scenario) => {
-                const unitCount = scenario.apartmentMix.reduce((sum, row) => sum + row.count, 0);
+                const unitCount = scenario.apartmentMix.reduce(
+                  (sum, row) => sum + row.count,
+                  0,
+                );
                 return (
                   <tr key={scenario.id}>
                     <th scope="row">{scenario.name}</th>
                     <td className="cell-num">{formatNumber(unitCount)}</td>
-                    <td className="cell-num">{formatFraction(scenario.discountRate)}</td>
+                    <td className="cell-num">
+                      {formatFraction(scenario.discountRate)}
+                    </td>
                     <td>
-                      <Link to={`/projects/${project.id}/scenarios/${scenario.id}/results`}>
+                      <Link
+                        to={`/projects/${project.id}/scenarios/${scenario.id}/results`}
+                      >
                         {t("project.scenarios.viewResults")}
                       </Link>
                     </td>

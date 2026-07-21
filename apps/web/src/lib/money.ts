@@ -14,7 +14,9 @@ const percentFormat = new Intl.NumberFormat("he-IL", {
   maximumFractionDigits: 1,
 });
 
-const decimalFormat = new Intl.NumberFormat("he-IL", { maximumFractionDigits: 0 });
+const decimalFormat = new Intl.NumberFormat("he-IL", {
+  maximumFractionDigits: 0,
+});
 
 /**
  * Rounds integer agorot to whole shekels using only integer arithmetic
@@ -22,7 +24,9 @@ const decimalFormat = new Intl.NumberFormat("he-IL", { maximumFractionDigits: 0 
  */
 export function agorotToWholeShekels(agorot: number): number {
   if (!Number.isSafeInteger(agorot)) {
-    throw new RangeError(`agorot must be a safe integer, got ${String(agorot)}`);
+    throw new RangeError(
+      `agorot must be a safe integer, got ${String(agorot)}`,
+    );
   }
   const sign = agorot < 0 ? -1 : 1;
   const abs = Math.abs(agorot);

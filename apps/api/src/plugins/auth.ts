@@ -81,10 +81,18 @@ export const authPlugin = fp<AuthPluginOptions>(
       await request.jwtVerify();
       const role = RoleSchema.safeParse(request.user.role);
       if (!role.success) {
-        throw new AppError(401, "INVALID_TOKEN", "Token carries an unknown role");
+        throw new AppError(
+          401,
+          "INVALID_TOKEN",
+          "Token carries an unknown role",
+        );
       }
       if (ROLE_RANK[role.data] < ROLE_RANK[requiredRole]) {
-        throw new AppError(403, "FORBIDDEN", "Insufficient role for this route");
+        throw new AppError(
+          403,
+          "FORBIDDEN",
+          "Insufficient role for this route",
+        );
       }
     });
   },

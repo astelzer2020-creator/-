@@ -23,7 +23,11 @@ export class ProjectsService {
     return project;
   }
 
-  async update(orgId: string, projectId: string, patch: ProjectUpdate): Promise<Project> {
+  async update(
+    orgId: string,
+    projectId: string,
+    patch: ProjectUpdate,
+  ): Promise<Project> {
     const updated = await this.repo.update(orgId, projectId, patch);
     if (updated === null) {
       throw notFound("Project");

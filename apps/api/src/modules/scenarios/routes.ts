@@ -3,7 +3,9 @@ import { z } from "zod";
 import { ScenarioCreateSchema } from "@atlas/shared";
 
 const ProjectParamsSchema = z.object({ projectId: z.uuid() });
-const ScenarioParamsSchema = ProjectParamsSchema.extend({ scenarioId: z.uuid() });
+const ScenarioParamsSchema = ProjectParamsSchema.extend({
+  scenarioId: z.uuid(),
+});
 
 /**
  * Scenario routes under a project. Analysts create and simulate; viewers
@@ -16,7 +18,11 @@ export const scenariosRoutes: FastifyPluginAsync = async (app) => {
     async (request, reply) => {
       const { projectId } = ProjectParamsSchema.parse(request.params);
       const input = ScenarioCreateSchema.parse(request.body);
-      const scenario = await app.scenarios.create(request.user.orgId, projectId, input);
+      const scenario = await app.scenarios.create(
+        request.user.orgId,
+        projectId,
+        input,
+      );
       return reply.status(201).send(scenario);
     },
   );
@@ -34,7 +40,9 @@ export const scenariosRoutes: FastifyPluginAsync = async (app) => {
     "/projects/:projectId/scenarios/:scenarioId",
     { config: { auth: { role: "viewer" } } },
     async (request) => {
-      const { projectId, scenarioId } = ScenarioParamsSchema.parse(request.params);
+      const { projectId, scenarioId } = ScenarioParamsSchema.parse(
+        request.params,
+      );
       return app.scenarios.get(request.user.orgId, projectId, scenarioId);
     },
   );
@@ -43,7 +51,9 @@ export const scenariosRoutes: FastifyPluginAsync = async (app) => {
     "/projects/:projectId/scenarios/:scenarioId/simulate",
     { config: { auth: { role: "analyst" } } },
     async (request) => {
-      const { projectId, scenarioId } = ScenarioParamsSchema.parse(request.params);
+      const { projectId, scenarioId } = ScenarioParamsSchema.parse(
+        request.params,
+      );
       return app.scenarios.simulate(request.user.orgId, projectId, scenarioId);
     },
   );

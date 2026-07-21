@@ -24,7 +24,10 @@ export type SensitivityGrid = z.infer<typeof SensitivityGridSchema>;
 export const SimulationResultSchema = z.object({
   irr: z
     .string()
-    .regex(/^-?\d+(\.\d+)?$/, 'irr must be a decimal-fraction string, e.g. "0.1432"')
+    .regex(
+      /^-?\d+(\.\d+)?$/,
+      'irr must be a decimal-fraction string, e.g. "0.1432"',
+    )
     .nullable(),
   npvAgorot: AgorotSchema,
   profitAgorot: AgorotSchema,

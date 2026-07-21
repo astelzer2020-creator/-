@@ -1,10 +1,18 @@
 import { describe, expect, it } from "vitest";
 
-import { asAgorot, asRateFraction, formatILS, fromShekel, toShekel } from "./money.js";
+import {
+  asAgorot,
+  asRateFraction,
+  formatILS,
+  fromShekel,
+  toShekel,
+} from "./money.js";
 
 /** Intl inserts RTL/LTR marks and NBSPs; strip them for content assertions. */
 function visible(formatted: string): string {
-  return formatted.replace(/[\u200E\u200F\u061C\u00A0\u202A-\u202E]/g, " ").trim();
+  return formatted
+    .replace(/[\u200E\u200F\u061C\u00A0\u202A-\u202E]/g, " ")
+    .trim();
 }
 
 describe("asAgorot", () => {

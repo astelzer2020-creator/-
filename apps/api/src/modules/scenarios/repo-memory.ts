@@ -13,7 +13,11 @@ interface ScenarioRecord {
 export class InMemoryScenariosRepo implements ScenariosRepo {
   private readonly byId = new Map<string, ScenarioRecord>();
 
-  create(orgId: string, projectId: string, input: ScenarioCreate): Promise<Scenario> {
+  create(
+    orgId: string,
+    projectId: string,
+    input: ScenarioCreate,
+  ): Promise<Scenario> {
     const now = new Date().toISOString();
     const scenario: Scenario = {
       ...input,
@@ -29,15 +33,24 @@ export class InMemoryScenariosRepo implements ScenariosRepo {
 
   listByProject(orgId: string, projectId: string): Promise<Scenario[]> {
     const scenarios = [...this.byId.values()]
-      .filter((record) => record.orgId === orgId && record.scenario.projectId === projectId)
+      .filter(
+        (record) =>
+          record.orgId === orgId && record.scenario.projectId === projectId,
+      )
       .map((record) => record.scenario);
     return Promise.resolve(scenarios);
   }
 
-  getById(orgId: string, projectId: string, scenarioId: string): Promise<Scenario | null> {
+  getById(
+    orgId: string,
+    projectId: string,
+    scenarioId: string,
+  ): Promise<Scenario | null> {
     const record = this.byId.get(scenarioId);
     const found =
-      record !== undefined && record.orgId === orgId && record.scenario.projectId === projectId;
+      record !== undefined &&
+      record.orgId === orgId &&
+      record.scenario.projectId === projectId;
     return Promise.resolve(found ? record.scenario : null);
   }
 
@@ -51,7 +64,11 @@ export class InMemoryScenariosRepo implements ScenariosRepo {
     if (existing === null) {
       return null;
     }
-    const updated: Scenario = { ...existing, result, updatedAt: new Date().toISOString() };
+    const updated: Scenario = {
+      ...existing,
+      result,
+      updatedAt: new Date().toISOString(),
+    };
     this.byId.set(scenarioId, { orgId, scenario: updated });
     return updated;
   }

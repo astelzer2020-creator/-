@@ -29,7 +29,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       <input
         ref={ref}
         id={inputId}
-        className={["field-input", numeric ? "field-input--number" : "", className ?? ""]
+        className={[
+          "field-input",
+          numeric ? "field-input--number" : "",
+          className ?? "",
+        ]
           .filter(Boolean)
           .join(" ")}
         inputMode={numeric ? "decimal" : rest.inputMode}

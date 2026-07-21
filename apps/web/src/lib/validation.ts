@@ -18,7 +18,10 @@ export type LoginFormValues = z.infer<typeof loginSchema>;
 export const newProjectSchema = z.object({
   name: z.string().trim().min(1, t("projects.form.errors.nameRequired")),
   city: z.string().trim().min(1, t("projects.form.errors.cityRequired")),
-  caseNumber: z.string().trim().min(1, t("projects.form.errors.caseNumberRequired")),
+  caseNumber: z
+    .string()
+    .trim()
+    .min(1, t("projects.form.errors.caseNumberRequired")),
 });
 
 const apartmentMixRowSchema = z.object({
@@ -43,7 +46,9 @@ const apartmentMixRowSchema = z.object({
 export const scenarioSchema = z
   .object({
     name: z.string().trim().min(1, t("scenario.errors.nameRequired")),
-    apartmentMix: z.array(apartmentMixRowSchema).min(1, t("scenario.errors.mixRequired")),
+    apartmentMix: z
+      .array(apartmentMixRowSchema)
+      .min(1, t("scenario.errors.mixRequired")),
     buildCostPerSqmAgorot: z
       .number({ invalid_type_error: t("scenario.errors.numberInvalid") })
       .int(t("scenario.errors.buildCostPositive"))

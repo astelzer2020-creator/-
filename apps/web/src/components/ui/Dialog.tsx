@@ -26,7 +26,10 @@ export function Dialog({ open, title, onClose, children }: DialogProps) {
     if (!open) {
       return;
     }
-    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const opener =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
     const panel = panelRef.current;
     const firstFocusable = panel?.querySelector<HTMLElement>(FOCUSABLE);
     (firstFocusable ?? panel)?.focus();
@@ -40,7 +43,9 @@ export function Dialog({ open, title, onClose, children }: DialogProps) {
       if (event.key !== "Tab" || !panelRef.current) {
         return;
       }
-      const focusables = Array.from(panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE));
+      const focusables = Array.from(
+        panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE),
+      );
       const first = focusables[0];
       const last = focusables[focusables.length - 1];
       if (!first || !last) {
@@ -88,7 +93,12 @@ export function Dialog({ open, title, onClose, children }: DialogProps) {
       >
         <div className="dialog-header">
           <h2 id={titleId}>{title}</h2>
-          <Button variant="ghost" size="sm" onClick={onClose} aria-label={t("common.close")}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            aria-label={t("common.close")}
+          >
             ✕
           </Button>
         </div>

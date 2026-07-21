@@ -11,7 +11,14 @@ import {
 
 const VALID_SCENARIO = {
   name: "תרחיש בסיס",
-  apartmentMix: [{ label: "3 חדרים", units: 40, areaSqm: 85, salePricePerSqmAgorot: 4_500_000 }],
+  apartmentMix: [
+    {
+      label: "3 חדרים",
+      units: 40,
+      areaSqm: 85,
+      salePricePerSqmAgorot: 4_500_000,
+    },
+  ],
   costItems: [{ label: "עלות בנייה", amountAgorot: 9_000_000_000 }],
   discountRate: 0.07,
 };
@@ -35,7 +42,9 @@ const VALID_RESULT = {
 
 describe("ProjectCreateSchema", () => {
   it("accepts a minimal project (name only)", () => {
-    expect(ProjectCreateSchema.parse({ name: "רוטשילד 45" }).name).toBe("רוטשילד 45");
+    expect(ProjectCreateSchema.parse({ name: "רוטשילד 45" }).name).toBe(
+      "רוטשילד 45",
+    );
   });
 
   it("accepts taba-mapped fields with agorot integers", () => {
@@ -53,9 +62,12 @@ describe("ProjectCreateSchema", () => {
 
   it("rejects a missing name, negative units and float agorot", () => {
     expect(ProjectCreateSchema.safeParse({}).success).toBe(false);
-    expect(ProjectCreateSchema.safeParse({ name: "x", existingUnits: -1 }).success).toBe(false);
     expect(
-      ProjectCreateSchema.safeParse({ name: "x", landValueAgorot: 100.5 }).success,
+      ProjectCreateSchema.safeParse({ name: "x", existingUnits: -1 }).success,
+    ).toBe(false);
+    expect(
+      ProjectCreateSchema.safeParse({ name: "x", landValueAgorot: 100.5 })
+        .success,
     ).toBe(false);
   });
 });
@@ -67,7 +79,8 @@ describe("ScenarioCreateSchema", () => {
 
   it("rejects percent-point discount rates (7 instead of 0.07)", () => {
     expect(
-      ScenarioCreateSchema.safeParse({ ...VALID_SCENARIO, discountRate: 7 }).success,
+      ScenarioCreateSchema.safeParse({ ...VALID_SCENARIO, discountRate: 7 })
+        .success,
     ).toBe(false);
   });
 
@@ -79,7 +92,8 @@ describe("ScenarioCreateSchema", () => {
       }).success,
     ).toBe(false);
     expect(
-      ScenarioCreateSchema.safeParse({ ...VALID_SCENARIO, apartmentMix: [] }).success,
+      ScenarioCreateSchema.safeParse({ ...VALID_SCENARIO, apartmentMix: [] })
+        .success,
     ).toBe(false);
   });
 });
@@ -100,12 +114,16 @@ describe("SimulationResultSchema", () => {
   });
 
   it("rejects numeric irr, malformed irr strings, and float npvAgorot", () => {
-    expect(SimulationResultSchema.safeParse({ ...VALID_RESULT, irr: 0.14 }).success).toBe(false);
-    expect(SimulationResultSchema.safeParse({ ...VALID_RESULT, irr: "14.3%" }).success).toBe(
-      false,
-    );
     expect(
-      SimulationResultSchema.safeParse({ ...VALID_RESULT, npvAgorot: 1.5 }).success,
+      SimulationResultSchema.safeParse({ ...VALID_RESULT, irr: 0.14 }).success,
+    ).toBe(false);
+    expect(
+      SimulationResultSchema.safeParse({ ...VALID_RESULT, irr: "14.3%" })
+        .success,
+    ).toBe(false);
+    expect(
+      SimulationResultSchema.safeParse({ ...VALID_RESULT, npvAgorot: 1.5 })
+        .success,
     ).toBe(false);
   });
 });
@@ -113,10 +131,21 @@ describe("SimulationResultSchema", () => {
 describe("auth schemas", () => {
   it("parses a valid login request and rejects bad emails / short passwords", () => {
     expect(
-      LoginRequestSchema.parse({ email: "analyst@example.com", password: "s3cret-pass" }).email,
+      LoginRequestSchema.parse({
+        email: "analyst@example.com",
+        password: "s3cret-pass",
+      }).email,
     ).toBe("analyst@example.com");
-    expect(LoginRequestSchema.safeParse({ email: "not-an-email", password: "s3cret-pass" }).success).toBe(false);
-    expect(LoginRequestSchema.safeParse({ email: "a@b.co", password: "short" }).success).toBe(false);
+    expect(
+      LoginRequestSchema.safeParse({
+        email: "not-an-email",
+        password: "s3cret-pass",
+      }).success,
+    ).toBe(false);
+    expect(
+      LoginRequestSchema.safeParse({ email: "a@b.co", password: "short" })
+        .success,
+    ).toBe(false);
   });
 
   it("only allows the three documented roles", () => {
@@ -128,7 +157,8 @@ describe("auth schemas", () => {
 describe("ApiErrorSchema", () => {
   it("matches the single error envelope", () => {
     expect(
-      ApiErrorSchema.parse({ error: { code: "NOT_FOUND", message: "missing" } }).error.code,
+      ApiErrorSchema.parse({ error: { code: "NOT_FOUND", message: "missing" } })
+        .error.code,
     ).toBe("NOT_FOUND");
     expect(ApiErrorSchema.safeParse({ code: "NOT_FOUND" }).success).toBe(false);
   });

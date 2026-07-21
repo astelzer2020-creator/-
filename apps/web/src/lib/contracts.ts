@@ -1,10 +1,15 @@
 /**
  * API contract types for the Atlas pilot walking skeleton.
  *
- * TODO(shared): this file is a LOCAL mirror of the types @atlas/shared will own
- * (packages/shared is still the ATL-007 placeholder as of this work package).
- * Field names and units are written to be byte-identical to the planned shared
- * definitions so the swap is a mechanical import change.
+ * TODO(shared): this file is a LOCAL mirror pending the swap to @atlas/shared.
+ * The shared package landed mid-flight with shapes that DIVERGE from this work
+ * package's approved API contract — known deltas to reconcile before swapping
+ * (flagged for CEO/integration, see handoff): roiOnCost string (here, per spec)
+ * vs number (shared); paybackPeriods months (spec) vs paybackYears (shared);
+ * ApartmentMixRow rooms/count/salePricePerUnitAgorot (spec form fields) vs
+ * label/units/salePricePerSqmAgorot (shared); named cost fields (spec) vs
+ * costItems[] (shared); web pins zod ^3, shared uses ^4. Sensitivity axis names
+ * are already aligned to shared (priceDeltas/costDeltas).
  *
  * Unit conventions (docs/CODING_STANDARDS.md rule 3):
  * - monetary amounts are INTEGER AGOROT in storage and transport (suffix `Agorot`);
@@ -12,7 +17,8 @@
  *   strings to avoid float drift between the analytics engine and clients.
  */
 
-export type ProjectStatus = "planning" | "approved" | "inProgress" | "completed";
+export type ProjectStatus =
+  "planning" | "approved" | "inProgress" | "completed";
 
 export interface Project {
   id: string;
@@ -59,9 +65,9 @@ export interface Scenario extends ScenarioInput {
 
 export interface SensitivityGrid {
   /** Sale-price deltas (decimal fractions, e.g. -0.1) — column axis, ascending. */
-  salePriceDeltas: number[];
+  priceDeltas: number[];
   /** Build-cost deltas (decimal fractions) — row axis, ascending. */
-  buildCostDeltas: number[];
+  costDeltas: number[];
   /** npvAgorot[rowIndex][columnIndex], integer agorot. */
   npvAgorot: number[][];
 }

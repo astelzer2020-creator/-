@@ -72,9 +72,24 @@ const seedScenario: Scenario = {
   projectId: "p-1",
   name: "תרחיש בסיס",
   apartmentMix: [
-    { rooms: 3, count: 40, areaSqm: 78, salePricePerUnitAgorot: 2_400_000 * 100 },
-    { rooms: 4, count: 36, areaSqm: 102, salePricePerUnitAgorot: 3_100_000 * 100 },
-    { rooms: 5, count: 12, areaSqm: 126, salePricePerUnitAgorot: 4_050_000 * 100 },
+    {
+      rooms: 3,
+      count: 40,
+      areaSqm: 78,
+      salePricePerUnitAgorot: 2_400_000 * 100,
+    },
+    {
+      rooms: 4,
+      count: 36,
+      areaSqm: 102,
+      salePricePerUnitAgorot: 3_100_000 * 100,
+    },
+    {
+      rooms: 5,
+      count: 12,
+      areaSqm: 126,
+      salePricePerUnitAgorot: 4_050_000 * 100,
+    },
   ],
   buildCostPerSqmAgorot: 9_800 * 100,
   otherCostsAgorot: 12_000_000 * 100,
@@ -88,17 +103,29 @@ interface DemoStore {
   nextId: number;
 }
 
-function totals(input: ScenarioInput): { revenueAgorot: number; costAgorot: number } {
+function totals(input: ScenarioInput): {
+  revenueAgorot: number;
+  costAgorot: number;
+} {
   const revenueAgorot = input.apartmentMix.reduce(
     (sum, row) => sum + row.count * row.salePricePerUnitAgorot,
     0,
   );
-  const areaSqm = input.apartmentMix.reduce((sum, row) => sum + row.count * row.areaSqm, 0);
-  const costAgorot = Math.round(areaSqm * input.buildCostPerSqmAgorot) + input.otherCostsAgorot;
+  const areaSqm = input.apartmentMix.reduce(
+    (sum, row) => sum + row.count * row.areaSqm,
+    0,
+  );
+  const costAgorot =
+    Math.round(areaSqm * input.buildCostPerSqmAgorot) + input.otherCostsAgorot;
   return { revenueAgorot, costAgorot };
 }
 
-function npvOf(revenueAgorot: number, costAgorot: number, rate: number, months: number): number {
+function npvOf(
+  revenueAgorot: number,
+  costAgorot: number,
+  rate: number,
+  months: number,
+): number {
   // Two-point model: costs at t0, revenue at completion, discounted annually.
   const years = months / 12;
   return Math.round(revenueAgorot / Math.pow(1 + rate, years)) - costAgorot;
@@ -113,13 +140,14 @@ function simulateScenario(input: ScenarioInput): SimulationResult {
     revenueAgorot > 0 && costAgorot > 0 && profitAgorot > 0
       ? (Math.pow(revenueAgorot / costAgorot, 1 / years) - 1).toFixed(6)
       : null;
-  const roiOnCost = costAgorot > 0 ? (profitAgorot / costAgorot).toFixed(6) : "0";
+  const roiOnCost =
+    costAgorot > 0 ? (profitAgorot / costAgorot).toFixed(6) : "0";
   const paybackPeriods = profitAgorot > 0 ? input.constructionMonths : null;
 
   const deltas = [-0.1, -0.05, 0, 0.05, 0.1];
   const sensitivity: SensitivityGrid = {
-    salePriceDeltas: deltas,
-    buildCostDeltas: deltas,
+    priceDeltas: deltas,
+    costDeltas: deltas,
     npvAgorot: deltas.map((costDelta) =>
       deltas.map((priceDelta) =>
         npvOf(
@@ -134,7 +162,12 @@ function simulateScenario(input: ScenarioInput): SimulationResult {
 
   return {
     irr,
-    npvAgorot: npvOf(revenueAgorot, costAgorot, input.discountRate, input.constructionMonths),
+    npvAgorot: npvOf(
+      revenueAgorot,
+      costAgorot,
+      input.discountRate,
+      input.constructionMonths,
+    ),
     profitAgorot,
     roiOnCost,
     paybackPeriods,
@@ -154,7 +187,11 @@ export function createDemoApi(): AtlasApi {
       await delay();
       // Demo accepts any syntactically valid credentials — the zod form gate still applies.
       if (!input.email.includes("@") || input.password.length < 8) {
-        throw new ApiError("INVALID_CREDENTIALS", t("auth.errors.loginFailed"), 401);
+        throw new ApiError(
+          "INVALID_CREDENTIALS",
+          t("auth.errors.loginFailed"),
+          401,
+        );
       }
       return { token: `demo-token-${String(Date.now())}` };
     },
@@ -183,24 +220,34 @@ export function createDemoApi(): AtlasApi {
 
     async getProject(projectId) {
       await delay();
-      const project = store.projects.find((candidate) => candidate.id === projectId);
+      const project = store.projects.find(
+        (candidate) => candidate.id === projectId,
+      );
       if (!project) {
         throw new ApiError("NOT_FOUND", t("common.notFound"), 404);
       }
       const detail: ProjectDetail = {
         project,
-        scenarios: store.scenarios.filter((scenario) => scenario.projectId === projectId),
+        scenarios: store.scenarios.filter(
+          (scenario) => scenario.projectId === projectId,
+        ),
       };
       return detail;
     },
 
     async createScenario(projectId, input) {
       await delay();
-      const project = store.projects.find((candidate) => candidate.id === projectId);
+      const project = store.projects.find(
+        (candidate) => candidate.id === projectId,
+      );
       if (!project) {
         throw new ApiError("NOT_FOUND", t("common.notFound"), 404);
       }
-      const scenario: Scenario = { ...input, id: `s-${String(store.nextId++)}`, projectId };
+      const scenario: Scenario = {
+        ...input,
+        id: `s-${String(store.nextId++)}`,
+        projectId,
+      };
       store.scenarios.push(scenario);
       return scenario;
     },
@@ -208,7 +255,8 @@ export function createDemoApi(): AtlasApi {
     async simulate(projectId, scenarioId) {
       await delay();
       const scenario = store.scenarios.find(
-        (candidate) => candidate.id === scenarioId && candidate.projectId === projectId,
+        (candidate) =>
+          candidate.id === scenarioId && candidate.projectId === projectId,
       );
       if (!scenario) {
         throw new ApiError("NOT_FOUND", t("common.notFound"), 404);

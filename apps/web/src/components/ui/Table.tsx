@@ -15,7 +15,11 @@ export interface TableProps {
 export function Table({ caption, interactive = false, children }: TableProps) {
   return (
     <div className="table-scroll" role="group" aria-label={caption}>
-      <table className={["table", interactive ? "table--interactive" : ""].filter(Boolean).join(" ")}>
+      <table
+        className={["table", interactive ? "table--interactive" : ""]
+          .filter(Boolean)
+          .join(" ")}
+      >
         <caption>{caption}</caption>
         {children}
       </table>

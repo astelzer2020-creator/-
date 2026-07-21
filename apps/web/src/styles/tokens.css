@@ -8,17 +8,10 @@
 :root {
   /* Typography — system stack with Hebrew-capable fallbacks. */
   --font-family:
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    "Heebo",
-    "Assistant",
-    "Arial Hebrew",
-    "Noto Sans Hebrew",
-    Arial,
-    sans-serif;
-  --font-family-mono: ui-monospace, "Cascadia Mono", "Fira Code", Consolas, monospace;
+    system-ui, -apple-system, "Segoe UI", Roboto, "Heebo", "Assistant",
+    "Arial Hebrew", "Noto Sans Hebrew", Arial, sans-serif;
+  --font-family-mono:
+    ui-monospace, "Cascadia Mono", "Fira Code", Consolas, monospace;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-md: 1rem;

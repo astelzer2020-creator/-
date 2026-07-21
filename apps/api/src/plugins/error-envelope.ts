@@ -8,7 +8,9 @@ interface ErrorBody {
 }
 
 function envelope(code: string, message: string, details?: unknown): ErrorBody {
-  return { error: { code, message, ...(details === undefined ? {} : { details }) } };
+  return {
+    error: { code, message, ...(details === undefined ? {} : { details }) },
+  };
 }
 
 /**
@@ -20,10 +22,15 @@ export const errorEnvelopePlugin = fp(
     app.setNotFoundHandler(async (request, reply) => {
       return reply
         .status(404)
-        .send(envelope("NOT_FOUND", `Route ${request.method} ${request.url} not found`));
+        .send(
+          envelope(
+            "NOT_FOUND",
+            `Route ${request.method} ${request.url} not found`,
+          ),
+        );
     });
 
-    app.setErrorHandler(async (error, request, reply) => {
+    app.setErrorHandler(async (error: unknown, request, reply) => {
       if (error instanceof AppError) {
         return reply
           .status(error.statusCode)
@@ -32,16 +39,42 @@ export const errorEnvelopePlugin = fp(
       if (error instanceof ZodError) {
         return reply
           .status(400)
-          .send(envelope("VALIDATION_ERROR", "Request failed validation", error.issues));
+          .send(
+            envelope(
+              "VALIDATION_ERROR",
+              "Request failed validation",
+              error.issues,
+            ),
+          );
       }
+      // Framework errors (e.g. @fastify/jwt) carry statusCode/code on an Error.
+      const httpError =
+        error instanceof Error
+          ? (error as Error & { statusCode?: unknown; code?: unknown })
+          : null;
       const statusCode =
-        typeof error.statusCode === "number" && error.statusCode >= 400 ? error.statusCode : 500;
-      if (statusCode >= 500) {
+        httpError !== null &&
+        typeof httpError.statusCode === "number" &&
+        httpError.statusCode >= 400
+          ? httpError.statusCode
+          : 500;
+      if (httpError === null || statusCode >= 500) {
         // Never leak internals; the log carries the details.
         request.log.error(error);
-        return reply.status(statusCode).send(envelope("INTERNAL", "Internal server error"));
+        return reply
+          .status(statusCode)
+          .send(envelope("INTERNAL", "Internal server error"));
       }
-      return reply.status(statusCode).send(envelope(error.code ?? "REQUEST_ERROR", error.message));
+      return reply
+        .status(statusCode)
+        .send(
+          envelope(
+            typeof httpError.code === "string"
+              ? httpError.code
+              : "REQUEST_ERROR",
+            httpError.message,
+          ),
+        );
     });
   },
   { name: "error-envelope" },

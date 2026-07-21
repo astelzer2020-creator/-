@@ -30,7 +30,13 @@ const statusLabel: Record<ProjectStatus, string> = {
   completed: t("project.status.completed"),
 };
 
-function NewProjectDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+function NewProjectDialog({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
   const [caseNumber, setCaseNumber] = useState("");
@@ -126,10 +132,13 @@ function ProjectsTable({ projects }: { projects: Project[] }) {
             <td className="cell-num">{project.caseNumber}</td>
             <td>{project.planType}</td>
             <td className="cell-num">
-              {formatNumber(project.existingUnits)} ← {formatNumber(project.proposedUnits)}
+              {formatNumber(project.existingUnits)} ←{" "}
+              {formatNumber(project.proposedUnits)}
             </td>
             <td>
-              <Badge tone={statusTone[project.status]}>{statusLabel[project.status]}</Badge>
+              <Badge tone={statusTone[project.status]}>
+                {statusLabel[project.status]}
+              </Badge>
             </td>
           </tr>
         ))}
@@ -182,7 +191,9 @@ export function ProjectsPage() {
         />
       ) : null}
 
-      {projects.isSuccess && projects.data.length > 0 ? <ProjectsTable projects={projects.data} /> : null}
+      {projects.isSuccess && projects.data.length > 0 ? (
+        <ProjectsTable projects={projects.data} />
+      ) : null}
 
       <NewProjectDialog
         open={dialogOpen}
