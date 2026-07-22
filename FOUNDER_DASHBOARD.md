@@ -3,7 +3,7 @@
 
 # Atlas — Founder Control Center
 
-_Generated from repo sources at commit `1ae4b67` · coordination data as of **2026-07-21** (last `docs/coordination` commit) · ATL-021 / DL-013_
+_Generated from repo sources at commit `ae1f59f` · coordination data as of **2026-07-21** (last `docs/coordination` commit) · ATL-021 / DL-013_
 
 ## 1. EXECUTIVE
 
@@ -13,7 +13,7 @@ _Generated from repo sources at commit `1ae4b67` · coordination data as of **20
 | Sprint progress | 3 of 9 sprint tasks at IMPLEMENTED/VERIFIED (CLOSED: 1 · IMPLEMENTED: 1 · IN PROGRESS: 2 · READY: 4 · VERIFIED: 1) |
 | Production score | 8/10 (production-readiness, docs/coordination/AGENT_WORKBOARD.md) |
 | Pilot readiness | Not ready — M1 in-progress, M2 planned, M3 planned; 2 Founder decision(s) pending |
-| Current version | pre-release @ 1ae4b67 (last source commit; no git tags yet) |
+| Current version | pre-release @ ae1f59f (last source commit; no git tags yet) |
 | Estimated pilot date | not yet schedulable — gated on: ATL-008 (archive deletion decision on docs/CLEANUP_REPORT.md); GITLEAKS_LICENSE / secrets-scan wiring (DL-009). M1 kickoff green-light RECEIVED (DL-014); M1 in-progress; M2 planned |
 
 **Founder decisions pending:**
@@ -40,7 +40,7 @@ _Execution-worker tasks (not agent-owned): ATL-016 (Grok, BACKLOG), ATL-017 (Cod
 | Open P0 tasks | 3 — ATL-001, ATL-003, ATL-005 |
 | Open P1 tasks | 5 — ATL-006, ATL-013, ATL-014, ATL-018, ATL-019 |
 | Open P2 tasks | 6 — ATL-008, ATL-011, ATL-012, ATL-015, ATL-016, ATL-017 |
-| Build & tests | pnpm lint PASS · pnpm typecheck PASS · pnpm test PASS · uv run pytest PASS — QA evidence of 2026-07-21 (ATL-010). Live check: run `pnpm test`. |
+| Build & tests | pnpm lint PASS · pnpm typecheck PASS · pnpm test PASS · uv run pytest PASS · pnpm lint PASS · pnpm typecheck PASS · pnpm test PASS · uv run pytest PASS — QA evidence of 2026-07-21 (ATL-010). Live check: run `pnpm test`. |
 | Coverage | n/a — placeholder suites until M1; coverage floors defined in docs/TESTING_STRATEGY.md (source not yet in repo: real test suites land with M1 code) |
 | Performance | n/a pre-M1 — source not yet in repo (performance evidence lands with the M1 staging deploy per docs/ROADMAP.md) |
 | Security | secrets-scan decorative (QA-M0-2, S3): CI secrets-scan job is a no-op that reports green. Disclosed in comments, but branch prot… · R-09 Open (Medium/Medium) — Founder decision pending (DL-009) |
