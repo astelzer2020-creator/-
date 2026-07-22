@@ -3,18 +3,18 @@
 
 # Atlas — Founder Control Center
 
-_Generated from repo sources at commit `ae1f59f` · coordination data as of **2026-07-21** (last `docs/coordination` commit) · ATL-021 / DL-013_
+_Generated from repo sources at commit `ec2a0d6` · coordination data as of **2026-07-22** (last `docs/coordination` commit) · ATL-021 / DL-013_
 
 ## 1. EXECUTIVE
 
 | Item | Value |
 |---|---|
 | Current sprint | Sprint-1 (2026-07-21 → +1 week) |
-| Sprint progress | 3 of 9 sprint tasks at IMPLEMENTED/VERIFIED (CLOSED: 1 · IMPLEMENTED: 1 · IN PROGRESS: 2 · READY: 4 · VERIFIED: 1) |
+| Sprint progress | 5 of 12 sprint tasks at IMPLEMENTED/VERIFIED (CLOSED: 1 · IMPLEMENTED: 1 · READY: 7 · VERIFIED: 3) |
 | Production score | 8/10 (production-readiness, docs/coordination/AGENT_WORKBOARD.md) |
-| Pilot readiness | Not ready — M1 in-progress, M2 planned, M3 planned; 2 Founder decision(s) pending |
-| Current version | pre-release @ ae1f59f (last source commit; no git tags yet) |
-| Estimated pilot date | not yet schedulable — gated on: ATL-008 (archive deletion decision on docs/CLEANUP_REPORT.md); GITLEAKS_LICENSE / secrets-scan wiring (DL-009). M1 kickoff green-light RECEIVED (DL-014); M1 in-progress; M2 planned |
+| Pilot readiness | Not ready — M1 in-progress — slice verified 2026-07-21, M2 planned, M3 planned; 2 Founder decision(s) pending |
+| Current version | pre-release @ ec2a0d6 (last source commit; no git tags yet) |
+| Estimated pilot date | not yet schedulable — gated on: ATL-008 (archive deletion decision on docs/CLEANUP_REPORT.md); GITLEAKS_LICENSE / secrets-scan wiring (DL-009). M1 kickoff green-light RECEIVED (DL-014); M1 in-progress — slice verified 2026-07-21; M2 planned |
 
 **Founder decisions pending:**
 
@@ -25,8 +25,8 @@ _Generated from repo sources at commit `ae1f59f` · coordination data as of **20
 
 | Agent | Sprint task(s) | Status | Blocked | Backlog (frozen) | Completed | Total on board |
 |---|---|---|---|---|---|---|
-| CEO | ATL-001 (IN PROGRESS) | Active | 0 | 0 | 0 | 1 |
-| CTO | ATL-003-PLAN (CLOSED), ATL-003 (IN PROGRESS), ATL-020 (VERIFIED), ATL-021 (IMPLEMENTED) | Active | 1 | 2 | 5 | 9 |
+| CEO | ATL-001 (IMPLEMENTED) | Waiting | 0 | 0 | 1 | 1 |
+| CTO | ATL-003-PLAN (CLOSED), ATL-003 (VERIFIED), ATL-020 (VERIFIED), ATL-021 (VERIFIED), ATL-022 (READY), ATL-023 (READY), ATL-024 (READY) | Ready | 1 | 2 | 6 | 12 |
 | Product | ATL-013 (READY), ATL-014 (READY) | Ready | 0 | 1 | 1 | 4 |
 | Growth | ATL-019 (READY) | Ready | 0 | 0 | 1 | 2 |
 | QA | ATL-018 (READY) | Ready | 2 | 0 | 1 | 4 |
@@ -37,8 +37,8 @@ _Execution-worker tasks (not agent-owned): ATL-016 (Grok, BACKLOG), ATL-017 (Cod
 
 | Item | Value |
 |---|---|
-| Open P0 tasks | 3 — ATL-001, ATL-003, ATL-005 |
-| Open P1 tasks | 5 — ATL-006, ATL-013, ATL-014, ATL-018, ATL-019 |
+| Open P0 tasks | 2 — ATL-005, ATL-022 |
+| Open P1 tasks | 7 — ATL-006, ATL-013, ATL-014, ATL-018, ATL-019, ATL-023, ATL-024 |
 | Open P2 tasks | 6 — ATL-008, ATL-011, ATL-012, ATL-015, ATL-016, ATL-017 |
 | Build & tests | pnpm lint PASS · pnpm typecheck PASS · pnpm test PASS · uv run pytest PASS · pnpm lint PASS · pnpm typecheck PASS · pnpm test PASS · uv run pytest PASS — QA evidence of 2026-07-21 (ATL-010). Live check: run `pnpm test`. |
 | Coverage | n/a — placeholder suites until M1; coverage floors defined in docs/TESTING_STRATEGY.md (source not yet in repo: real test suites land with M1 code) |
@@ -63,7 +63,7 @@ _Execution-worker tasks (not agent-owned): ATL-016 (Grok, BACKLOG), ATL-017 (Cod
 | Pricing | HYPOTHESIS (DL-005, 2026-07-21): Pilot offer = free 8-week design-partner with hard end date, traded for feedback commitment, case-study rights, week-7 conversion conversation — revisit: Pricing validation, week 6 |
 | Demo status | OUTLINE ONLY — gated: no live demo until QA verification + ATL-006 capability matrix (binding gate in the doc) |
 | Sales material | DEMO_OUTLINE.md: OUTLINE ONLY [claims-gated] · PILOT_OFFER.md: DRAFT — internal structure, not yet an external document [claims-gated] · PIPELINE.md: DRAFT — internal plan [claims-gated] |
-| Documentation | 11 strategy/docs files (docs/*.md) · 10 ADRs · 5 pilot docs · 9 coordination files · 3 growth docs |
+| Documentation | 11 strategy/docs files (docs/*.md) · 10 ADRs · 5 pilot docs · 10 coordination files · 3 growth docs |
 
 ## 6. RISKS
 
