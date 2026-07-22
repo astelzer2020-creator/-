@@ -103,14 +103,16 @@ describe("SimulationResultSchema", () => {
     expect(SimulationResultSchema.parse(VALID_RESULT).irr).toBe("0.1432");
   });
 
-  it("accepts null irr and null payback (undefined, never fabricated)", () => {
+  it("accepts null irr, null payback and null roiOnCost (undefined, never fabricated)", () => {
     const parsed = SimulationResultSchema.parse({
       ...VALID_RESULT,
       irr: null,
       paybackYears: null,
+      roiOnCost: null,
     });
     expect(parsed.irr).toBeNull();
     expect(parsed.paybackYears).toBeNull();
+    expect(parsed.roiOnCost).toBeNull();
   });
 
   it("rejects numeric irr, malformed irr strings, and float npvAgorot", () => {

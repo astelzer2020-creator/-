@@ -1,15 +1,15 @@
 /**
  * API contract types for the Atlas pilot walking skeleton.
  *
- * TODO(shared): this file is a LOCAL mirror pending the swap to @atlas/shared.
- * The shared package landed mid-flight with shapes that DIVERGE from this work
- * package's approved API contract — known deltas to reconcile before swapping
- * (flagged for CEO/integration, see handoff): roiOnCost string (here, per spec)
- * vs number (shared); paybackPeriods months (spec) vs paybackYears (shared);
- * ApartmentMixRow rooms/count/salePricePerUnitAgorot (spec form fields) vs
- * label/units/salePricePerSqmAgorot (shared); named cost fields (spec) vs
- * costItems[] (shared); web pins zod ^3, shared uses ^4. Sensitivity axis names
- * are already aligned to shared (priceDeltas/costDeltas).
+ * TODO(shared): this file is a LOCAL mirror pending the swap to @atlas/shared
+ * (type-only imports; blocked on the zod ^3/^4 split). SimulationResult and
+ * SensitivityGrid are RECONCILED to the shared contract (integration pass,
+ * 2026-07-21): roiOnCost is a number, paybackYears (years, not months),
+ * sensitivity axes priceDeltas/costDeltas. REMAINING divergence, flagged for
+ * the next integration slice: ApartmentMixRow rooms/count/salePricePerUnitAgorot
+ * (form fields) vs shared label/units/salePricePerSqmAgorot, and named cost
+ * fields vs shared costItems[] — the form→ScenarioCreate mapping happens at the
+ * HTTP-client boundary and only bites in non-demo mode.
  *
  * Unit conventions (docs/CODING_STANDARDS.md rule 3):
  * - monetary amounts are INTEGER AGOROT in storage and transport (suffix `Agorot`);
@@ -77,10 +77,10 @@ export interface SimulationResult {
   irr: string | null;
   npvAgorot: number;
   profitAgorot: number;
-  /** ROI on total cost as a decimal-fraction string. */
-  roiOnCost: string;
-  /** Months until cumulative cashflow turns positive, or null if it never does. */
-  paybackPeriods: number | null;
+  /** ROI on total cost as a decimal fraction (shared contract: JSON number). */
+  roiOnCost: number;
+  /** Years until cumulative cashflow turns positive, or null if it never does. */
+  paybackYears: number | null;
   sensitivity: SensitivityGrid;
 }
 
@@ -95,7 +95,8 @@ export interface LoginInput {
 }
 
 export interface LoginResponse {
-  token: string;
+  /** JWT access token (shared contract field name; 15-min lifetime per SECURITY.md). */
+  accessToken: string;
 }
 
 /** The single API error envelope (docs/CODING_STANDARDS.md rule 4). */

@@ -27,7 +27,7 @@ function kpiValueClass(agorot: number): string {
 function KpiCards({ result }: { result: SimulationResult }) {
   const irrDisplay =
     result.irr === null ? null : formatFractionString(result.irr);
-  const roiDisplay = formatFractionString(result.roiOnCost);
+  const roiDisplay = formatFraction(result.roiOnCost);
 
   return (
     <div className="kpi-grid">
@@ -66,10 +66,10 @@ function KpiCards({ result }: { result: SimulationResult }) {
       <Card>
         <p className="kpi-label">{t("results.kpi.payback")}</p>
         <p className="kpi-value">
-          {result.paybackPeriods === null
+          {result.paybackYears === null
             ? t("results.kpi.paybackNone")
-            : t("results.kpi.paybackMonths", {
-                months: formatNumber(result.paybackPeriods),
+            : t("results.kpi.paybackYears", {
+                years: formatNumber(result.paybackYears),
               })}
         </p>
       </Card>

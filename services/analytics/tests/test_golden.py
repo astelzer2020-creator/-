@@ -12,7 +12,6 @@ from typing import Any
 
 import pytest
 
-from atlas_analytics.api.models import ScenarioIn
 from atlas_analytics.engine import (
     build_cashflow,
     discounted_payback,
@@ -23,6 +22,7 @@ from atlas_analytics.engine import (
     to_agorot,
     total_cost_agorot,
 )
+from atlas_analytics.engine.cashflow import CostCategory, CostItem, Phasing, Scenario
 
 GOLDEN_DIR = Path(__file__).parent / "golden"
 FIXTURES = sorted(GOLDEN_DIR.glob("*.json"))
@@ -49,13 +49,40 @@ def _assert_close(key: str, actual: Decimal | None, expected: str | None) -> Non
     assert abs(actual - expected_dec) <= bound, f"{key}: |{actual} - {expected_dec}| > {bound}"
 
 
+def _phasing(data: dict[str, Any]) -> Phasing:
+    return Phasing(start_period=data["start_period"], end_period=data["end_period"])
+
+
+def _scenario_from_fixture(data: dict[str, Any]) -> Scenario:
+    """Build the engine scenario from a fixture's engine-level input block.
+
+    Golden fixtures pin ENGINE semantics (num_periods, phasing) and are richer than the
+    shared wire contract (which is single-year in v1 — see api/models.py); they therefore
+    construct engine dataclasses directly instead of riding the HTTP request model.
+    """
+    return Scenario(
+        num_periods=data["num_periods"],
+        total_revenue_agorot=data["total_revenue_agorot"],
+        revenue_phasing=_phasing(data["revenue_phasing"]),
+        cost_items=tuple(
+            CostItem(
+                name=item["name"],
+                category=CostCategory(item["category"]),
+                amount_agorot=item["amount_agorot"],
+                phasing=_phasing(item["phasing"]),
+            )
+            for item in data["cost_items"]
+        ),
+    )
+
+
 def _compute(fixture: dict[str, Any]) -> dict[str, Any]:
     rate = Decimal(fixture["input"]["discount_rate_per_period"])
     results: dict[str, Any] = {}
     if fixture["kind"] == "cashflows":
         cashflows: list[int] = fixture["input"]["cashflows"]
     else:
-        scenario = ScenarioIn.model_validate(fixture["input"]["scenario"]).to_engine()
+        scenario = _scenario_from_fixture(fixture["input"]["scenario"])
         cashflows = build_cashflow(scenario)
         results["profit_agorot"] = profit_agorot(scenario)
         total_cost = total_cost_agorot(scenario)

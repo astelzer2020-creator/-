@@ -128,7 +128,7 @@ export const he = {
   "results.kpi.profit": "רווח יזמי",
   "results.kpi.roiOnCost": "תשואה על העלות",
   "results.kpi.payback": "תקופת החזר",
-  "results.kpi.paybackMonths": "{months} חודשים",
+  "results.kpi.paybackYears": "{years} שנים",
   "results.kpi.paybackNone": "אין החזר בטווח התחזית",
   "results.sensitivity.title": "ניתוח רגישות",
   "results.sensitivity.caption":

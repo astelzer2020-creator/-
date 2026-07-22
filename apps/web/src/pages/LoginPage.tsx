@@ -21,9 +21,9 @@ export function LoginPage() {
 
   const login = useMutation({
     mutationFn: () => api.login({ email, password }),
-    onSuccess: ({ token }) => {
+    onSuccess: ({ accessToken }) => {
       // Token stays in memory only — see lib/auth-store.ts (localStorage audit finding).
-      authStore.setToken(token);
+      authStore.setToken(accessToken);
       scheduleTokenRefresh();
       const from = (location.state as { from?: string } | null)?.from;
       void navigate(from ?? "/projects", { replace: true });

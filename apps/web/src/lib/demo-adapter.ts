@@ -141,8 +141,9 @@ function simulateScenario(input: ScenarioInput): SimulationResult {
       ? (Math.pow(revenueAgorot / costAgorot, 1 / years) - 1).toFixed(6)
       : null;
   const roiOnCost =
-    costAgorot > 0 ? (profitAgorot / costAgorot).toFixed(6) : "0";
-  const paybackPeriods = profitAgorot > 0 ? input.constructionMonths : null;
+    costAgorot > 0 ? Number((profitAgorot / costAgorot).toFixed(6)) : 0;
+  const paybackYears =
+    profitAgorot > 0 ? Number((input.constructionMonths / 12).toFixed(2)) : null;
 
   const deltas = [-0.1, -0.05, 0, 0.05, 0.1];
   const sensitivity: SensitivityGrid = {
@@ -170,7 +171,7 @@ function simulateScenario(input: ScenarioInput): SimulationResult {
     ),
     profitAgorot,
     roiOnCost,
-    paybackPeriods,
+    paybackYears,
     sensitivity,
   };
 }
@@ -193,7 +194,7 @@ export function createDemoApi(): AtlasApi {
           401,
         );
       }
-      return { token: `demo-token-${String(Date.now())}` };
+      return { accessToken: `demo-token-${String(Date.now())}` };
     },
 
     async listProjects() {

@@ -31,8 +31,12 @@ export const SimulationResultSchema = z.object({
     .nullable(),
   npvAgorot: AgorotSchema,
   profitAgorot: AgorotSchema,
-  /** Profit over total cost, as a decimal fraction. */
-  roiOnCost: z.number(),
+  /**
+   * Profit over total cost, as a decimal fraction. Null when total cost is
+   * zero — the ratio is undefined there and the engine never fabricates a
+   * number (a wrong financial figure is an S1).
+   */
+  roiOnCost: z.number().nullable(),
   /** Years until cumulative cashflow turns positive; null if never. */
   paybackYears: z.number().nonnegative().nullable(),
   sensitivity: SensitivityGridSchema,
