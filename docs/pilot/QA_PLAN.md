@@ -288,3 +288,155 @@ Residual notes (non-blocking):
 testing (fresh passes, stale fails, merge commits excluded, determinism intact). QA recommends
 promoting ATL-021 to VERIFIED. QA-M0-3 (first remote CI run observed green) remains open — it gates
 ATL-007's `verified`, not ATL-021, and per RN-3 that first run will exercise this gate for real.
+
+## M1 Verification Results (ATL-003, 2026-07-21)
+
+Independent adversarial verification of ATL-003 (three CTO work packages + integration pass) at
+HEAD `f1fc530` on branch `claude/production-project-init-bfa25e`. Environment: node v22.22.2,
+pnpm 10.33.0, uv 0.8.17, Python 3.11.15. Working tree clean before and after (`git status
+--porcelain` empty except this append); no product or legacy file modified. Servers were run on
+non-default ports (analytics 8021, API 3021, web preview 4021) and killed afterward.
+
+### 1. Full gates — commands executed and results (all run by QA)
+
+| # | Command | Result | Key output |
+|---|---|---|---|
+| 1 | `pnpm install` | PASS | "Done in 958ms", 6 workspace projects |
+| 2 | `pnpm lint` | PASS | eslint api/web/shared Done; mobile stub skipped |
+| 3 | `pnpm typecheck` | PASS | tsc --noEmit Done ×3 (api/web/shared) |
+| 4 | `pnpm test` | PASS | **84 TS tests**: shared 32 (5 files), web 31 (5 files), api 21 (5 files) — matches claim exactly |
+| 5 | `pnpm -r build` | PASS | shared tsc -b; web `tsc -b && vite build` → 122 modules, `dist/index.html` + assets; api tsc -b |
+| 6 | `uv sync` | PASS | "Resolved 31 packages", audited 29 |
+| 7 | `uv run ruff check .` | PASS | "All checks passed!" |
+| 8 | `uv run ruff format --check .` | PASS | "16 files already formatted" |
+| 9 | `uv run mypy src` | PASS | "Success: no issues found in 11 source files" |
+| 10 | `uv run pytest` | PASS | **39 passed** in 2.63s (1 StarletteDeprecationWarning, non-blocking) |
+
+All gate expectations (0 errors; 84 TS = 32/31/21; 39 pytest) reproduced independently. Green.
+
+### 2. Golden-fixture independent re-derivation (ADR-0006 human-verification proxy)
+
+**This is analytic re-derivation from the closed-form algebra in each fixture's `derivation`
+field — NOT a customer spreadsheet.** Three of nine fixtures recomputed from scratch in Python
+(`fractions.Fraction` / `decimal.Decimal`, exact rationals), independent of any Atlas code:
+
+- **02_geometric_three_period** (`cf=[-1e6,0,0,1.331e6]`, r=0): IRR = (1.331)^(1/3)−1 = **0.1** exact
+  (verified 1.1³ = 1331/1000 as exact fraction); NPV@0 = **331000**; simple payback = 2 + 1000/1331 =
+  **2.7513148009015777…** — fixture pins `2.751314800901578` (agrees to 15 sig figs, within the 1e-9
+  rel tol). MATCH.
+- **07_multi_root_smallest_positive** (`cf=[-1e5,2.5e5,-1.56e5]`, r=0): quadratic 100x²−250x+156=0,
+  discriminant **100**, roots x∈{1.3,1.2} ⇒ r∈{0.3,0.2}; verified NPV(0.3)=NPV(0.2)=**0** exactly
+  (both genuine roots); smallest-positive policy ⇒ IRR = **0.2**; NPV@0 = **−6000**; first-crossing
+  payback = 1e5/2.5e5 = **0.4** (the later dip to −6000 correctly ignored). MATCH.
+- **09_scenario_remainder_split** (`total_rev=1000001` over periods 1-3, one 2-agora cost at t0):
+  floor split 333333 + remainder 2 to the two earliest periods ⇒ cashflows **[-2,333334,333334,
+  333333]** (sum 1000001, lossless); NPV@0 = profit = **999999**; roi_on_cost = 999999/2 =
+  **499999.5** exact; payback = 2/333334 = 5.999988…e−6 (fixture `0.000005999988`, rel err 4e−12,
+  within 1e-9); IRR = **null** confirmed — NPV stays strictly positive across (−0.99, 10) (scanned;
+  min NPV over window ≈ 33306 > 0), so the true root lies outside the policy window. MATCH.
+
+All three fixtures' committed values equal my own independent arithmetic. `uv run pytest
+tests/test_golden.py` runs all 9 fixtures + inventory = 10 passed. Golden suite is trustworthy.
+
+### 3. LIVE e2e smoke — independently executed (real analytics + real API)
+
+Started analytics (`uvicorn … --port 8021`, healthz→`{"status":"ok"}`) and API (`node dist/server.js`,
+PORT=3021, ANALYTICS_URL=http://127.0.0.1:8021, 32-char JWT_SECRET, SEED_USER_PASSWORD set).
+Flow: login `analyst@atlas.local` → POST /projects → POST scenario → POST simulate, all with my own
+PROFITABLE inputs (mix 20u × 100 m² × 3,000,000 agorot/m²; costs 4,000,000,000 + 500,000,000; rate 0.08).
+
+Response (`HTTP 200`): `irr="0.333333333"`, `npvAgorot=1055555556`, `profitAgorot=1500000000`,
+`roiOnCost=0.3333…`, `paybackYears=0.75`, full 5×5 sensitivity grid.
+
+**Hand-verified against my own arithmetic (Decimal):** revenue = 20·100·3e6 = 6,000,000,000;
+cost = 4,500,000,000; profit = **1,500,000,000** ✓; NPV = −4.5e9 + 6e9/1.08 = 1,055,555,555.5…
+→ half-even **1,055,555,556** ✓; IRR = 6/4.5 − 1 = **0.3333…** ✓; payback = 4.5/6 = **0.75** ✓
+(non-null, numeric, as required for a profitable scenario). Two sensitivity corner cells also
+hand-checked: cell[0][0] (cost/price −10%) = −4.05e9 + 5.4e9/1.08 = **950,000,000** ✓; cell[4][4]
+(cost/price +10%) = **1,161,111,111** ✓; centre cell = base NPV 1,055,555,556 ✓. Every displayed
+financial figure equals my independent computation to the agora.
+
+### 4. Security probes on the live API
+
+| Probe | Expected | Actual | Result |
+|---|---|---|---|
+| 4a — no token → `GET /projects` | 401 envelope | `401 {"error":{"code":"FST_JWT_NO_AUTHORIZATION_IN_HEADER",…}}` | PASS |
+| 4b — viewer token → `POST /projects` | 403 | `403 {"error":{"code":"FORBIDDEN","message":"Insufficient role for this route"}}` | PASS |
+| 4b′ — viewer token → `GET /projects/:id` (same org) | 200 | `200` (read allowed, write denied — role split correct) | PASS |
+| 4d — wrong password vs unknown email | identical 401 shape | both `401 {"error":{"code":"INVALID_CREDENTIALS","message":"Email or password is incorrect"}}` — byte-identical, no account probing | PASS |
+| extra — garbage token | 401 | `401 FST_JWT_AUTHORIZATION_TOKEN_INVALID` (bad base64url) | PASS |
+| extra — tampered signature | 401 | `401` "The token signature is invalid" | PASS |
+| extra — analytics DOWN → simulate | 503, no fabricated number | `503 {"error":{"code":"ANALYTICS_UNAVAILABLE",…}}` — **NO number returned** (legacy silent-fallback ban holds live) | PASS |
+
+Note on the 503 test: my first kill hit only the `uv run` wrapper; the uvicorn child reparented and
+kept serving (log showed a second `POST /v1/simulate 200`), so the re-simulate legitimately returned
+correct numbers. I then killed the real listener via `fuser -k 8021/tcp` (healthz→connection
+refused) and re-ran: 503 with no numbers. The no-fallback path is genuinely verified, not a false
+pass.
+
+**4c — cross-tenant (live):** NOT probeable on this build's default seed — `server.ts` seeds all
+three users (admin/analyst/viewer) under **one** shared `orgId`, so no second org exists to probe
+across at runtime. Cross-tenant isolation is instead verified via committed evidence:
+`apps/api/test/projects.test.ts` "cross-tenant probe" seeds ORG_A + ORG_B and asserts org B gets
+**404** on read/update/delete of org A's project and `[]` on list, with org A's project untouched
+(part of the 21 green api tests). Org scoping is taken from the token, never client input
+(routes pass `request.user.orgId` into every service call — confirmed by source read). Recorded as
+QA-M1-3 (note): live two-org probing needs a two-org seed or the Postgres user store.
+
+### 5. Web — preview smoke, RTL, demo banner, contract render path
+
+- `pnpm --filter @atlas/web build` → green (in step 1). `vite preview --port 4021`: served `/`
+  returns `<html lang="he" dir="rtl">` and `<title>אטלס — סימולטור התחדשות עירונית</title>` — RTL and
+  Hebrew lang attributes present in the served artifact (matches `dist/index.html`).
+- Demo-mode banner logic exists: `lib/api.ts` `isDemoMode()` = `(VITE_DEMO ?? "1") !== "0"` (ON by
+  default); `app/AppShell.tsx:52` renders `<p className="demo-banner" role="note">{t("app.demoBanner")}</p>`;
+  he string `"מצב הדגמה — הנתונים סינתטיים ואינם נשמרים בשרת"`. Demo dataset is synthetic
+  (`lib/demo-adapter.ts`, TESTING_STRATEGY rule 4) — no customer data.
+- `ResultsPage.tsx` render path matches the shared contract: reads `result.irr` (string|null →
+  honest "undefined" state, no fabricated number), `npvAgorot`, `profitAgorot`, `roiOnCost` (number),
+  `paybackYears` (number|null → "none" state), and `sensitivity` (priceDeltas/costDeltas/npvAgorot).
+  Field shapes align with `SimulationResultSchema`.
+
+### 6. Acceptance-criteria coverage map (ATL-003)
+
+| # | Criterion | Status | Evidence |
+|---|---|---|---|
+| AC-1 | Persistence with migrations | **PARTIAL** | `migrations/0001_init.sql` written and well-formed (orgs/users/projects/scenarios; money BIGINT agorot; `projects_org_case_number_unique` per-org dedup for §5.5; argon2id column; role CHECK). BUT never executed — `repo-pg.ts` are 501 NOT_IMPLEMENTED stubs, `app.ts` wires `InMemory*Repo` by default. Consequence: data does **not** survive a process restart, so QA_PLAN §2.4 "persists after reload" holds only within process lifetime. |
+| AC-2 | Auth with roles | **MET** (in-memory stopgap) | Live: argon2id hash at seed, HS256 15-min token (`expiresInSeconds:900`), viewer→POST 403 / analyst→POST 201, undeclared routes fail closed (`ROUTE_POLICY_MISSING`), identical 401 for wrong-password/unknown-email. Stopgap: users are in-memory (`InMemoryUserStore`), seeded only when `SEED_USER_PASSWORD` set (safe default = no login). |
+| AC-3 | Analytics internal-only, single public API | **MET** (architecturally) | `AnalyticsClient` is the only caller path; **no fallback compute** — unreachable → 503 (proven live), non-200 → 502 ANALYTICS_ERROR, schema mismatch → 502 ANALYTICS_CONTRACT_VIOLATION (Zod-validated response). No internet binding in code — host binding is a deployment concern (`uvicorn --host`); analytics carries no auth by design and trusts the private network per SECURITY.md. Deployment MUST bind analytics to a private interface (localhost/private subnet) — verify in the deploy manifest before pilot. |
+| AC-4 | CI green gate | **PARTIAL** | Every gate command green **locally, run by QA** (step 1). Remote CI still unobserved — QA-M0-3 carried forward; and the ATL-021 freshness gate was fixed at bc52714 but the in-flight tip is stale until `pnpm dashboard` runs with the M1 train (RN-3). First remote run remains the open evidence. |
+
+### Defects filed
+
+| ID | Sev | Finding | Return to |
+|---|---|---|---|
+| QA-M1-1 | S3 | `apps/web/src/lib/contracts.ts` is a hand-maintained LOCAL MIRROR, not an import of `@atlas/shared` (TODO says blocked on the zod ^3/^4 split) — contract-drift risk that the API contract-test layer does not cover for web. The non-demo form→ScenarioCreate mapping is **not implemented**: form `ApartmentMixRow{rooms,count,areaSqm,salePricePerUnitAgorot}` and named cost fields do not map to shared `{label,units,areaSqm,salePricePerSqmAgorot}` / `costItems[]`. So the live web core loop in **non-demo** mode cannot yet POST a valid scenario. Demo mode (default) works and is synthetic-only. Explicitly flagged by CTO in the f1fc530 message; scoped to a later integration slice, not an ATL-003 AC. Must close before any pilot on real data. | atlas-cto |
+| QA-M1-2 | S4 | Web mirror types `SimulationResult.roiOnCost` as `number` while the shared contract is `number \| null` (null when total cost = 0). Runtime is safe (`ResultsPage` uses `formatFraction(...) ?? fallback`), but the type is unsound and will drift once web imports shared. | atlas-cto |
+| QA-M1-3 | S4 (note) | Live cross-org probing is impossible on the default seed — `server.ts` puts all three seeded users in one org. Isolation is proven by committed `projects.test.ts` (ORG_A/ORG_B → 404 / `[]`). Add a two-org seed option (or wait for the Postgres user store) so cross-tenant can be probed against a live deploy during UAT. | atlas-cto |
+| QA-M0-3 | S4 (carried) | First remote CI run still unobserved; all gates verified locally by QA only. Gates ATL-007/ATL-003 AC-4 `verified`. | atlas-cto |
+
+Persistence gap (AC-1 PARTIAL) is not filed as a standalone defect — it is a declared, documented
+M1 boundary (in-memory stopgap with the Postgres task tracked separately). It is, however, a hard
+prerequisite for a real pilot (QA_PLAN §2.4/§2.9 require data to survive reload) and is called out
+in the readiness score below.
+
+### Verdict
+
+- **ATL-003: PASS-WITH-KNOWN-ISSUES.** The verified slice is strong: all gates green (84 TS + 39
+  pytest, reproduced), golden values independently re-derived to the agora, and a genuinely live
+  e2e smoke with every financial figure hand-checked and every security probe (401/403/401-parity/
+  no-fallback-503) passing against the running services. Zero S1/S2 defects; zero wrong financial
+  numbers. Known issues are all S3/S4 and all are documented, in-scope-for-later boundaries
+  (in-memory persistence, web non-demo mapping, unobserved remote CI), not regressions. AC coverage:
+  AC-2 and AC-3 MET; AC-1 and AC-4 PARTIAL (by design, not by defect).
+- **M1 production-readiness score: 6/10.** The financial engine and the API/auth/analytics contract
+  are trustworthy and independently verified — the hard part is done and honest. The remaining 4
+  points are the unbuilt pilot-critical remainder: durable persistence (data currently lost on
+  restart), the live web core loop in non-demo mode, and a first green remote CI run. Not a launch
+  candidate yet; a solid, verified walking skeleton.
+- **Recommended workboard status:** move ATL-003 to **VERIFIED** for the slice it actually claims
+  (persistence-schema + auth/roles + analytics-single-API + local-green gates), with QA-M1-1/2/3 and
+  QA-M0-3 recorded as open follow-ups and AC-1/AC-4 explicitly logged as PARTIAL. Do **not** treat
+  ATL-003 as closing the pilot core loop — CLOSED and any "pilot-ready" claim stay blocked until
+  Postgres persistence, the web non-demo mapping, and an observed green remote CI land and are
+  re-verified.
