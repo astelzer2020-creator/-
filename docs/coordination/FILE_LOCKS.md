@@ -26,13 +26,18 @@ STATUS: active | released | expired-escalated
 
 ## Active locks
 
+*(none)*
+
+## Released locks
+
 ```
 TASK ID: ATL-003 (work package WEB)
 OWNER: atlas-cto
 FILES OR DIRECTORIES: apps/web/**
 START TIME: 2026-07-21
 EXPECTED COMPLETION: 2026-07-21 (same day)
-STATUS: active
+STATUS: released (2026-07-21 — delivery handoff "ATL-003 work packages ENGINE + SHARED+API + WEB
++ integration pass" recorded in HANDOFFS.md; QA verdict PASS-WITH-KNOWN-ISSUES → VERIFIED, DL-015)
 NOTE: filed by atlas-ceo to regularize in-flight DL-014 work. The ATL-021 CTO's "unclaimed
 foreign edits" flag was procedurally correct — this lock was missing when work started.
 ```
@@ -43,7 +48,8 @@ OWNER: atlas-cto
 FILES OR DIRECTORIES: packages/shared/**, apps/api/**
 START TIME: 2026-07-21
 EXPECTED COMPLETION: 2026-07-21 (same day)
-STATUS: active
+STATUS: released (2026-07-21 — delivery handoff "ATL-003 work packages ENGINE + SHARED+API + WEB
++ integration pass" recorded in HANDOFFS.md; QA verdict PASS-WITH-KNOWN-ISSUES → VERIFIED, DL-015)
 NOTE: filed by atlas-ceo to regularize in-flight DL-014 work. The ATL-021 CTO's "unclaimed
 foreign edits" flag was procedurally correct — this lock was missing when work started.
 ```
@@ -54,11 +60,8 @@ OWNER: atlas-cto
 FILES OR DIRECTORIES: services/analytics/**
 START TIME: 2026-07-21
 EXPECTED COMPLETION: 2026-07-21 (same day)
-STATUS: active
+STATUS: released (2026-07-21 — delivery handoff "ATL-003 work packages ENGINE + SHARED+API + WEB
++ integration pass" recorded in HANDOFFS.md; QA verdict PASS-WITH-KNOWN-ISSUES → VERIFIED, DL-015)
 NOTE: filed by atlas-ceo to regularize in-flight DL-014 work. The ATL-021 CTO's "unclaimed
 foreign edits" flag was procedurally correct — this lock was missing when work started.
 ```
-
-## Released locks
-
-*(log begins after first unified-protocol implementation task)*

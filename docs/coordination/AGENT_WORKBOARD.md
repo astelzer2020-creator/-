@@ -37,29 +37,33 @@ SHARED+API / WEB; locks in FILE_LOCKS.md). ATL-003-PLAN is CLOSED as superseded.
 
 | Task | Owner | Reviewer | Approver | Pri | Effort | Status | Goal (one line) |
 |---|---|---|---|---|---|---|---|
-| ATL-001 | atlas-ceo | human owner | Founder | P0 | 0.5d | IN PROGRESS | Sprint-1 sequencing + roadmap consistency; IMPLEMENTED when this sprint section is complete, Founder sign-off pending |
+| ATL-001 | atlas-ceo | human owner | Founder | P0 | 0.5d | IMPLEMENTED | Sprint-1 plan complete; Founder sign-off pending (gates VERIFIED) |
 | ATL-003-PLAN | atlas-cto | atlas-ceo | atlas-qa | P0 | 1d | CLOSED | Superseded by DL-014 Founder direct green-light; plan content embedded in the three ATL-003 work-package delegations |
-| ATL-003 | atlas-cto | atlas-qa | atlas-qa | P0 | — | IN PROGRESS | M1 implementation joined the sprint per DL-014: three work packages — ENGINE, SHARED+API, WEB |
+| ATL-003 | atlas-cto | atlas-qa | atlas-qa | P0 | — | VERIFIED | Slice-scoped QA PASS-WITH-KNOWN-ISSUES 2026-07-21 (DL-015); AC-1/AC-4 PARTIAL; "pilot-ready" claim BLOCKED |
 | ATL-013 | atlas-product | atlas-cto | atlas-ceo | P1 | 0.5d | READY | Week-0 customer data dry-run runbook |
 | ATL-014 | atlas-product | atlas-qa | atlas-ceo | P1 | 0.5d | READY | Excel reconciliation worksheet spec (<1% divergence gate) |
 | ATL-018 | atlas-qa | atlas-ceo | atlas-ceo | P1 | 0.5d | READY | M1 verification plan for ATL-003 criteria + DL-008 QA_PLAN annotations |
 | ATL-019 | atlas-growth | atlas-product | Founder | P1 | 0.5d | READY | One-page pilot agreement draft text — material prep only, no external use |
 | ATL-020 | atlas-cto | atlas-qa | atlas-qa | P0 | 0.5d | VERIFIED | Read-only codebase audit → docs/CODEBASE_AUDIT.md; QA PASS 2026-07-21 (6/6 spot-checks) |
-| ATL-021 | atlas-cto | atlas-qa | atlas-ceo | P0 | 0.5d | IMPLEMENTED | Founder Control Center (DL-013); held by QA-S1-1 (fix bc52714, re-verification in progress) |
+| ATL-021 | atlas-cto | atlas-qa | atlas-ceo | P0 | 0.5d | VERIFIED | Founder Control Center; QA-S1-1 CONFIRMED-FIXED at bc52714 (adversarial re-verification RV-1…RV-9) |
+| ATL-022 | atlas-cto | atlas-qa | atlas-qa | P0 | — | READY | Postgres persistence live: execute migrations, pg repos, testcontainers (closes ATL-003 AC-1) |
+| ATL-023 | atlas-cto | atlas-qa | atlas-qa | P1 | — | READY | Web non-demo mapping form→ScenarioCreate + accessToken flow live against API (fixes QA-M1-1) |
+| ATL-024 | atlas-cto | atlas-qa | atlas-qa | P1 | — | READY | Observe first green remote CI + wire prettier --check (QA-M0-3/QA-M0-4; closes ATL-003 AC-4) |
 
 **Sprint-1 exit criteria (amended per DL-014):** all Sprint-1 tasks (incl. the three ATL-003 work
 packages) at IMPLEMENTED or VERIFIED with evidence, plus Founder rulings received on ATL-008 (archive
 deletion, DL-010) and GITLEAKS_LICENSE/secrets-scan (DL-009). The former ATL-003-PLAN approval gate is
 satisfied by the DL-014 direct green-light.
 
-Blocked-on-Founder: ATL-008 (DL-010), GITLEAKS/secrets-scan (DL-009). ATL-005/ATL-006 remain BLOCKED
-on ATL-003 delivery. ATL-002/004/007/009/010 keep their completed statuses.
+Blocked-on-Founder: ATL-008 (DL-010), GITLEAKS/secrets-scan (DL-009), ATL-001 sign-off. ATL-005/ATL-006
+remain BLOCKED — re-scoped onto the M1 follow-ups ATL-022/023/024 (see DL-015; ATL-003 slice is
+delivered and VERIFIED). ATL-002/004/007/009/010 keep their completed statuses.
 
 ---
 
 ### ATL-001 — Finalize pilot milestone priorities and sequencing
 - **Owner:** atlas-ceo · **Reviewer:** human owner · **Priority:** P0 · **Effort:** 0.5d
-- **Status:** IN PROGRESS (2026-07-21) — being satisfied by the Sprint-1 plan above (DL-012); moves to IMPLEMENTED when the sprint section is complete, Founder sign-off pending · **Dependencies:** none
+- **Status:** IMPLEMENTED (2026-07-21) — Sprint-1 plan complete (DL-012/013/014 amendments recorded, all tasks sequenced with owners/reviewers/criteria); Founder sign-off still pending — recorded in DECISION_LOG on receipt, which promotes this to VERIFIED · **Dependencies:** none
 - **Files affected:** docs/coordination/MASTER_ROADMAP.md, docs/ROADMAP.md
 - **Acceptance criteria:** M1/M2/M3 decomposed into workboard tasks each with owner, reviewer, criteria; sequencing respects dependencies; human owner sign-off recorded in DECISION_LOG.
 - **Verification evidence:** —
@@ -74,11 +78,14 @@ on ATL-003 delivery. ATL-002/004/007/009/010 keep their completed statuses.
 
 ### ATL-003 — Resolve P0/P1 production issues (persistence, auth, single API, CI)
 - **Owner:** atlas-cto · **Reviewer:** atlas-qa · **Priority:** P0
-- **Status:** IN PROGRESS (2026-07-21, DL-014 Founder direct green-light) — executing as three bounded atlas-cto work packages: ENGINE (services/analytics/**), SHARED+API (packages/shared/** + apps/api/**), WEB (apps/web/**); locks filed in FILE_LOCKS.md · **Dependencies:** ATL-001, ATL-007 (satisfied)
-- **Files affected:** apps/api/**, services/analytics/**, packages/shared/**, infra/**, .github/workflows/**
+- **Status:** VERIFIED (atlas-qa, 2026-07-21) — **slice-scoped** per the QA recommendation (DL-015): verified for the slice it actually claims (persistence schema + auth/roles + analytics-single-API + local-green gates). Delivered as three work packages + integration pass, commits 8c37779…f1fc530: ENGINE (Decimal engine, 9 analytic golden fixtures, FastAPI /v1/simulate, 39 pytest green), SHARED+API (@atlas/shared taba-mapping superset + money + zod schemas + i18n; Fastify API with JWT+argon2id, roles, fail-closed routes, org-scoped repos in-memory + pg stubs + 0001_init.sql, no-fallback analytics client; 53 TS tests), WEB (RTL Hebrew SaaS app, 11 UI primitives, 5 pages, demo mode, a11y; 31 tests), INTEGRATION (engine+web aligned to shared contract; live e2e smoke login→project→scenario→simulate with hand-verified numbers) · **Dependencies:** ATL-001, ATL-007 (satisfied)
+- **Files affected:** apps/api/**, services/analytics/**, packages/shared/**, apps/web/**, infra/**, .github/workflows/**
 - **Acceptance criteria:** the four P0-fatal gaps from docs/pilot/TECHNICAL_READINESS.md closed — Postgres persistence with migrations; auth with roles; analytics internal-only behind the single public API; CI green gate. Each closed gap has QA verification evidence.
-- **Verification evidence:** —
-- **Sprint-1 note:** the DL-012 gate (implementation only after Founder approval of ATL-003-PLAN.md) was SUPERSEDED by DL-014 — Founder pre-approved implementation directly. QA gates unchanged.
+- **Verification evidence:** docs/pilot/QA_PLAN.md § "M1 Verification Results (ATL-003, 2026-07-21)" — QA independently re-ran all gates (84 TS + 39 pytest green, reproduced exactly), re-derived 3/9 golden fixtures analytically (all MATCH), executed a live e2e smoke with every financial figure hand-checked to the agora, and ran live security probes (401/403/401-parity/no-fallback-503 all PASS). **Verdict: PASS-WITH-KNOWN-ISSUES; M1 pilot-readiness 6/10.** Zero S1/S2; zero wrong financial numbers.
+- **AC coverage map (per QA):** AC-2 auth **MET** (in-memory user store stopgap); AC-3 single-API **MET**; AC-1 persistence **PARTIAL** (migrations written and well-formed, pg repos stubbed, in-memory default — data does not survive restart); AC-4 CI **PARTIAL** (all gates green locally by QA; remote CI unobserved, QA-M0-3 carried).
+- **Open defects (follow-ups, not gates on this slice):** QA-M1-1 (S3, web non-demo form→ScenarioCreate mapping unimplemented → ATL-023), QA-M1-2 (S4, web mirror roiOnCost nullability), QA-M1-3 (S4, single-org seed blocks live cross-org probe), QA-M0-3 (carried → ATL-024).
+- **Scope boundary (binding, per QA + DL-015):** ATL-003 does NOT close the pilot core loop. CLOSED and any **"pilot-ready" claim remain BLOCKED** until ATL-022 (Postgres live), ATL-023 (web non-demo mapping), and ATL-024 (green remote CI) land and are re-verified.
+- **Sprint-1 note:** the DL-012 gate (implementation only after Founder approval of ATL-003-PLAN.md) was SUPERSEDED by DL-014 — Founder pre-approved implementation directly. QA gates unchanged — and were exercised in full.
 
 ### ATL-003-PLAN — ATL-003 implementation plan (sub-task of ATL-003; plan only, NO code)
 - **Owner:** atlas-cto · **Reviewer:** atlas-ceo · **Approver:** atlas-qa · **Priority:** P0 · **Effort:** 1d
@@ -96,7 +103,7 @@ on ATL-003 delivery. ATL-002/004/007/009/010 keep their completed statuses.
 
 ### ATL-005 — Independent critical-journey and security verification
 - **Owner:** atlas-qa · **Reviewer:** atlas-ceo · **Priority:** P0
-- **Status:** BLOCKED (on ATL-003 delivery — now IN PROGRESS per DL-014; unblocks when the three work packages reach IMPLEMENTED with handoffs) · **Dependencies:** ATL-003
+- **Status:** BLOCKED (re-scoped 2026-07-21) — the M1-slice portion of this verification was executed by QA under the ATL-003 verdict (QA_PLAN § M1 Verification Results); the FULL 11-scenario run + live cross-tenant probe needs the pilot workflow and durable persistence → now blocked on ATL-022/ATL-023/ATL-024 + M2 scope · **Dependencies:** ATL-003 (satisfied), ATL-022, ATL-023, ATL-024
 - **Files affected:** docs/pilot/QA_PLAN.md (results), docs/coordination/AGENT_WORKBOARD.md (evidence links)
 - **Acceptance criteria:** the 11 acceptance scenarios of QA_PLAN.md executed with recorded results; authZ probe of all endpoints incl. cross-tenant attempts; golden-file suite green; verdict + production-readiness score published.
 - **Verification evidence:** —
@@ -210,13 +217,42 @@ on ATL-003 delivery. ATL-002/004/007/009/010 keep their completed statuses.
 
 ### ATL-021 — Founder Control Center — generated dashboard + freshness CI gate
 - **Owner:** atlas-cto · **Reviewer:** atlas-qa · **Approver:** atlas-ceo · **Priority:** P0 (Founder directive, DL-013) · **Effort:** 0.5d
-- **Status:** IMPLEMENTED (2026-07-21) — held at IMPLEMENTED by QA pending QA-S1-1 re-verification; NOT verified yet · **Dependencies:** none
+- **Status:** VERIFIED (atlas-qa, 2026-07-21) — QA-S1-1 CONFIRMED-FIXED at bc52714; QA recommended promotion to VERIFIED · **Dependencies:** none
 - **File scope:** tools/founder-dashboard/**, FOUNDER_DASHBOARD.md + FOUNDER_DASHBOARD.html (root, generated), package.json (additive script), .github/workflows/ci.yml (freshness step), README.md (one banner link line)
 - **Acceptance criteria:** (1) all six sections (EXECUTIVE / TEAM / ENGINEERING / PRODUCT / BUSINESS / RISKS) generated from coordination/docs sources or explicitly "n/a — source not yet in repo"; (2) deterministic output — same commit → byte-identical, timestamp from git not wall clock; (3) CI fails if coordination files change without regeneration; (4) zero hand-entered status constants; (5) QA verifies by re-running the generator and cross-checking values against sources.
-- **Verification evidence:** docs/pilot/QA_PLAN.md § "Sprint-1 Verification Results (ATL-020/ATL-021, 2026-07-21)" — partial: generator determinism checks recorded; freshness gate FAILED under real CI conditions (see QA-S1-1).
-- **Open QA defects:**
-  - QA-S1-1 (S3) — CI freshness gate false-positives on shallow clone (depth-1 grafted HEAD stamps wrong source commit → gate fails on every remote run, fresh or stale). CTO fix delivered in commit bc52714; **QA re-verification IN PROGRESS** — VERIFIED gate.
+- **Verification evidence:** docs/pilot/QA_PLAN.md § "Sprint-1 Verification Results (ATL-020/ATL-021, 2026-07-21)" + § "Addendum — QA-S1-1 re-verification (fix commit bc52714, 2026-07-21)" — adversarial re-verification RV-1…RV-9 in scratch clones pinned to bc52714: shallow-clone false positive gone (RV-1), stale states fail as required (RV-2/3/4/8), merge commits excluded (RV-5), byte-identical determinism (RV-6). **QA-S1-1: CONFIRMED-FIXED; QA recommendation VERIFIED.**
+- **QA defects:**
+  - QA-S1-1 (S3) — CI freshness gate false-positives on shallow clone. **CLOSED 2026-07-21:** CTO fix bc52714, QA re-verification CONFIRMED-FIXED (addendum above). Residual notes RN-1/RN-2 (S4, accepted) and RN-3 (dashboard regeneration needed with the M1 commit train — first remote CI run will exercise the gate for real; tracked under ATL-024).
   - QA-S1-2 (S4) — commit e3f7e6d message overclaims "coordination updates" (commit touched no coordination file). Noted for history hygiene; no gate.
+
+---
+
+## M1 completion follow-ups (from ATL-003 QA verdict, DL-015 — filed 2026-07-21)
+
+These three tasks are the gap between the verified M1 slice and M1 completion. Any "pilot-ready"
+claim stays BLOCKED until all three are VERIFIED (DL-015). M2 work starts only after them.
+
+### ATL-022 — Postgres persistence live (execute migrations, pg repos, testcontainers)
+- **Owner:** atlas-cto · **Reviewer:** atlas-qa · **Approver:** atlas-qa · **Priority:** P0
+- **Status:** READY · **Dependencies:** ATL-003 (satisfied — 0001_init.sql written, repo-pg.ts stubs in place)
+- **Files affected:** apps/api/** (repo-pg.ts, app.ts wiring, migration runner), infra/** (Postgres compose), packages/shared/** if contract touch needed
+- **Acceptance criteria:** migrations execute against a real Postgres; pg repositories replace the 501 stubs and become the default wiring; org-scoped queries preserved (token orgId, never client input); data survives process restart (closes ATL-003 AC-1 / QA_PLAN §2.4/§2.9); integration tests run against real Postgres (testcontainers or equivalent) incl. the ORG_A/ORG_B cross-tenant probe live (also closes QA-M1-3 via a real multi-org store); user store moves off in-memory or the stopgap is explicitly re-scoped with QA agreement.
+- **Rationale:** persistence is the last P0-fatal gap from docs/pilot/TECHNICAL_READINESS.md still open.
+- **Verification evidence:** —
+
+### ATL-023 — Web non-demo mapping: form→ScenarioCreate + accessToken flow live against API
+- **Owner:** atlas-cto · **Reviewer:** atlas-qa · **Approver:** atlas-qa · **Priority:** P1
+- **Status:** READY · **Dependencies:** ATL-003 (satisfied); fixes QA-M1-1 (S3)
+- **Files affected:** apps/web/** (lib/contracts.ts, lib/api.ts, form/mapping code)
+- **Acceptance criteria:** non-demo mode maps the web form (ApartmentMixRow + named cost fields) to the shared ScenarioCreate contract and POSTs a valid scenario; accessToken flow works live against the API (login → authorized calls → 15-min expiry handled honestly); web imports @atlas/shared or the mirror-drift risk is eliminated with a contract test (also closes QA-M1-2 roiOnCost nullability); live core loop login→project→scenario→simulate demonstrated in non-demo mode and re-verified by QA.
+- **Verification evidence:** —
+
+### ATL-024 — Observe first green remote CI + wire prettier --check
+- **Owner:** atlas-cto · **Reviewer:** atlas-qa · **Approver:** atlas-qa · **Priority:** P1
+- **Status:** READY · **Dependencies:** none (push of the M1 train triggers the run); resolves QA-M0-3, QA-M0-4; absorbs frozen ATL-017 scope (Codex assignment superseded — single owner to avoid collision)
+- **Files affected:** .github/workflows/ci.yml, root package.json scripts (additive); FOUNDER_DASHBOARD.* regeneration with the M1 train (per RN-3)
+- **Acceptance criteria:** first remote CI run observed green with link/log evidence (closes QA-M0-3; promotes ATL-007 and ATL-003 AC-4 to fully verified); `prettier --check` (or `pnpm format:check`) gates the CI lint job, demonstrated failing on a deliberately misformatted scratch file then passing clean (closes QA-M0-4); dashboard freshness gate exercised for real on that run (RN-3); secrets-scan job NOT modified (blocked on DL-009).
+- **Verification evidence:** —
 
 ---
 

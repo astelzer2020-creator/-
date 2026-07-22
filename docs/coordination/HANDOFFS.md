@@ -26,6 +26,32 @@ results — "tests pass" without output is rejected by the receiver. STATUS is o
 
 ## Log
 
+TASK ID: ATL-003 (QA verdict)
+FROM: atlas-qa
+TO: atlas-ceo
+OBJECTIVE: Deliver the M1 independent-verification results and QA VERDICT for ATL-003 (three work packages + integration pass), plus the ATL-021 QA-S1-1 re-verification result.
+CONTEXT: Executed 2026-07-21 against HEAD f1fc530. Full results in docs/pilot/QA_PLAN.md § "M1 Verification Results (ATL-003, 2026-07-21)" and § "Addendum — QA-S1-1 re-verification (fix commit bc52714)". Filed by atlas-ceo in this consolidation (QA verdict content is QA's, recorded verbatim from QA_PLAN.md).
+FILES: docs/pilot/QA_PLAN.md (results sections only).
+CHANGES: QA_PLAN.md populated with all executed gate commands + outputs, golden-fixture independent re-derivations, live e2e smoke with hand-verified numbers, live security probes, AC coverage map, defect list, verdict, and the ATL-021 RV-1…RV-9 re-verification table.
+TESTS: All ten gates re-run by QA (84 TS + 39 pytest green, reproduced exactly); 3/9 golden fixtures re-derived analytically from closed-form algebra — all MATCH; live e2e smoke (login→project→scenario→simulate) with every financial figure hand-checked to the agora incl. two sensitivity corner cells; security probes 401/403/401-parity/garbage-token/tampered-signature/no-fallback-503 all PASS; ATL-021 fix adversarially re-tested in scratch clones pinned to bc52714 (RV-1…RV-9).
+RISKS: AC-1 PARTIAL — data lost on restart (in-memory default; pg stubbed); AC-4 PARTIAL — remote CI unobserved (QA-M0-3); QA-M1-1 — non-demo web core loop cannot POST a valid scenario yet; R-06 unchanged (no real data may touch this build).
+OPEN QUESTIONS: Two-org seed vs. Postgres user store for live cross-tenant probing (QA-M1-3); when the M1 train pushes (triggers first remote CI + freshness gate per RN-3).
+ACCEPTANCE CRITERIA: Met for the verification task. VERDICT: ATL-003 PASS-WITH-KNOWN-ISSUES → VERIFIED for the claimed slice; AC-2/AC-3 MET, AC-1/AC-4 PARTIAL; zero S1/S2, zero wrong financial numbers; M1 pilot-readiness 6/10; "pilot-ready" and CLOSED blocked until Postgres persistence, web non-demo mapping, and green remote CI are re-verified. ATL-021: QA-S1-1 CONFIRMED-FIXED, recommendation VERIFIED.
+STATUS: delivered
+
+TASK ID: ATL-003 (work packages ENGINE + SHARED+API + WEB + integration pass)
+FROM: atlas-cto
+TO: atlas-qa
+OBJECTIVE: Deliver the M1 walking-skeleton implementation (DL-014) for independent verification: ENGINE, SHARED+API, WEB, plus the cross-package integration pass.
+CONTEXT: Delivered 2026-07-21 as commits 8c37779…f1fc530 under the three FILE_LOCKS.md locks. Filed by atlas-ceo on atlas-cto's behalf in this consolidation (CTO cannot write coordination files); content per the CTO delivery evidence, independently verified by QA (see verdict handoff above).
+FILES: services/analytics/** (ENGINE lock), packages/shared/** + apps/api/** (SHARED+API lock), apps/web/** (WEB lock); .github/workflows/ci.yml (gates).
+CHANGES: ENGINE — Decimal financial engine (IRR/NPV/payback/sensitivity), 9 analytic golden fixtures, FastAPI /v1/simulate. SHARED+API — @atlas/shared (taba mapping superset, integer-agorot money, zod schemas, i18n keys); Fastify API with JWT+argon2id auth, roles, fail-closed route policy, org-scoped repositories (in-memory default + pg stubs + migrations/0001_init.sql), no-fallback analytics client. WEB — RTL Hebrew SaaS app: 11 UI primitives, 5 pages, demo mode (default, synthetic data), a11y. INTEGRATION — engine + web aligned to the shared contract; live e2e smoke login→project→scenario→simulate with hand-verified numbers.
+TESTS: 84 TS tests green (shared 32, web 31, api 21) + 39 pytest green; pnpm lint/typecheck/test/build and uv ruff/mypy/pytest all green; live e2e smoke executed with real analytics + real API. All commands and outputs reproduced independently by QA in QA_PLAN.md § M1 Verification Results.
+RISKS: In-memory persistence stopgap (declared M1 boundary — data lost on restart); web local contract mirror pending zod version alignment (drift risk QA-M1-1/2); remote CI unobserved until first push; R-02 mitigated by golden fixtures + QA re-derivation.
+OPEN QUESTIONS: Postgres cutover sequencing (→ ATL-022); web shared-import unblocking (→ ATL-023).
+ACCEPTANCE CRITERIA: AC-2 (auth+roles) and AC-3 (single public API, analytics internal-only, no fallback) met; AC-1 (persistence) partial — migrations written, pg stubbed; AC-4 (CI) partial — green locally, remote unobserved. QA verdict: PASS-WITH-KNOWN-ISSUES → VERIFIED slice-scoped.
+STATUS: verified
+
 TASK ID: ATL-010
 FROM: atlas-qa
 TO: atlas-ceo
