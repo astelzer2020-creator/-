@@ -21,13 +21,13 @@ Run manually against a staging build identical to the pilot deploy. All pass = a
    Given a Windows-1255 CSV with the standard 17 Hebrew columns (מספר תיק … סטטוס), When the user uploads it on the import page, Then all rows appear with correct Hebrew (no mojibake), the column mapping preview shows מספר תיק → caseNumber etc., and the row count matches the file.
 2. **Import XLSX with Hebrew sheet**
    Given the same data as `.xlsx`, When uploaded, Then results are identical to the CSV import (same normalized rows in DB).
-3. **Import GeoJSON and see it on the map**
+3. **Import GeoJSON and see it on the map** — **DEFERRED TO POST-PILOT (DL-008 — out of pilot scope; PILOT_SCOPE Won'ts win).** Not executed for the pilot acceptance gate; retained verbatim for post-pilot re-activation. (The Leaflet map itself is a PILOT_SCOPE §4 "Should" and, if shipped, is smoke-checked under §2.6's dashboard portion — only the GeoJSON import path is deferred.)
    Given a GeoJSON of project parcels, When imported, Then each project appears as a Leaflet marker/polygon at the correct coordinates and clicking opens the project.
 4. **Create project & configure scenario**
    Given an imported project (e.g. case 2024-001, פינוי-בינוי), When the user sets apartment mix, build cost, and sale price and saves, Then the scenario persists after reload and input validation rejects negatives/blank required fields with Hebrew error messages.
 5. **Run simulation**
    Given a saved scenario, When the user runs the simulation, Then IRR, NPV, payback, and the sensitivity table are displayed within 10 s and match the golden values for that fixture (§3).
-6. **View results: dashboard + 3D + map**
+6. **View results: dashboard + 3D + map** — **DEFERRED TO POST-PILOT (DL-008 — out of pilot scope; PILOT_SCOPE Won'ts win)** for its **3D portion** (per PILOT_SCOPE §9 scope note: "their GeoJSON/3D portions"). The 3D before/after clause is not executed for the pilot gate. The non-3D substance — charts render and **figures on screen equal figures in the API response** — remains in scope and is executed under PILOT_SCOPE §9 AC-RES-1/AC-SCN-3 and §2.5 of this suite; it is NOT deferred.
    Given computed results, When the user opens the results view, Then charts render, the before/after 3D view shows existing vs. proposed floors (4 → 22 for 2024-001), and figures on screen equal figures in the API response.
 7. **Export PDF report**
    Given computed results, When the user exports the executive-summary PDF, Then Hebrew text is RTL and readable (not reversed/boxes), numbers match the on-screen values, and the file opens in Adobe Reader and Chrome's viewer.
