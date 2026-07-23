@@ -3,7 +3,7 @@
 
 # Atlas — Founder Control Center
 
-_Generated from repo sources at commit `6c09bc6` · coordination data as of **2026-07-23** (last `docs/coordination` commit) · ATL-021 / DL-013_
+_Generated from repo sources at commit `813c5c9` · coordination data as of **2026-07-23** (last `docs/coordination` commit) · ATL-021 / DL-013_
 
 ## 1. EXECUTIVE
 
@@ -13,7 +13,7 @@ _Generated from repo sources at commit `6c09bc6` · coordination data as of **20
 | Sprint progress | 5 of 12 sprint tasks at IMPLEMENTED/VERIFIED (CLOSED: 1 · IMPLEMENTED: 1 · READY: 7 · VERIFIED: 3) |
 | Production score | 8/10 (production-readiness, docs/coordination/AGENT_WORKBOARD.md) |
 | Pilot readiness | Not ready — M1 in-progress — slice verified 2026-07-21, M2 planned, M3 planned; 2 Founder decision(s) pending |
-| Current version | pre-release @ 6c09bc6 (last source commit; no git tags yet) |
+| Current version | pre-release @ 813c5c9 (last source commit; no git tags yet) |
 | Estimated pilot date | not yet schedulable — gated on: ATL-008 (archive deletion decision on docs/CLEANUP_REPORT.md); GITLEAKS_LICENSE / secrets-scan wiring (DL-009). M1 kickoff green-light RECEIVED (DL-014); M1 in-progress — slice verified 2026-07-21; M2 planned |
 
 **Founder decisions pending:**
@@ -63,7 +63,7 @@ _Execution-worker tasks (not agent-owned): ATL-016 (Grok, BACKLOG), ATL-017 (Cod
 | Pricing | HYPOTHESIS (DL-005, 2026-07-21): Pilot offer = free 8-week design-partner with hard end date, traded for feedback commitment, case-study rights, week-7 conversion conversation — revisit: Pricing validation, week 6 |
 | Demo status | OUTLINE ONLY — gated: no live demo until QA verification + ATL-006 capability matrix (binding gate in the doc) |
 | Sales material | DEMO_OUTLINE.md: OUTLINE ONLY [claims-gated] · PILOT_AGREEMENT_DRAFT.md: DRAFT — awaiting Founder review · PILOT_OFFER.md: DRAFT — internal structure, not yet an external document [claims-gated] · PIPELINE.md: DRAFT — internal plan [claims-gated] |
-| Documentation | 11 strategy/docs files (docs/*.md) · 10 ADRs · 5 pilot docs · 10 coordination files · 4 growth docs |
+| Documentation | 11 strategy/docs files (docs/*.md) · 10 ADRs · 7 pilot docs · 10 coordination files · 4 growth docs |
 
 ## 6. RISKS
 
