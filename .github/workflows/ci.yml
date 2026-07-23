@@ -7,7 +7,9 @@ name: ci
 
 on:
   push:
-    branches: [main]
+    # claude/** included so mission branches get CI before a PR exists (ATL-024:
+    # the "observed green remote run" gate cannot be met by a main-only trigger).
+    branches: [main, "claude/**"]
   pull_request:
 
 jobs:
