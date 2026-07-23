@@ -900,3 +900,19 @@ note only).
 | RN-3 | note | Committed dashboard stale at M1 tip until `pnpm dashboard` runs with the M1 train; repaired gate will correctly fail the first remote run otherwise | atlas-cto | ATL-024 (regeneration with the train) | **OPEN** (tracked under ATL-024) |
 | RN-4 | S4 (design note) | Access token lives in module memory only — never localStorage/sessionStorage/cookies (verified live via page evaluation: all empty). A page reload drops the session by design. Deliberate security choice (legacy localStorage token was an audit finding); QA concurs. | atlas-cto | httpOnly-cookie refresh flow (post-M1 TODO in auth-store.ts) | **ACCEPTED** 2026-07-23 (ATL-023) |
 | RN-5 | S4 (design note) | `scheduleTokenRefresh` is a documented no-op stub — no refresh flow, so every 15-min token expiry forces a re-login (401 → login with location preserved, verified live; honest handling, no retry loop, no stale data). Not a defect; flagged to atlas-product as UAT friction (2-hour sessions ⇒ ~8 re-logins) to schedule before pilot UAT. | atlas-cto | httpOnly-cookie refresh endpoint (same work package as RN-4) | **ACCEPTED** 2026-07-23 (ATL-023) |
+
+## Remote CI Observation (ATL-024, 2026-07-23 — recorded by orchestrator, pending atlas-qa countersign)
+
+- Run #1: id 30024466771, sha 72d78b6 — lint GREEN (freshness gate + prettier gate passed remotely,
+  proving the QA-S1-1 fix in production CI); test job: all 10 pg integration tests GREEN against the
+  postgres:16 service container; sole failure: apps/web api-mapping.test.ts could not resolve
+  @atlas/shared (no build step before tests in fresh checkout).
+- Fix: commit 5246b8c — `pnpm -r build` step added before tests (one line; per the ATL-023 CTO's own
+  CI-ordering note). Applied by orchestrator.
+- Run #2: id 30040627259, sha 5246b8c — **completed: success. All three jobs green.**
+  https://github.com/astelzer2020-creator/-/actions/runs/30040627259
+- Ledger impact (formal closure = atlas-qa countersign at next touch, per no-self-approval):
+  QA-M0-3 (remote CI unobserved) — green run now observed; QA-M0-4 (prettier gate) — active and
+  proven remotely. ATL-007 → VERIFIED and ATL-003 AC-4 → MET become effective on countersign.
+- Note: secrets-scan job green = "workflow executes", NOT a security gate (QA-M0-2 / DL-009 unchanged,
+  Founder decision still pending).
