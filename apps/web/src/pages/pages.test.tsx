@@ -3,6 +3,7 @@ import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { t } from "../i18n";
+import { ApiError } from "../lib/api";
 import { authStore } from "../lib/auth-store";
 import { createDemoApi } from "../lib/demo-adapter";
 import { AppProviders, AppRoutes } from "../app/App";
@@ -131,6 +132,56 @@ describe("ScenarioFormPage", () => {
         screen.getByRole("heading", { name: t("results.title") }),
       ).toBeTruthy();
     });
+  });
+});
+
+describe("ResultsPage — roiOnCost null (QA-M1-2)", () => {
+  it("renders the honest undefined state instead of a fabricated ROI number", async () => {
+    // Same pattern as the IRR-null contract: null must never render as a number.
+    const api = createDemoApi();
+    const nullRoiApi = {
+      ...api,
+      simulate: async (projectId: string, scenarioId: string) => {
+        const result = await api.simulate(projectId, scenarioId);
+        return { ...result, roiOnCost: null };
+      },
+    };
+    render(
+      <AppProviders api={nullRoiApi}>
+        <MemoryRouter initialEntries={["/projects/p-1/scenarios/s-1/results"]}>
+          <AppRoutes />
+        </MemoryRouter>
+      </AppProviders>,
+    );
+    expect(await screen.findByText(t("results.kpi.roiOnCost"))).toBeTruthy();
+    expect(screen.getByText(t("results.kpi.roiUndefinedHint"))).toBeTruthy();
+  });
+});
+
+describe("Mid-session token expiry (ATL-023 accessToken flow)", () => {
+  it("redirects to the login page when a request 401s and the token is dropped", async () => {
+    // Mimics lib/api.ts request(): on 401 the client clears the in-memory
+    // token and throws; RequireAuth must then route back to /login.
+    const api = createDemoApi();
+    const expiredApi = {
+      ...api,
+      listProjects: () => {
+        authStore.clear();
+        return Promise.reject(
+          new ApiError("UNAUTHORIZED", t("errors.unauthorized"), 401),
+        );
+      },
+    };
+    render(
+      <AppProviders api={expiredApi}>
+        <MemoryRouter initialEntries={["/projects"]}>
+          <AppRoutes />
+        </MemoryRouter>
+      </AppProviders>,
+    );
+    expect(
+      await screen.findByRole("heading", { name: t("auth.title") }),
+    ).toBeTruthy();
   });
 });
 

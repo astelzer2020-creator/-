@@ -98,6 +98,11 @@ export const he = {
   "scenario.form.otherCosts": "עלויות נוספות (₪)",
   "scenario.form.discountRate": "שיעור היוון שנתי (%)",
   "scenario.form.constructionMonths": "משך ביצוע (חודשים)",
+  /* Wire-mapping labels (lib/api-mapping.ts): human-readable Hebrew carried
+     inside ScenarioCreate payloads (apartment-mix line label, cost-item labels). */
+  "scenario.mix.label": "{rooms} חדרים",
+  "scenario.cost.buildCost": "עלות בנייה",
+  "scenario.cost.otherCosts": "עלויות נוספות",
   "scenario.form.submit": "שמירה והרצת סימולציה",
   "scenario.form.submitting": "שומר…",
   "scenario.form.errorSummary": "הטופס מכיל שגיאות — תקנו את השדות המסומנים",
@@ -127,6 +132,8 @@ export const he = {
   "results.kpi.npv": "ערך נוכחי נקי (NPV)",
   "results.kpi.profit": "רווח יזמי",
   "results.kpi.roiOnCost": "תשואה על העלות",
+  "results.kpi.roiUndefinedHint":
+    "התשואה על העלות אינה מוגדרת כאשר סך העלויות הוא אפס",
   "results.kpi.payback": "תקופת החזר",
   "results.kpi.paybackYears": "{years} שנים",
   "results.kpi.paybackNone": "אין החזר בטווח התחזית",
@@ -138,6 +145,10 @@ export const he = {
   "results.sensitivity.baseCase": "בסיס",
 
   "errors.generic": "משהו השתבש — נסו שוב",
+  "errors.duplicateCaseNumber":
+    "מספר התיק כבר קיים בחשבון — בחרו מספר תיק אחר",
+  "errors.analyticsUnavailable":
+    "שירות החישוב אינו זמין כעת — נסו שוב בעוד מספר רגעים",
   "errors.unauthorized": "נדרשת התחברות מחדש",
   "errors.network": "שגיאת תקשורת — בדקו את החיבור ונסו שוב",
 } as const;

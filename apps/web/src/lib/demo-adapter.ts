@@ -140,8 +140,10 @@ function simulateScenario(input: ScenarioInput): SimulationResult {
     revenueAgorot > 0 && costAgorot > 0 && profitAgorot > 0
       ? (Math.pow(revenueAgorot / costAgorot, 1 / years) - 1).toFixed(6)
       : null;
+  // Null at zero cost, mirroring the real engine (shared contract; QA-M1-2):
+  // the ratio is undefined there and no number is fabricated.
   const roiOnCost =
-    costAgorot > 0 ? Number((profitAgorot / costAgorot).toFixed(6)) : 0;
+    costAgorot > 0 ? Number((profitAgorot / costAgorot).toFixed(6)) : null;
   const paybackYears =
     profitAgorot > 0 ? Number((input.constructionMonths / 12).toFixed(2)) : null;
 

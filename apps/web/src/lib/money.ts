@@ -63,6 +63,19 @@ export function formatNumber(value: number): string {
   return decimalFormat.format(value);
 }
 
+const yearsFormat = new Intl.NumberFormat("he-IL", {
+  maximumFractionDigits: 1,
+});
+
+/**
+ * Formats a duration in years keeping sub-year precision (0.44 → "0.4") —
+ * payback is a financial figure; truncating 0.44 years to "0" would display
+ * a wrong number (ATL-023 live-loop finding).
+ */
+export function formatYears(value: number): string {
+  return yearsFormat.format(value);
+}
+
 /**
  * Parses a user-typed shekel amount ("1,250,000" / "₪ 1250000.50") into integer agorot.
  * Returns null when not parseable. The single float multiply is confined to this input

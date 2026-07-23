@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@atlas/config": "workspace:*",
+    "@atlas/shared": "workspace:*",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.3.0",
     "@types/react": "^18.3.0",

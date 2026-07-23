@@ -5,6 +5,7 @@ import {
   formatAgorot,
   formatFraction,
   formatFractionString,
+  formatYears,
   parseIntegerInput,
   parsePercentInput,
   parseShekelInput,
@@ -16,6 +17,15 @@ const ils = new Intl.NumberFormat("he-IL", {
   style: "currency",
   currency: "ILS",
   maximumFractionDigits: 0,
+});
+
+describe("formatYears", () => {
+  it("keeps sub-year precision — 0.44 years must not display as 0 (ATL-023)", () => {
+    const years = new Intl.NumberFormat("he-IL", { maximumFractionDigits: 1 });
+    expect(formatYears(0.4435)).toBe(years.format(0.4435)); // "0.4", never "0"
+    expect(formatYears(3)).toBe(years.format(3));
+    expect(formatYears(12.25)).toBe(years.format(12.25)); // one fraction digit
+  });
 });
 
 describe("agorotToWholeShekels", () => {

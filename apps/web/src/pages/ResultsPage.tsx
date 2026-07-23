@@ -7,7 +7,7 @@ import {
   formatAgorot,
   formatFraction,
   formatFractionString,
-  formatNumber,
+  formatYears,
 } from "../lib/money";
 import { Card } from "../components/ui/Card";
 import { ErrorState } from "../components/ui/ErrorState";
@@ -27,7 +27,8 @@ function kpiValueClass(agorot: number): string {
 function KpiCards({ result }: { result: SimulationResult }) {
   const irrDisplay =
     result.irr === null ? null : formatFractionString(result.irr);
-  const roiDisplay = formatFraction(result.roiOnCost);
+  const roiDisplay =
+    result.roiOnCost === null ? null : formatFraction(result.roiOnCost);
 
   return (
     <div className="kpi-grid">
@@ -59,9 +60,18 @@ function KpiCards({ result }: { result: SimulationResult }) {
       </Card>
       <Card>
         <p className="kpi-label">{t("results.kpi.roiOnCost")}</p>
-        <p className="kpi-value num">
-          {roiDisplay ?? t("results.kpi.irrUndefined")}
-        </p>
+        {roiDisplay === null ? (
+          <>
+            {/* Honest edge state (QA-M1-2): ROI is undefined at zero total cost —
+                no fabricated number, same pattern as IRR. */}
+            <p className="kpi-value">{t("results.kpi.irrUndefined")}</p>
+            <p className="text-muted text-sm">
+              {t("results.kpi.roiUndefinedHint")}
+            </p>
+          </>
+        ) : (
+          <p className="kpi-value num">{roiDisplay}</p>
+        )}
       </Card>
       <Card>
         <p className="kpi-label">{t("results.kpi.payback")}</p>
@@ -69,7 +79,7 @@ function KpiCards({ result }: { result: SimulationResult }) {
           {result.paybackYears === null
             ? t("results.kpi.paybackNone")
             : t("results.kpi.paybackYears", {
-                years: formatNumber(result.paybackYears),
+                years: formatYears(result.paybackYears),
               })}
         </p>
       </Card>

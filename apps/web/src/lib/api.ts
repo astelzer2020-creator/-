@@ -8,8 +8,15 @@ import type {
   ScenarioInput,
   SimulationResult,
 } from "./contracts";
+import {
+  fromProjectWire,
+  fromScenarioWire,
+  toScenarioCreate,
+  type ProjectWire,
+  type ScenarioWire,
+} from "./api-mapping";
 import { authStore } from "./auth-store";
-import { t } from "../i18n";
+import { t, type MessageKey } from "../i18n";
 
 /** The typed client surface every page consumes (HTTP in production, in-memory in demo). */
 export interface AtlasApi {
@@ -38,6 +45,19 @@ export function isDemoMode(): boolean {
   return (import.meta.env.VITE_DEMO ?? "1") !== "0";
 }
 
+/**
+ * Known API error codes → Hebrew messages (i18n rule: user-facing strings come
+ * from the catalog, never off the wire — the API's messages are English).
+ * Unknown codes fall back to the generic Hebrew error; the code survives on
+ * ApiError for programmatic handling.
+ */
+const MESSAGE_KEY_BY_CODE: Readonly<Partial<Record<string, MessageKey>>> = {
+  DUPLICATE_CASE_NUMBER: "errors.duplicateCaseNumber",
+  INVALID_CREDENTIALS: "auth.errors.loginFailed",
+  NOT_FOUND: "common.notFound",
+  ANALYTICS_UNAVAILABLE: "errors.analyticsUnavailable",
+};
+
 interface RequestOptions {
   method: "GET" | "POST";
   body?: unknown;
@@ -49,9 +69,12 @@ async function request<T>(
   path: string,
   options: RequestOptions,
 ): Promise<T> {
-  const headers: Record<string, string> = {
-    "content-type": "application/json",
-  };
+  const headers: Record<string, string> = {};
+  if (options.body !== undefined) {
+    // Only when a body is actually sent — Fastify 400s a body-less POST that
+    // declares application/json (FST_ERR_CTP_EMPTY_JSON_BODY), e.g. /simulate.
+    headers["content-type"] = "application/json";
+  }
   if (options.auth) {
     const token = authStore.getToken();
     if (token !== null) {
@@ -72,14 +95,16 @@ async function request<T>(
   }
 
   if (!response.ok) {
-    if (response.status === 401) {
-      // Session expired/invalid: drop the in-memory token so the guard redirects.
+    if (response.status === 401 && options.auth) {
+      // Access token expired/invalid mid-session (15-min TTL, no refresh flow
+      // yet — see auth-store.ts): drop the in-memory token; RequireAuth
+      // re-renders via useSyncExternalStore and redirects to /login with the
+      // current location preserved in `state.from`.
       authStore.clear();
       throw new ApiError("UNAUTHORIZED", t("errors.unauthorized"), 401);
     }
     // Boundary validation of the error envelope (never trust the wire shape).
     let code = "UNKNOWN";
-    let message = t("errors.generic");
     try {
       const payload: unknown = await response.json();
       if (
@@ -88,60 +113,105 @@ async function request<T>(
         "error" in payload &&
         typeof (payload as { error: unknown }).error === "object"
       ) {
-        const errorField = (
-          payload as { error: { code?: unknown; message?: unknown } }
-        ).error;
+        const errorField = (payload as { error: { code?: unknown } }).error;
         if (typeof errorField.code === "string") {
           code = errorField.code;
         }
-        if (typeof errorField.message === "string") {
-          message = errorField.message;
-        }
       }
     } catch {
-      // Non-JSON error body — keep the generic message.
+      // Non-JSON error body — keep the unknown code.
     }
-    throw new ApiError(code, message, response.status);
+    const messageKey = MESSAGE_KEY_BY_CODE[code] ?? "errors.generic";
+    throw new ApiError(code, t(messageKey), response.status);
   }
 
   return (await response.json()) as T;
 }
 
-/** HTTP client for the real Fastify API (apps/api). */
+/**
+ * HTTP client for the real Fastify API (apps/api). All request/response shapes
+ * cross through lib/api-mapping.ts — pages never see the wire contract.
+ */
 export function createHttpApi(
   baseUrl: string = import.meta.env.VITE_API_URL ?? "/api",
 ): AtlasApi {
   return {
+    // Response includes tokenType/expiresInSeconds/user beyond accessToken;
+    // the web only consumes accessToken (structural subtype — no mapping needed).
     login: (input) =>
-      request(baseUrl, "/auth/login", {
+      request<LoginResponse>(baseUrl, "/auth/login", {
         method: "POST",
         body: input,
         auth: false,
       }),
-    listProjects: () =>
-      request(baseUrl, "/projects", { method: "GET", auth: true }),
-    createProject: (input) =>
-      request(baseUrl, "/projects", {
-        method: "POST",
-        body: input,
-        auth: true,
-      }),
-    getProject: (projectId) =>
-      request(baseUrl, `/projects/${encodeURIComponent(projectId)}`, {
+
+    listProjects: async () => {
+      const wires = await request<ProjectWire[]>(baseUrl, "/projects", {
         method: "GET",
         auth: true,
-      }),
-    createScenario: (projectId, input) =>
-      request(baseUrl, `/projects/${encodeURIComponent(projectId)}/scenarios`, {
+      });
+      return wires.map(fromProjectWire);
+    },
+
+    // Web NewProject {name, city, caseNumber} is field-name-aligned with the
+    // shared ProjectCreate (where city/caseNumber are optional but the form
+    // requires them non-empty) — passthrough body, mapped response.
+    createProject: async (input) => {
+      const wire = await request<ProjectWire>(baseUrl, "/projects", {
         method: "POST",
         body: input,
         auth: true,
-      }),
-    simulate: (projectId, scenarioId) =>
-      request(
+      });
+      return fromProjectWire(wire);
+    },
+
+    // The API has no aggregate detail endpoint — compose it from the project
+    // and its scenario list (both org-scoped server-side via the token).
+    getProject: async (projectId) => {
+      const encoded = encodeURIComponent(projectId);
+      const [projectWire, scenarioWires] = await Promise.all([
+        request<ProjectWire>(baseUrl, `/projects/${encoded}`, {
+          method: "GET",
+          auth: true,
+        }),
+        request<ScenarioWire[]>(baseUrl, `/projects/${encoded}/scenarios`, {
+          method: "GET",
+          auth: true,
+        }),
+      ]);
+      return {
+        project: fromProjectWire(projectWire),
+        scenarios: scenarioWires.map(fromScenarioWire),
+      };
+    },
+
+    createScenario: async (projectId, input) => {
+      const wire = await request<ScenarioWire>(
+        baseUrl,
+        `/projects/${encodeURIComponent(projectId)}/scenarios`,
+        {
+          method: "POST",
+          body: toScenarioCreate(input),
+          auth: true,
+        },
+      );
+      return fromScenarioWire(wire);
+    },
+
+    // POST .../simulate returns the UPDATED SCENARIO with `result` stored on
+    // it (shared contract); the web consumes the result itself.
+    simulate: async (projectId, scenarioId) => {
+      const wire = await request<ScenarioWire>(
         baseUrl,
         `/projects/${encodeURIComponent(projectId)}/scenarios/${encodeURIComponent(scenarioId)}/simulate`,
         { method: "POST", auth: true },
-      ),
+      );
+      if (wire.result === null) {
+        // A successful simulate must carry a result; a null here is a broken
+        // server contract — surface it, never render fabricated figures.
+        throw new ApiError("SIMULATION_MISSING", t("errors.generic"), 502);
+      }
+      return wire.result;
+    },
   };
 }

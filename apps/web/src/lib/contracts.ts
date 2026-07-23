@@ -4,12 +4,15 @@
  * TODO(shared): this file is a LOCAL mirror pending the swap to @atlas/shared
  * (type-only imports; blocked on the zod ^3/^4 split). SimulationResult and
  * SensitivityGrid are RECONCILED to the shared contract (integration pass,
- * 2026-07-21): roiOnCost is a number, paybackYears (years, not months),
- * sensitivity axes priceDeltas/costDeltas. REMAINING divergence, flagged for
- * the next integration slice: ApartmentMixRow rooms/count/salePricePerUnitAgorot
- * (form fields) vs shared label/units/salePricePerSqmAgorot, and named cost
- * fields vs shared costItems[] — the form→ScenarioCreate mapping happens at the
- * HTTP-client boundary and only bites in non-demo mode.
+ * 2026-07-21, roiOnCost nullability aligned 2026-07-23 / QA-M1-2 / ATL-023):
+ * roiOnCost is number|null, paybackYears (years, not months), sensitivity axes
+ * priceDeltas/costDeltas. The form-shape divergences (ApartmentMixRow
+ * rooms/count/salePricePerUnitAgorot vs shared label/units/salePricePerSqmAgorot;
+ * named cost fields vs shared costItems[]) are RESOLVED at the HTTP-client
+ * boundary by lib/api-mapping.ts (ATL-023, fixes QA-M1-1); the mapping output is
+ * contract-tested against the real @atlas/shared ScenarioCreateSchema in
+ * lib/api-mapping.test.ts. constructionMonths remains a form/demo-only field —
+ * the shared ScenarioCreate does not carry it and the mapping drops it.
  *
  * Unit conventions (docs/CODING_STANDARDS.md rule 3):
  * - monetary amounts are INTEGER AGOROT in storage and transport (suffix `Agorot`);
@@ -77,8 +80,12 @@ export interface SimulationResult {
   irr: string | null;
   npvAgorot: number;
   profitAgorot: number;
-  /** ROI on total cost as a decimal fraction (shared contract: JSON number). */
-  roiOnCost: number;
+  /**
+   * ROI on total cost as a decimal fraction, or null when total cost is zero —
+   * the ratio is undefined there and the engine never fabricates a number
+   * (shared contract: `number | null`; QA-M1-2).
+   */
+  roiOnCost: number | null;
   /** Years until cumulative cashflow turns positive, or null if it never does. */
   paybackYears: number | null;
   sensitivity: SensitivityGrid;

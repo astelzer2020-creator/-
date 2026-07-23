@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router";
 
 import { t } from "../i18n";
+import { ApiError } from "../lib/api";
 import type { Project, ProjectStatus } from "../lib/contracts";
 import { useCreateProject, useProjects } from "../lib/queries";
 import { formatNumber } from "../lib/money";
@@ -91,7 +92,11 @@ function NewProjectDialog({
         />
         {createProject.isError ? (
           <p className="form-error-summary" role="alert">
-            {t("errors.generic")}
+            {/* ApiError messages are already Hebrew via the i18n code map
+                (e.g. 409 DUPLICATE_CASE_NUMBER); anything else stays generic. */}
+            {createProject.error instanceof ApiError
+              ? createProject.error.message
+              : t("errors.generic")}
           </p>
         ) : null}
         <div className="form-actions">
