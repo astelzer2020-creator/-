@@ -14,13 +14,33 @@ import pg from "pg";
  * convert in the row mappers via `agorotFromDb` below — a global int8 parser
  * would silently affect unrelated queries (COUNT(*), etc.).
  */
-export function createPool(databaseUrl: string): pg.Pool {
-  return new pg.Pool({
+export function createPool(
+  databaseUrl: string,
+  onIdleError?: (error: Error) => void,
+): pg.Pool {
+  const pool = new pg.Pool({
     connectionString: databaseUrl,
     max: 10,
     // Fail loudly and quickly in dev/pilot rather than hanging forever.
     connectionTimeoutMillis: 10_000,
   });
+  // QA-M1-4: a pg Pool emits 'error' for IDLE clients whose backend dies
+  // (Postgres restart/failover, pg_terminate_backend — SQLSTATE 57P01).
+  // Without a listener that is an unhandled 'error' event and Node kills
+  // the whole API process. Log and carry on: the pool discards the dead
+  // client and opens fresh connections on demand, so the API degrades to
+  // per-request errors (/readyz 503) and self-recovers when the database
+  // returns. In-flight queries are unaffected by this handler — they
+  // reject normally and surface as enveloped 5xx responses.
+  const handler =
+    onIdleError ??
+    ((error: Error): void => {
+      console.error(
+        `pg pool idle-client error (non-fatal, pool recovers): ${error.message}`,
+      );
+    });
+  pool.on("error", handler);
+  return pool;
 }
 
 export type { Pool, PoolClient } from "pg";

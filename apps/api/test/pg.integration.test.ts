@@ -280,6 +280,44 @@ describe.skipIf(DATABASE_URL_TEST === undefined)("postgres integration", () => {
     }
   });
 
+  it("survives pg_terminate_backend on idle clients and keeps serving (QA-M1-4)", async () => {
+    const app = await makePgApp();
+    try {
+      // Open (and idle) at least one app-pool client via a real request.
+      const token = await loginPg(app, USER_A);
+
+      // Kill every other backend on this database — the app pool's idle
+      // clients die with SQLSTATE 57P01. Pre-fix this raised an unhandled
+      // pool 'error' event and took down the whole process (QA-M1-4).
+      await admin.query(
+        `SELECT pg_terminate_backend(pid) FROM pg_stat_activity
+         WHERE pid <> pg_backend_pid() AND datname = current_database()`,
+      );
+      // Let the async idle-client 'error' events fire.
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      // Reaching this line at all proves the process survived; the pool
+      // must now discard dead clients and reconnect on demand.
+      const ready = await app.inject({ method: "GET", url: "/readyz" });
+      expect(ready.statusCode).toBe(200);
+      expect(ready.json()).toEqual({ status: "ok", database: "ok" });
+
+      const list = await app.inject({
+        method: "GET",
+        url: "/projects",
+        headers: bearer(token),
+      });
+      expect(list.statusCode).toBe(200);
+    } finally {
+      await app.close();
+    }
+    // /readyz down->up (full server stop/start) cannot be driven from
+    // vitest here — pg_ctl needs the cluster owner's privileges. It is
+    // covered by the documented manual repro in the ATL-022/QA-M1-4
+    // handoff: pg_ctl stop -m fast -> API stays alive, /readyz 503;
+    // pg_ctl start -> /readyz 200 again without an API restart.
+  });
+
   it("duplicate case number within an org is a 409, across orgs is fine", async () => {
     const repo = new PgProjectsRepo(admin);
     const body = ProjectCreateSchema.parse(PROJECT_BODY);

@@ -66,9 +66,18 @@ export async function buildApp(
 
   await app.register(errorEnvelopePlugin);
 
+  // Pools created here log idle-client errors through pino; a passed-in
+  // pool already carries the non-crashing default handler from createPool
+  // (QA-M1-4 — an unhandled pool 'error' would kill the process).
   const pool: Pool | undefined =
     config.databaseUrl !== undefined
-      ? (options.pool ?? createPool(config.databaseUrl))
+      ? (options.pool ??
+        createPool(config.databaseUrl, (error) => {
+          app.log.error(
+            { err: error },
+            "pg pool idle-client error (non-fatal, pool recovers)",
+          );
+        }))
       : undefined;
   if (pool !== undefined) {
     app.addHook("onClose", async () => {
