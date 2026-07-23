@@ -556,6 +556,164 @@ duplicated; Hebrew/RTL correctness is part of every criterion (§9 cross-cutting
 pass; real customer data never enters fixtures (TESTING_STRATEGY rule 4) — AC-RES-4 evidence lives
 only in reconciliation session records.
 
+## ATL-022 Verification Results (Postgres persistence live, 2026-07-23)
+
+Independent adversarial verification of ATL-022 by atlas-qa at HEAD `08cd493` (branch
+`claude/production-project-init-bfa25e`, delivery was a `wip … UNVERIFIED checkpoint` commit).
+Executed the ATL-022 subsection of the M1 Completion Verification Plan above. Environment: node
+v22.22.2, pnpm 10.33.0, PostgreSQL 16.13. QA ran its **own** scratch cluster (independence): `initdb`
+as the unprivileged `postgres` user under the scratchpad, port **54331**, databases `atlas_qa`,
+`atlas_qa_test`, plus `atlas_qa_lock`/`atlas_qa_dirty` for edge tests. Analytics on 8033, API on 3033.
+Cluster + processes torn down after; `git status --porcelain` empty before and after (this append only).
+`infra/environments/dev/README.md` was followed as written and is accurate except for the reliability
+claim contradicted in item 5.
+
+Plan items executed: **8/8** (item 5 FAILS).
+
+### 1. Migration apply + re-apply + advisory lock + dirty-DB — PASS
+
+- `DATABASE_URL=…/atlas_qa pnpm --filter @atlas/api migrate` run 1 → `applied: 0001_init.sql` /
+  `migrations complete — 1 applied, 0 already applied`. Run 2 (same DB) → `already applied:
+  0001_init.sql` / `0 applied, 1 already applied` — clean idempotent no-op, exit 0, no DDL.
+- Schema objects verified by `psql`: 5 tables (orgs/users/projects/scenarios/schema_migrations);
+  `land_value_agorot`/`build_cost_per_sqm_agorot`/`sale_price_per_sqm_agorot` = **bigint**;
+  `projects_org_case_number_unique` partial unique index (`WHERE case_number IS NOT NULL`) present;
+  users role CHECK = `role = ANY (ARRAY['admin','analyst','viewer'])`; `discount_rate numeric(7,6)`;
+  jsonb apartment_mix/cost_items/result.
+- **Advisory lock (concurrent boot):** held `pg_advisory_lock(721000001)` in a psql session for 6 s,
+  launched the migrate CLI against the same DB → it **blocked 5 s** until the lock released, then
+  applied. Concurrent runners serialize, not race. PASS.
+- **Dirty-DB safety:** pre-created a conflicting `projects` table, ran migrate → failed loudly
+  (`relation "projects" already exists`, exit 1) and **rolled back** — `schema_migrations` count = 0,
+  `orgs`/`users` = null (transaction-per-file rollback works; no partial apply recorded).
+
+### 2. Restart-survival (kill -9 + Postgres restart) — PASS
+
+Live: login `analyst@atlas.local` → POST project (`2026-QA-022`) → POST scenario → POST simulate
+(`irr="0.333333333"`, `npvAgorot=1055555556`, `profitAgorot=1500000000` — matches the M1 hand-verified
+arithmetic). Captured pre-kill GET responses, then **`kill -9`** the API (pid confirmed dead, no
+listener on 3033). Separately **restarted Postgres** (`pg_ctl -m fast restart`) to prove durability is
+on disk, not a process cache. Restarted the API, re-logged-in (users survived), re-GET the same ids:
+`cmp` of pre-kill vs post-kill project JSON → **byte-identical**; scenario+stored result JSON →
+**byte-identical**. This is the §2.4/§2.9 "persists after reload" criterion the M1 slice could not pass.
+
+### 3. Live cross-org probes + forged orgId — PASS (closes QA-M1-3)
+
+Two-org seed (org A `analyst@atlas.local`, org B `analyst-b@atlas.local`) via `SEED_USER_PASSWORD`.
+From org B against org A's project/scenario:
+
+| Probe | Result |
+|---|---|
+| `GET /projects` (B) | `[]` (200) |
+| `GET /projects/:idA` | 404, 0 leak hits (no A caseNumber/orgId/id in body) |
+| `PATCH /projects/:idA` `{name:"hijack"}` | 404, 0 leak |
+| `DELETE /projects/:idA` | 404, 0 leak |
+| `GET /projects/:idA/scenarios` | 404 `Project not found` |
+| `GET …/scenarios/:sidA` | 404 `Scenario not found` |
+| `POST …/simulate` | 404 `Scenario not found` |
+
+**No existence oracle:** org B gets the identical `Project not found` for org A's *real* project id and
+for a random UUID, and identical `Scenario not found` for real-vs-random — 404 leaks nothing. Org A's
+row unchanged in pg after all probes (`cmp` clean). **Forged orgId injection:** org B POSTed a project
+with `orgId`=orgA in both the JSON body and `?orgId=` query → created row landed in **org B**
+(token-derived), org A cannot see it. Org scoping is taken from `request.user.orgId`, never client
+input (confirmed by source + live). The committed `pg.integration.test.ts` cross-tenant test also runs
+green against real pg (item 6).
+
+### 4. Agorot BIGINT boundary round-trip — PASS (no S1)
+
+POST project `landValueAgorot` at each boundary; compared raw pg value and round-trip GET:
+
+| Sent | HTTP | stored in pg | GET round-trip |
+|---|---|---|---|
+| 0 | 201 | 0 | 0 |
+| 1 | 201 | 1 | 1 |
+| 2147483647 (int4 max) | 201 | 2147483647 | 2147483647 |
+| **2147483648 (int4+1)** | 201 | 2147483648 | 2147483648 (true BIGINT, no INTEGER-column cast) |
+| 9007199254740991 (MAX_SAFE) | 201 | 9007199254740991 | 9007199254740991 |
+| **9007199254740993 (>2^53)** | **400** | — | rejected: `VALIDATION_ERROR` `too_big`, `maximum:9007199254740991` |
+
+The above-2^53 value is **rejected loudly at the boundary**, not silently truncated — the S1 precision-loss
+trap is closed on both the write path (Zod `AgorotSchema`) and the read path (`agorotFromDb` throws on
+unsafe int, covered by the committed test `agorotFromDb refuses unsafe integers`). Every stored value is
+exact to the agora.
+
+### 5. /readyz DB up/down/recover — **FAIL (defect QA-M1-4, S2)**
+
+- DB up: `/readyz` → `{"status":"ok","database":"ok"}` (200); `/healthz` → 200. OK.
+- **Stop Postgres → the API PROCESS CRASHES.** node-postgres emits an `'error'` event on an idle
+  pooled client (`terminating connection due to administrator command`, SQLSTATE **57P01**); there is
+  **no `pool.on('error', …)` handler**, so Node throws `Unhandled 'error' event` and the whole process
+  exits. Observed: no listener on 3033, `/readyz` and `/healthz` both return HTTP `000`, stack trace in
+  the process log (`throw er; // Unhandled 'error' event` → `Emitted 'error' event on BoundPool
+  instance at … Client.idleListener`). The `/readyz` 503 branch in `app.ts` **can never fire** — the
+  process dies before it can serve the honest 503 it was designed to return.
+- **No self-recovery:** after Postgres came back up, the API stayed down (no listener) — it only served
+  again after a **manual restart**. The plan's "process stays alive (no crash-loop)" and "recovers
+  without an API restart" both fail.
+- **Worse than a full stop:** terminating a **single idle pooled backend** via `pg_terminate_backend`
+  (the routine failover / `idle_session_timeout` / maintenance / connection-limit scenario) crashes the
+  API identically (same 57P01 unhandled 'error'). Any server-side connection reset = full API outage
+  for all tenants.
+- This **contradicts `infra/environments/dev/README.md`** ("`/readyz` pings the DB … data survives
+  restarts" — the *data* survives, the *service* does not) and the `pool.ts` intent ("fail loudly and
+  quickly … rather than hanging"). Data durability is intact; service availability is not.
+- Filed **QA-M1-4 (S2)** — reliability/availability defect, no documented/tested workaround → must be
+  fixed and independently re-verified before pilot go-live. Fix direction (CTO's choice, not
+  prescribed): attach a `pool.on('error', …)` handler that logs and lets `/readyz` report 503 while the
+  process survives and reconnects.
+
+### 6. Regression gates — PASS
+
+| Command | Result |
+|---|---|
+| `pnpm test` (in-memory, no `DATABASE_URL_TEST`) | 84 TS: shared **32**, web **31**, api **21**; pg suite **9 skipped** (gate works) |
+| `DATABASE_URL_TEST=…/atlas_qa_test pnpm --filter @atlas/api test` | **30 passed** (21 + 9 pg integration incl. live cross-tenant, restart-survival, BIGINT round-trip, idempotent-migrate, dup-case-number) — exactly as the plan predicted |
+| `pnpm lint` | PASS (eslint api/web/shared Done) |
+| `pnpm typecheck` | PASS (tsc ×3 Done) |
+| `pnpm -r build` | PASS (web vite build 122 modules; api/shared tsc -b) |
+| `uv run pytest` (services/analytics) | **39 passed** (1 StarletteDeprecationWarning, non-blocking) |
+
+Live no-fallback path re-confirmed: the committed `scenarios.test.ts` `503 ANALYTICS_UNAVAILABLE …
+never a fallback number` passes on the pg build.
+
+### 7. 409 DUPLICATE_CASE_NUMBER per-org / cross-org — PASS
+
+Live: org A POST `caseNumber:DUP-1` → 201; A POSTs `DUP-1` again → **409** `DUPLICATE_CASE_NUMBER`
+("already exists in this organization"). Org B POSTs the **same** `DUP-1` → **201 allowed** (dedup is
+per-org, `orgId` from token). Two projects with **null** caseNumber for org A → both 201 (partial index
+`WHERE case_number IS NOT NULL` lets nulls coexist). Matches §5.5.
+
+### 8. CTO-flagged gaps — confirmed real, recorded (not re-litigated)
+
+- **Timing-observable login (account enumeration):** unknown email avg **4.6 ms** (skips argon2id) vs
+  valid-email/wrong-password avg **39.2 ms** (runs argon2id) — ~8.5×. Response *bodies* are byte-identical
+  (verified M1), but the timing side-channel enables account enumeration. CTO-disclosed; recorded as a
+  known security note (see ledger), not a new blocking find for ATL-022.
+- **No checksum in `schema_migrations`:** columns are `filename` + `applied_at` only — a silently
+  edited already-applied migration file would not be detected. CTO-disclosed known gap.
+- **CI has no Postgres service / no `DATABASE_URL_TEST`:** `.github/workflows/ci.yml` contains no
+  postgres service, so the 9 pg-integration tests **never run in CI** (skipped, green-by-absence). Stays
+  with **ATL-024**.
+
+### AC-1 recommendation & verdict
+
+- **ATL-003 AC-1 (persistence with migrations): PARTIAL → MET.** Migrations execute against a real
+  Postgres; pg repositories + pg user store are the **default** wiring when `DATABASE_URL` is set;
+  org-scoped queries are token-derived; data survives `kill -9` **and** a Postgres restart, byte-identical.
+- **ATL-022: PASS-WITH-KNOWN-ISSUES.** All stated ATL-022 acceptance criteria (workboard) are
+  independently verified and MET; zero S1 — no wrong financial numbers (above-2^53 rejected loudly),
+  no cross-tenant leak, no data loss, live two-org isolation proven. **One S2 (QA-M1-4):** the pg pool
+  lacks an error handler, so any DB connection reset (stop, failover, idle-timeout, single-backend kill)
+  crashes the whole API and defeats the `/readyz` graceful-degradation design. This is outside ATL-022's
+  written ACs but is a real production availability defect surfaced by plan item 5.
+- **Workboard recommendation:** promote ATL-022's coded ACs (and ATL-003 AC-1 → MET) on this evidence,
+  but ATL-022 **may not count toward "M1 complete / pilot-ready" (DL-015)** until **QA-M1-4 is fixed by
+  atlas-cto and independently re-verified** (CLAUDE.md rule 2 — no fix-and-approve in one cycle). The
+  delivery commit is still a `wip … UNVERIFIED` checkpoint; a clean delivery commit + handoff entry are
+  also required. QA-M1-3 → **CLOSED**; QA-M1-2 remains OPEN under ATL-023 (web `roiOnCost` nullability,
+  untouched by ATL-022).
+
 ## Open Defects Ledger (single source of status)
 
 Consolidated 2026-07-23 (ATL-018). **This table is the one authoritative status list for QA-filed
@@ -574,7 +732,9 @@ note only).
 | QA-S1-3 | S4 | CODEBASE_AUDIT.md C-1/T-6 cite ROIScreen.jsx:61; actual line 62 | atlas-cto | Optional doc correction, backlog | **OPEN — backlog** |
 | QA-M1-1 | S3 | Web non-demo form→ScenarioCreate mapping unimplemented; live non-demo core loop cannot POST a valid scenario | atlas-cto | ATL-023 | **OPEN** — blocks any pilot on real data |
 | QA-M1-2 | S4 | Web mirror types `roiOnCost` as `number`, shared contract is `number \| null` | atlas-cto | ATL-023 | **OPEN** |
-| QA-M1-3 | S4 | Default seed is single-org — live cross-tenant probe impossible; isolation proven only via committed tests | atlas-cto | ATL-022 (two-org seed / real multi-org store) | **OPEN** |
+| QA-M1-3 | S4 | Default seed is single-org — live cross-tenant probe impossible; isolation proven only via committed tests | atlas-cto | ATL-022 (two-org seed / real multi-org store) | **CLOSED** 2026-07-23 — ATL-022 ships a two-org seed; QA ran live cross-org probes at HEAD 08cd493 (org B → A: list `[]`, GET/PATCH/DELETE/scenarios all 404, zero leak, no existence oracle, forged orgId ignored). See ATL-022 Verification Results §3 |
+| QA-M1-4 | S2 | pg pool has no `pool.on('error')` handler → any Postgres connection reset (stop, restart, failover, `idle_session_timeout`, single-backend `pg_terminate_backend`) crashes the whole API via an unhandled `'error'` event (SQLSTATE 57P01). The `/readyz` 503 branch never fires (process dies first); no self-recovery — manual restart required. Data durability intact; service availability is not. Contradicts `infra/environments/dev/README.md` "data survives restarts". No workaround. | atlas-cto | — (ATL-022 follow-up; fix + independent re-verify before pilot go-live) | **OPEN** — reliability; blocks pilot-ready (DL-015) |
+| QA-M1-5 | S3 | Login timing side-channel: unknown email ~4.6 ms (skips argon2id) vs valid-email/wrong-password ~39 ms (~8.5×); bodies identical but timing enables account enumeration. CTO-disclosed; recorded per ATL-022 item 8. | atlas-cto | — (constant-time verify / dummy-hash on unknown email) | **OPEN — recorded** |
 | RN-1 | S4 | Shallow-clone fallback passes a docs commit that changes no parsed value (enforced CI path is full-clone, where it fails) | atlas-cto | Accepted with note | **ACCEPTED** |
 | RN-2 | S4 | "Last source commit" label semantically means "last docs/** commit" | atlas-cto | Cosmetic; fix opportunistically | **ACCEPTED** |
 | RN-3 | note | Committed dashboard stale at M1 tip until `pnpm dashboard` runs with the M1 train; repaired gate will correctly fail the first remote run otherwise | atlas-cto | ATL-024 (regeneration with the train) | **OPEN** (tracked under ATL-024) |
