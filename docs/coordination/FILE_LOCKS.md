@@ -13,7 +13,7 @@ OWNER:
 FILES OR DIRECTORIES:
 START TIME:
 EXPECTED COMPLETION:
-STATUS: active | released | expired-escalated
+STATUS: released (2026-07-23 — task delivered and QA-verified; released by orchestrator at cycle close) | released | expired-escalated
 ```
 
 ## Standing locks (do not require an entry — always in force)
@@ -32,7 +32,7 @@ OWNER: atlas-cto
 FILES OR DIRECTORIES: apps/web/** (+ pnpm-lock.yaml side effect)
 START TIME: 2026-07-23
 EXPECTED COMPLETION: 2026-07-23 (same day)
-STATUS: active
+STATUS: released (2026-07-23 — task delivered and QA-verified; released by orchestrator at cycle close)
 NOTE: filed by orchestrator on the owner's behalf BEFORE spawning (R-07 action item).
 ```
 
@@ -42,7 +42,7 @@ OWNER: atlas-cto
 FILES OR DIRECTORIES: apps/api/** (pg repos, migration runner), infra/environments/** (dev DB compose/env docs)
 START TIME: 2026-07-22
 EXPECTED COMPLETION: 2026-07-22 (same day)
-STATUS: active
+STATUS: released (2026-07-23 — task delivered and QA-verified; released by orchestrator at cycle close)
 NOTE: filed by orchestrator on the owner's behalf BEFORE spawning (R-07 action item).
 ```
 
@@ -52,7 +52,7 @@ OWNER: atlas-product
 FILES OR DIRECTORIES: docs/pilot/DRY_RUN_RUNBOOK.md (new), docs/pilot/RECONCILIATION_WORKSHEET.md (new)
 START TIME: 2026-07-22
 EXPECTED COMPLETION: 2026-07-22 (same day)
-STATUS: active
+STATUS: released (2026-07-23 — task delivered and QA-verified; released by orchestrator at cycle close)
 NOTE: filed by orchestrator on the owner's behalf BEFORE spawning (R-07 action item).
 ```
 
@@ -62,7 +62,7 @@ OWNER: atlas-qa
 FILES OR DIRECTORIES: docs/pilot/QA_PLAN.md (M1 verification-plan section + DL-008 annotations)
 START TIME: 2026-07-22
 EXPECTED COMPLETION: 2026-07-22 (same day)
-STATUS: active
+STATUS: released (2026-07-23 — task delivered and QA-verified; released by orchestrator at cycle close)
 NOTE: filed by orchestrator on the owner's behalf BEFORE spawning (R-07 action item).
 ```
 
@@ -72,7 +72,7 @@ OWNER: atlas-growth
 FILES OR DIRECTORIES: docs/growth/PILOT_AGREEMENT_DRAFT.md (new)
 START TIME: 2026-07-22
 EXPECTED COMPLETION: 2026-07-22 (same day)
-STATUS: active
+STATUS: released (2026-07-23 — task delivered and QA-verified; released by orchestrator at cycle close)
 NOTE: filed by orchestrator on the owner's behalf BEFORE spawning (R-07 action item).
 ```
 

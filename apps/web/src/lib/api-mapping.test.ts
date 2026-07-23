@@ -45,8 +45,18 @@ const handComputedInput: ScenarioInput = {
 const handComputedWire = {
   name: "תרחיש בדיקה",
   apartmentMix: [
-    { label: "3 חדרים", units: 40, areaSqm: 78, salePricePerSqmAgorot: 3_076_923 },
-    { label: "4 חדרים", units: 36, areaSqm: 102, salePricePerSqmAgorot: 3_039_216 },
+    {
+      label: "3 חדרים",
+      units: 40,
+      areaSqm: 78,
+      salePricePerSqmAgorot: 3_076_923,
+    },
+    {
+      label: "4 חדרים",
+      units: 36,
+      areaSqm: 102,
+      salePricePerSqmAgorot: 3_039_216,
+    },
   ],
   costItems: [
     { label: "עלות בנייה", amountAgorot: 6_656_160_000 },
@@ -61,7 +71,9 @@ describe("toScenarioCreate (form → shared ScenarioCreate)", () => {
   });
 
   it("parses under the REAL @atlas/shared ScenarioCreateSchema with identical values", () => {
-    const parsed = ScenarioCreateSchema.parse(toScenarioCreate(handComputedInput));
+    const parsed = ScenarioCreateSchema.parse(
+      toScenarioCreate(handComputedInput),
+    );
     expect(parsed).toEqual(handComputedWire);
   });
 
@@ -80,7 +92,9 @@ describe("toScenarioCreate (form → shared ScenarioCreate)", () => {
     // 5 / 2 = 2.5 → 3.
     const out = toScenarioCreate({
       ...handComputedInput,
-      apartmentMix: [{ rooms: 2, count: 1, areaSqm: 2, salePricePerUnitAgorot: 5 }],
+      apartmentMix: [
+        { rooms: 2, count: 1, areaSqm: 2, salePricePerUnitAgorot: 5 },
+      ],
     });
     expect(out.apartmentMix[0]?.salePricePerSqmAgorot).toBe(3);
   });
@@ -90,14 +104,22 @@ describe("toScenarioCreate (form → shared ScenarioCreate)", () => {
     const out = toScenarioCreate({
       ...handComputedInput,
       apartmentMix: [
-        { rooms: 3, count: 3, areaSqm: 80.5, salePricePerUnitAgorot: 100_000_000 },
+        {
+          rooms: 3,
+          count: 3,
+          areaSqm: 80.5,
+          salePricePerUnitAgorot: 100_000_000,
+        },
       ],
       buildCostPerSqmAgorot: 999,
       otherCostsAgorot: 0,
     });
     expect(out.costItems[0]?.amountAgorot).toBe(241_259);
     // otherCosts of 0 is still sent — it mirrors what the user entered.
-    expect(out.costItems[1]).toEqual({ label: "עלויות נוספות", amountAgorot: 0 });
+    expect(out.costItems[1]).toEqual({
+      label: "עלויות נוספות",
+      amountAgorot: 0,
+    });
   });
 
   it("refuses to emit a precision-lossy amount (unsafe integer) instead of corrupting money", () => {
@@ -145,7 +167,12 @@ describe("fromScenarioWire (shared Scenario → web view-model)", () => {
     const scenario = fromScenarioWire({
       ...wire,
       apartmentMix: [
-        { label: "פנטהאוז", units: 2, areaSqm: 200, salePricePerSqmAgorot: 5_000_000 },
+        {
+          label: "פנטהאוז",
+          units: 2,
+          areaSqm: 200,
+          salePricePerSqmAgorot: 5_000_000,
+        },
       ],
     });
     expect(scenario.apartmentMix[0]?.rooms).toBe(0);

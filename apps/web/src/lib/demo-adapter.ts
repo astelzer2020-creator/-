@@ -145,7 +145,9 @@ function simulateScenario(input: ScenarioInput): SimulationResult {
   const roiOnCost =
     costAgorot > 0 ? Number((profitAgorot / costAgorot).toFixed(6)) : null;
   const paybackYears =
-    profitAgorot > 0 ? Number((input.constructionMonths / 12).toFixed(2)) : null;
+    profitAgorot > 0
+      ? Number((input.constructionMonths / 12).toFixed(2))
+      : null;
 
   const deltas = [-0.1, -0.05, 0, 0.05, 0.1];
   const sensitivity: SensitivityGrid = {

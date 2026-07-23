@@ -15,6 +15,7 @@
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
     "format": "pnpm -r format",
+    "format:check": "pnpm --filter @atlas/api --filter @atlas/web --filter @atlas/shared exec prettier --check --ignore-path ../../.gitignore .",
     "dashboard": "node tools/founder-dashboard/generate.mjs",
     "build:atlas": "pnpm -r build"
   },

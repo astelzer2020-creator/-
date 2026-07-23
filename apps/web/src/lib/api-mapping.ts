@@ -241,7 +241,9 @@ export function fromScenarioWire(wire: ScenarioWire): Scenario {
       ),
     })),
     buildCostPerSqmAgorot:
-      area > 0 ? toSafeAgorot(buildCostTotalAgorot / area, "buildCostPerSqmAgorot") : 0,
+      area > 0
+        ? toSafeAgorot(buildCostTotalAgorot / area, "buildCostPerSqmAgorot")
+        : 0,
     otherCostsAgorot,
     discountRate: wire.discountRate,
     constructionMonths: 0,

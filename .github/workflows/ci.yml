@@ -32,6 +32,11 @@ jobs:
         run: pnpm lint
       - name: Typecheck (tsc --noEmit, all workspaces)
         run: pnpm typecheck
+      - name: Format check (prettier, TS workspaces — QA-M0-4)
+        # Runs in the workspaces that carry prettier (api, web, shared); the
+        # dashboard-freshness step below regenerates root files only, so the two
+        # gates cannot interfere.
+        run: pnpm format:check
       - uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.12"
@@ -53,6 +58,23 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    # Real Postgres for the api pg-integration suite (ATL-024 / QA-M0-3): without it
+    # the suite self-skips (gated on DATABASE_URL_TEST) and CI is green-by-absence.
+    # The skip-gate stays intact for contributors without a local Postgres.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: atlas
+          POSTGRES_PASSWORD: atlas
+          POSTGRES_DB: atlas_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U atlas -d atlas_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -62,7 +84,11 @@ jobs:
           cache: pnpm
       - name: Install (TS workspaces)
         run: pnpm install --frozen-lockfile
-      - name: Tests (vitest, all workspaces)
+      - name: Tests (vitest, all workspaces — pg integration runs against the service container)
+        env:
+          # Matches the service container above. The test suite TRUNCATEs this
+          # database between tests — it is throwaway CI state, never real data.
+          DATABASE_URL_TEST: postgresql://atlas:atlas@127.0.0.1:5432/atlas_test
         run: pnpm test
       - uses: astral-sh/setup-uv@v5
         with:

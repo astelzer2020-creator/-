@@ -145,8 +145,7 @@ export const he = {
   "results.sensitivity.baseCase": "בסיס",
 
   "errors.generic": "משהו השתבש — נסו שוב",
-  "errors.duplicateCaseNumber":
-    "מספר התיק כבר קיים בחשבון — בחרו מספר תיק אחר",
+  "errors.duplicateCaseNumber": "מספר התיק כבר קיים בחשבון — בחרו מספר תיק אחר",
   "errors.analyticsUnavailable":
     "שירות החישוב אינו זמין כעת — נסו שוב בעוד מספר רגעים",
   "errors.unauthorized": "נדרשת התחברות מחדש",
