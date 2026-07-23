@@ -3,7 +3,7 @@
 
 # Atlas — Founder Control Center
 
-_Generated from repo sources at commit `be7add2` · coordination data as of **2026-07-23** (last `docs/coordination` commit) · ATL-021 / DL-013_
+_Generated from repo sources at commit `78d016c` · coordination data as of **2026-07-23** (last `docs/coordination` commit) · ATL-021 / DL-013_
 
 ## 1. EXECUTIVE
 
@@ -13,7 +13,7 @@ _Generated from repo sources at commit `be7add2` · coordination data as of **20
 | Sprint progress | 5 of 12 sprint tasks at IMPLEMENTED/VERIFIED (CLOSED: 1 · IMPLEMENTED: 1 · READY: 7 · VERIFIED: 3) |
 | Production score | 8/10 (production-readiness, docs/coordination/AGENT_WORKBOARD.md) |
 | Pilot readiness | Not ready — M1 in-progress — slice verified 2026-07-21, M2 planned, M3 planned; 2 Founder decision(s) pending |
-| Current version | pre-release @ be7add2 (last source commit; no git tags yet) |
+| Current version | pre-release @ 78d016c (last source commit; no git tags yet) |
 | Estimated pilot date | not yet schedulable — gated on: ATL-008 (archive deletion decision on docs/CLEANUP_REPORT.md); GITLEAKS_LICENSE / secrets-scan wiring (DL-009). M1 kickoff green-light RECEIVED (DL-014); M1 in-progress — slice verified 2026-07-21; M2 planned |
 
 **Founder decisions pending:**
@@ -62,8 +62,8 @@ _Execution-worker tasks (not agent-owned): ATL-016 (Grok, BACKLOG), ATL-017 (Cod
 | Pilot customers | 0 live prospects — docs/growth/PIPELINE.md is plan-stage (status: DRAFT — internal plan); no prospect log section exists yet. Stage targets: Identified 20, Intro 10, Discovery 6, Data dry-run scheduled 3, Pilot agreed 1 primary + 2 queued |
 | Pricing | HYPOTHESIS (DL-005, 2026-07-21): Pilot offer = free 8-week design-partner with hard end date, traded for feedback commitment, case-study rights, week-7 conversion conversation — revisit: Pricing validation, week 6 |
 | Demo status | OUTLINE ONLY — gated: no live demo until QA verification + ATL-006 capability matrix (binding gate in the doc) |
-| Sales material | DEMO_OUTLINE.md: OUTLINE ONLY [claims-gated] · PILOT_OFFER.md: DRAFT — internal structure, not yet an external document [claims-gated] · PIPELINE.md: DRAFT — internal plan [claims-gated] |
-| Documentation | 11 strategy/docs files (docs/*.md) · 10 ADRs · 5 pilot docs · 10 coordination files · 3 growth docs |
+| Sales material | DEMO_OUTLINE.md: OUTLINE ONLY [claims-gated] · PILOT_AGREEMENT_DRAFT.md: DRAFT — awaiting Founder review · PILOT_OFFER.md: DRAFT — internal structure, not yet an external document [claims-gated] · PIPELINE.md: DRAFT — internal plan [claims-gated] |
+| Documentation | 11 strategy/docs files (docs/*.md) · 10 ADRs · 5 pilot docs · 10 coordination files · 4 growth docs |
 
 ## 6. RISKS
 
