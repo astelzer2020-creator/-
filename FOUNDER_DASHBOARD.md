@@ -3,7 +3,7 @@
 
 # Atlas — Founder Control Center
 
-_Generated from repo sources at commit `5cda906` · coordination data as of **2026-07-23** (last `docs/coordination` commit) · ATL-021 / DL-013_
+_Generated from repo sources at commit `6c09bc6` · coordination data as of **2026-07-23** (last `docs/coordination` commit) · ATL-021 / DL-013_
 
 ## 1. EXECUTIVE
 
@@ -13,7 +13,7 @@ _Generated from repo sources at commit `5cda906` · coordination data as of **20
 | Sprint progress | 5 of 12 sprint tasks at IMPLEMENTED/VERIFIED (CLOSED: 1 · IMPLEMENTED: 1 · READY: 7 · VERIFIED: 3) |
 | Production score | 8/10 (production-readiness, docs/coordination/AGENT_WORKBOARD.md) |
 | Pilot readiness | Not ready — M1 in-progress — slice verified 2026-07-21, M2 planned, M3 planned; 2 Founder decision(s) pending |
-| Current version | pre-release @ 5cda906 (last source commit; no git tags yet) |
+| Current version | pre-release @ 6c09bc6 (last source commit; no git tags yet) |
 | Estimated pilot date | not yet schedulable — gated on: ATL-008 (archive deletion decision on docs/CLEANUP_REPORT.md); GITLEAKS_LICENSE / secrets-scan wiring (DL-009). M1 kickoff green-light RECEIVED (DL-014); M1 in-progress — slice verified 2026-07-21; M2 planned |
 
 **Founder decisions pending:**
