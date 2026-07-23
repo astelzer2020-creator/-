@@ -714,6 +714,35 @@ per-org, `orgId` from token). Two projects with **null** caseNumber for org A �
   also required. QA-M1-3 → **CLOSED**; QA-M1-2 remains OPEN under ATL-023 (web `roiOnCost` nullability,
   untouched by ATL-022).
 
+### Addendum — QA-M1-4 re-verification (fix commit a78fed6, 2026-07-23)
+
+Independent narrow re-verification of the atlas-cto fix (`pool.on('error')` always attached in
+`createPool` — optional `onIdleError` callback, pino handler wired in `app.ts`; regression test
+"survives pg_terminate_backend on idle clients" added to `pg.integration.test.ts`). Fresh QA scratch
+cluster (port **54332**, dbs `atlas_rv`/`atlas_rv_test`), API on 3034, torn down after. Fix landed as
+a clean non-wip delivery commit `a78fed6` at HEAD (3 files: pool.ts, app.ts, pg.integration.test.ts).
+
+| Test | Result |
+|---|---|
+| RV22-1 original repro: `pg_ctl stop -m fast` with API up | **FIXED** — process ALIVE, **same pid 13211**; `/readyz` → `{"status":"unavailable","database":"unreachable"}` **[503]**; `/healthz` → 200; DB-touching GET and POST during outage → honest `500 {"error":{"code":"INTERNAL",…}}` envelope, never fabricated success, never a crash |
+| RV22-2 self-recovery: `pg_ctl start`, NO API restart | **FIXED** — same pid still alive, `/readyz` → 200 `database:"ok"` immediately; login + authed list work; the outage-time POST did **not** silently persist (pg shows only the pre-outage row `RV-1`) |
+| RV22-3 idle-backend kill: `pg_terminate_backend` on the app pool's idle client | **FIXED** — process ALIVE (same pid), next `/readyz` 200, authed list 200; API log shows 2× "pg pool idle-client error (non-fatal, pool recovers)" and **zero** `Unhandled 'error'` |
+| RV22-4 pg suite | `DATABASE_URL_TEST=…/atlas_rv_test pnpm --filter @atlas/api test` → **31 passed (31)**, incl. the new `survives pg_terminate_backend … (QA-M1-4)` regression test (693 ms, green) |
+| RV22-5 no error-masking | Diff read: handler is attached to the **pool's** idle-client `'error'` event only; in-flight/per-query failures still reject through the normal path. Proven live: duplicate caseNumber with DB **up** → still `409 DUPLICATE_CASE_NUMBER` (row count unchanged); DB-touching requests with DB **down** → 500 envelope (RV22-1). No silent success anywhere |
+| RV22-6 gates | `pnpm lint` / `pnpm typecheck` green; in-memory `pnpm test` 84 TS (32/31/21, 10 pg skipped — count grew by the new test, skip-gate intact) |
+
+Residual note (S4, non-blocking): the vitest regression test cannot drive a full `pg_ctl stop/start`
+(cluster-owner privileges), so the stop/start path is covered by manual repro only — executed
+independently by QA here (RV22-1/-2) and documented in the test's trailing comment. Acceptable.
+
+**QA-M1-4: CONFIRMED-FIXED at a78fed6.** All three failure modes from the original finding (full stop
+crash, no self-recovery, single-backend-kill crash) are gone under adversarial re-testing; error
+envelopes stay honest in both DB-up and DB-down states. **QA-M1-4 → CLOSED.** The ATL-022 hold
+condition is satisfied: ATL-022 may now count toward M1 completion (DL-015) — remaining conditions are
+process-side only: HANDOFFS.md delivery entry (CEO filing pending) and the DL-015 companions
+(ATL-023, ATL-024) which are unaffected by this fix. QA-M1-5 (login timing, S3) remains open and does
+not block ATL-022.
+
 ## Open Defects Ledger (single source of status)
 
 Consolidated 2026-07-23 (ATL-018). **This table is the one authoritative status list for QA-filed
@@ -733,7 +762,7 @@ note only).
 | QA-M1-1 | S3 | Web non-demo form→ScenarioCreate mapping unimplemented; live non-demo core loop cannot POST a valid scenario | atlas-cto | ATL-023 | **OPEN** — blocks any pilot on real data |
 | QA-M1-2 | S4 | Web mirror types `roiOnCost` as `number`, shared contract is `number \| null` | atlas-cto | ATL-023 | **OPEN** |
 | QA-M1-3 | S4 | Default seed is single-org — live cross-tenant probe impossible; isolation proven only via committed tests | atlas-cto | ATL-022 (two-org seed / real multi-org store) | **CLOSED** 2026-07-23 — ATL-022 ships a two-org seed; QA ran live cross-org probes at HEAD 08cd493 (org B → A: list `[]`, GET/PATCH/DELETE/scenarios all 404, zero leak, no existence oracle, forged orgId ignored). See ATL-022 Verification Results §3 |
-| QA-M1-4 | S2 | pg pool has no `pool.on('error')` handler → any Postgres connection reset (stop, restart, failover, `idle_session_timeout`, single-backend `pg_terminate_backend`) crashes the whole API via an unhandled `'error'` event (SQLSTATE 57P01). The `/readyz` 503 branch never fires (process dies first); no self-recovery — manual restart required. Data durability intact; service availability is not. Contradicts `infra/environments/dev/README.md` "data survives restarts". No workaround. | atlas-cto | — (ATL-022 follow-up; fix + independent re-verify before pilot go-live) | **OPEN** — reliability; blocks pilot-ready (DL-015) |
+| QA-M1-4 | S2 | pg pool has no `pool.on('error')` handler → any Postgres connection reset (stop, restart, failover, `idle_session_timeout`, single-backend `pg_terminate_backend`) crashes the whole API via an unhandled `'error'` event (SQLSTATE 57P01). The `/readyz` 503 branch never fires (process dies first); no self-recovery — manual restart required. Data durability intact; service availability is not. Contradicts `infra/environments/dev/README.md` "data survives restarts". No workaround. | atlas-cto | Fix a78fed6 (`pool.on('error')` in createPool + pino handler + pg_terminate_backend regression test); QA re-verification RV22-1..RV22-6 | **CLOSED** 2026-07-23 (CONFIRMED-FIXED — process survives full stop, single-backend kill, self-recovers; 31/31 pg tests) |
 | QA-M1-5 | S3 | Login timing side-channel: unknown email ~4.6 ms (skips argon2id) vs valid-email/wrong-password ~39 ms (~8.5×); bodies identical but timing enables account enumeration. CTO-disclosed; recorded per ATL-022 item 8. | atlas-cto | — (constant-time verify / dummy-hash on unknown email) | **OPEN — recorded** |
 | RN-1 | S4 | Shallow-clone fallback passes a docs commit that changes no parsed value (enforced CI path is full-clone, where it fails) | atlas-cto | Accepted with note | **ACCEPTED** |
 | RN-2 | S4 | "Last source commit" label semantically means "last docs/** commit" | atlas-cto | Cosmetic; fix opportunistically | **ACCEPTED** |

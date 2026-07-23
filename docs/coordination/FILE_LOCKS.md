@@ -27,6 +27,16 @@ STATUS: active | released | expired-escalated
 ## Active locks
 
 ```
+TASK ID: ATL-023
+OWNER: atlas-cto
+FILES OR DIRECTORIES: apps/web/** (+ pnpm-lock.yaml side effect)
+START TIME: 2026-07-23
+EXPECTED COMPLETION: 2026-07-23 (same day)
+STATUS: active
+NOTE: filed by orchestrator on the owner's behalf BEFORE spawning (R-07 action item).
+```
+
+```
 TASK ID: ATL-022
 OWNER: atlas-cto
 FILES OR DIRECTORIES: apps/api/** (pg repos, migration runner), infra/environments/** (dev DB compose/env docs)
