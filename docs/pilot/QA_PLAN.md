@@ -743,6 +743,137 @@ process-side only: HANDOFFS.md delivery entry (CEO filing pending) and the DL-01
 (ATL-023, ATL-024) which are unaffected by this fix. QA-M1-5 (login timing, S3) remains open and does
 not block ATL-022.
 
+## ATL-023 Verification Results (Web non-demo live, 2026-07-23)
+
+Independent adversarial verification of ATL-023 by atlas-qa at HEAD `c3d9a28` (delivery commit
+`feat(web): ATL-023 — non-demo mode live against real API`). Executed the ATL-023 subsection of the
+M1 Completion Verification Plan above: **plan items 4/4** (mapping, accessToken flow, full live
+browser loop, RTL/null states) plus regression gates. Environment: node v22.22.2, pnpm 10.33.0,
+PostgreSQL 16.13, chromium 141 (Playwright). QA ran its **own** stack end-to-end (independence):
+scratch `initdb` cluster under the scratchpad on port **54341** (dbs `atlas_qa23`/`atlas_qa23_test`),
+analytics on 8046 (`PYTHONPATH=src uvicorn`), API on 3046 (own `JWT_SECRET`/`SEED_USER_PASSWORD`),
+vite dev on 5199 with `VITE_DEMO=0` (+ a second instance on 5198 in default demo mode for the banner
+regression). The CTO's scratch driver was consulted but **not reused for evidence** — QA wrote its
+own Playwright drivers with **its own scenario numbers**. All processes and the cluster torn down
+after; `git status --porcelain` empty before and after (this append only).
+
+### 1. Mapping correctness (plan item 1) — PASS
+
+- **Real shared schema, not a copy:** `api-mapping.test.ts` imports `ScenarioCreateSchema` from
+  `@atlas/shared`; `apps/web/node_modules/@atlas/shared` is a workspace symlink to
+  `/…/packages/shared` (readlink verified), added as a devDependency in this commit; no vitest/vite
+  alias stubbing exists. The mapping output is parsed by the real zod-4 schema in the suite.
+- **Hand-computed case independently recomputed** (Python `fractions`/`decimal` + JS `Math.round` =
+  `floor(x+0.5)` semantics): 240,000,000/78 = 3,076,923.0769 → **3,076,923** ✓;
+  310,000,000/102 = 3,039,215.6863 → **3,039,216** ✓; area 40×78+36×102 = **6,792** ✓;
+  980,000×6,792 = **6,656,160,000** ✓; inverse 3,076,923×78 = **239,999,994** ✓ (disclosed 6-agorot
+  per-sqm conversion residue, correctly documented as a contract conversion, not drift);
+  fractional-area case 241.5×999 = 241,258.5 → **241,259** ✓; half-agora 5/2 → **3** ✓. Every
+  committed constant equals QA's own arithmetic.
+- **QA's own case** verified end-to-end live (see §3): per-sqm = round(350,000,000/120) =
+  **2,916,667** (rounds up at .6667), build total = 750,000×1,440 = **1,080,000,000** — stored wire
+  scenario matched agora-exact.
+- `pnpm -r build` green (shared dist required by the contract test); `pnpm --filter @atlas/web test`
+  → **45 passed (45)**, 6 files, incl. the 11 api-mapping tests. Unsafe-integer refusal (RangeError,
+  never a corrupted amount) and `constructionMonths` dropping covered by committed tests, re-run by QA.
+
+### 2. accessToken flow (plan item 2) — PASS
+
+Live in the browser (QA driver, real stack): logged in, then **restarted the API with a rotated
+`JWT_SECRET`** (invalidating the live token exactly like a 15-min expiry), then client-side navigated
+into a project:
+
+- The two authed GETs 401'd; the client dropped the in-memory token and landed on the **Hebrew login
+  page** at `/login` — no stale page rendered as fresh, no crash.
+- **No silent retry loop:** exactly 2 `/api` requests in the observation window (the two parallel
+  project/scenario GETs), zero retries.
+- **Location preserved:** after re-login, the app returned to the exact project-detail URL
+  (`state.from` flow, RequireAuth → LoginPage), verified live.
+- **Token storage (security record):** `page.evaluate` after login — `localStorage` `{}`,
+  `sessionStorage` `{}`, `document.cookie` empty. Token lives in module memory only
+  (`auth-store.ts`); page reload drops the session by design. Consequences recorded as accepted
+  design notes RN-4/RN-5 (ledger), not defects.
+
+### 3. Full live browser loop, QA's own numbers (plan item 3) — PASS
+
+`VITE_DEMO=0` → **demo banner ABSENT** (asserted, count 0); default demo instance on 5198 →
+**banner PRESENT** (regression). Login → create project → scenario form → simulate → results, all in
+chromium against the real pg-backed API + engine. QA's scenario (nobody else's): mix 12u × 120 m²,
+per-unit ₪3.5M (240→350 form path exercises the .667-rounds-up branch), build ₪7,500/m², other ₪6M,
+rate 7%:
+
+| Figure | QA closed-form hand math | Wire (API) | Displayed | Match |
+|---|---|---|---|---|
+| stored per-sqm | round(350,000,000/120) = 2,916,667 | 2,916,667 | — | ✓ agora-exact |
+| revenue (engine) | 12×120×2,916,667 = 4,200,000,480 | — | — | ✓ |
+| profit | 4,200,000,480−1,680,000,000 = **2,520,000,480** | 2520000480 | ‏25,200,005 ₪ | ✓ (half-away-from-zero shekel) |
+| NPV @7% | −1.68e9 + 4,200,000,480/1.07 = 2,245,234,093.458 → **2,245,234,093** (half-even) | 2245234093 | ‏22,452,341 ₪ | ✓ |
+| IRR | 4,200,000,480/1,680,000,000 − 1 = 1.5000002857… → **"1.500000286"** (9dp) | "1.500000286" | 150% | ✓ non-null |
+| roiOnCost | 2,520,000,480/1,680,000,000 = 1.5000002857 | 1.5000002857142858 | 150% | ✓ |
+| payback | 1,680,000,000/4,200,000,480 = 0.39999995 | 0.3999999542857195 | 0.4 שנים | ✓ (formatYears keeps sub-year precision) |
+
+- **Displayed == wire proven strictly:** expected display strings were computed inside the page's own
+  Intl (he-IL currency/percent formats) from QA's hand-math numbers and string-compared to the DOM —
+  all 5 KPI cells byte-identical.
+- **Sensitivity grid recomputed from closed form:** QA re-derived rows for cost deltas −10%/0/+10% ×
+  all five price deltas (revenue×(1+pd), each cost item×(1+cd), half-even per item, NPV half-even) —
+  **all 15 recomputed cells equal the wire grid agora-exact** (e.g. corner [−10%,−10%] =
+  2,020,710,684; center = base 2,245,234,093; corner [+10%,+10%] = 2,469,757,503); displayed corner/
+  center cells match as whole-shekel format. 25 cells rendered.
+- Duplicate caseNumber re-checked live at HTTP level: second POST with the same caseNumber → **409**
+  (the Hebrew dialog rendering of it is covered by `ProjectsPage` code + the CTO's driver; not
+  re-driven in-browser by QA — cosmetic residual, no defect).
+
+### 4. RTL + honest null states (plan item 4) — PASS
+
+- Served document and live DOM: `<html lang="he" dir="rtl">` asserted via `page.evaluate` in non-demo
+  mode. All strings on the driven pages come from the he catalog (login, projects, form, results —
+  the drivers located every element by its Hebrew i18n string; nothing English leaked).
+- **Numbers LTR inside RTL** (§4 E8): `.num` class = `direction: ltr; unicode-bidi: isolate;
+  tabular-nums` (global.css), applied to KPI values and all 25 sensitivity cells; rendered strings
+  carry the RLM-embedded he-IL currency format, captured verbatim in evidence.
+- **roiOnCost null path (QA-M1-2) live, not just unit-tested:** the form correctly blocks zero build
+  cost (`.positive()` validation — unreachable by UI, by design), so QA created a **zero-cost
+  scenario via the real API** (`costItems: [{…, amountAgorot: 0}]`), simulated through the real
+  engine — wire `roiOnCost: null`, `irr: null` — and rendered its results page in the live browser:
+  IRR cell and ROI cell both show **"לא מוגדר"** with the Hebrew zero-cost hint, ROI cell contains
+  **no digits** (no fabricated number). NPV of the zero-cost case also hand-verified:
+  2e9/1.07 = 1,869,158,878.505 → half-even **1,869,158,879** = wire ✓ (displayed ‏18,691,589 ₪ ✓).
+  The committed jsdom test (`ResultsPage — roiOnCost null`) and demo-adapter null alignment re-run
+  green as part of the 45.
+
+### 5. Regression gates — PASS
+
+| Command | Result |
+|---|---|
+| `pnpm -r build` | PASS (shared tsc -b; web vite build 123 modules; api tsc -b) |
+| `pnpm lint` | PASS (eslint api/web/shared Done) |
+| `pnpm typecheck` | PASS (tsc ×3 Done) |
+| `pnpm test` (in-memory) | shared **32**, web **45**, api **21** (+10 pg skipped) — web grew 31→45 with this delivery |
+| `DATABASE_URL_TEST=…/atlas_qa23_test pnpm --filter @atlas/api test` | **31 passed (31)** incl. pg integration + QA-M1-4 regression |
+| `uv run pytest` | **39 passed** (1 StarletteDeprecationWarning, non-blocking) |
+
+### Verdict
+
+- **ATL-023: PASS.** All four plan items executed with zero defects found. The mapping's two rounding
+  points are correct, disclosed, and agora-exact against QA's independent arithmetic; the full
+  non-demo browser loop runs live against real Postgres + API + engine with every displayed figure
+  equal to QA's closed-form hand math (KPIs and 15 recomputed sensitivity cells); the accessToken
+  401-drop preserves location with no retry loop and no token in web storage; RTL attributes and
+  honest Hebrew null states verified in the live DOM. **QA-M1-1 → CLOSED; QA-M1-2 → CLOSED.**
+  Refresh-stub and memory-only token are recorded as **accepted design notes** (RN-4/RN-5), not
+  defects — deliberate, documented security choices with honest failure handling; RN-5's 15-minute
+  forced re-login is flagged to atlas-product as a UAT-session friction point to schedule before
+  pilot UAT (2-hour sessions).
+- **ATL-023 counts toward M1 completion (DL-015).** With ATL-022 already counted (QA-M1-4
+  CONFIRMED-FIXED), the sole remaining DL-015 gate is **ATL-024** (first observed green remote CI +
+  prettier gate).
+- **Pilot-readiness score: 7/10** — the entire M1 core loop (browser → API → Postgres → engine →
+  rendered Hebrew results) is now independently verified live with agora-exact numbers; the remaining
+  3 points are the unobserved remote CI (ATL-024/QA-M0-3/QA-M0-4), the decorative secrets scan
+  (QA-M0-2/DL-009, human-owner ruling), and the not-yet-built pilot feature surface beyond M1
+  (import pipeline, exports — M2 scope, see M2 Verification Approach above).
+
 ## Open Defects Ledger (single source of status)
 
 Consolidated 2026-07-23 (ATL-018). **This table is the one authoritative status list for QA-filed
@@ -759,11 +890,13 @@ note only).
 | QA-S1-1 | S3 | Dashboard freshness gate false-positives on shallow CI clone | atlas-cto | Fix bc52714; QA re-verification RV-1..RV-9 | **CLOSED** 2026-07-21 (CONFIRMED-FIXED) |
 | QA-S1-2 | S4 | Commit e3f7e6d message claims "coordination updates" it does not contain | atlas-cto | None possible (history not rewritten, CLAUDE.md rule 8) | **CLOSED — accepted as recorded history note** |
 | QA-S1-3 | S4 | CODEBASE_AUDIT.md C-1/T-6 cite ROIScreen.jsx:61; actual line 62 | atlas-cto | Optional doc correction, backlog | **OPEN — backlog** |
-| QA-M1-1 | S3 | Web non-demo form→ScenarioCreate mapping unimplemented; live non-demo core loop cannot POST a valid scenario | atlas-cto | ATL-023 | **OPEN** — blocks any pilot on real data |
-| QA-M1-2 | S4 | Web mirror types `roiOnCost` as `number`, shared contract is `number \| null` | atlas-cto | ATL-023 | **OPEN** |
+| QA-M1-1 | S3 | Web non-demo form→ScenarioCreate mapping unimplemented; live non-demo core loop cannot POST a valid scenario | atlas-cto | ATL-023 (`lib/api-mapping.ts` + contract test vs real `@atlas/shared` schema, commit c3d9a28) | **CLOSED** 2026-07-23 — QA re-verified independently: hand recompute of both rounding points to the agora + full live browser loop with QA-chosen numbers, stored wire scenario and all displayed figures agora-exact vs QA closed-form math. See ATL-023 Verification Results §1/§3 |
+| QA-M1-2 | S4 | Web mirror types `roiOnCost` as `number`, shared contract is `number \| null` | atlas-cto | ATL-023 (contracts.ts `number \| null` + honest "לא מוגדר" render + demo-adapter null, commit c3d9a28) | **CLOSED** 2026-07-23 — QA verified type alignment, committed jsdom test, AND the live path: zero-cost scenario through the real engine (wire `roiOnCost: null`) rendered "לא מוגדר" with the Hebrew hint and zero digits in the browser. See ATL-023 Verification Results §4 |
 | QA-M1-3 | S4 | Default seed is single-org — live cross-tenant probe impossible; isolation proven only via committed tests | atlas-cto | ATL-022 (two-org seed / real multi-org store) | **CLOSED** 2026-07-23 — ATL-022 ships a two-org seed; QA ran live cross-org probes at HEAD 08cd493 (org B → A: list `[]`, GET/PATCH/DELETE/scenarios all 404, zero leak, no existence oracle, forged orgId ignored). See ATL-022 Verification Results §3 |
 | QA-M1-4 | S2 | pg pool has no `pool.on('error')` handler → any Postgres connection reset (stop, restart, failover, `idle_session_timeout`, single-backend `pg_terminate_backend`) crashes the whole API via an unhandled `'error'` event (SQLSTATE 57P01). The `/readyz` 503 branch never fires (process dies first); no self-recovery — manual restart required. Data durability intact; service availability is not. Contradicts `infra/environments/dev/README.md` "data survives restarts". No workaround. | atlas-cto | Fix a78fed6 (`pool.on('error')` in createPool + pino handler + pg_terminate_backend regression test); QA re-verification RV22-1..RV22-6 | **CLOSED** 2026-07-23 (CONFIRMED-FIXED — process survives full stop, single-backend kill, self-recovers; 31/31 pg tests) |
 | QA-M1-5 | S3 | Login timing side-channel: unknown email ~4.6 ms (skips argon2id) vs valid-email/wrong-password ~39 ms (~8.5×); bodies identical but timing enables account enumeration. CTO-disclosed; recorded per ATL-022 item 8. | atlas-cto | — (constant-time verify / dummy-hash on unknown email) | **OPEN — recorded** |
 | RN-1 | S4 | Shallow-clone fallback passes a docs commit that changes no parsed value (enforced CI path is full-clone, where it fails) | atlas-cto | Accepted with note | **ACCEPTED** |
 | RN-2 | S4 | "Last source commit" label semantically means "last docs/** commit" | atlas-cto | Cosmetic; fix opportunistically | **ACCEPTED** |
 | RN-3 | note | Committed dashboard stale at M1 tip until `pnpm dashboard` runs with the M1 train; repaired gate will correctly fail the first remote run otherwise | atlas-cto | ATL-024 (regeneration with the train) | **OPEN** (tracked under ATL-024) |
+| RN-4 | S4 (design note) | Access token lives in module memory only — never localStorage/sessionStorage/cookies (verified live via page evaluation: all empty). A page reload drops the session by design. Deliberate security choice (legacy localStorage token was an audit finding); QA concurs. | atlas-cto | httpOnly-cookie refresh flow (post-M1 TODO in auth-store.ts) | **ACCEPTED** 2026-07-23 (ATL-023) |
+| RN-5 | S4 (design note) | `scheduleTokenRefresh` is a documented no-op stub — no refresh flow, so every 15-min token expiry forces a re-login (401 → login with location preserved, verified live; honest handling, no retry loop, no stale data). Not a defect; flagged to atlas-product as UAT friction (2-hour sessions ⇒ ~8 re-logins) to schedule before pilot UAT. | atlas-cto | httpOnly-cookie refresh endpoint (same work package as RN-4) | **ACCEPTED** 2026-07-23 (ATL-023) |
