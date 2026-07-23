@@ -170,9 +170,7 @@ export class PgProjectsRepo implements ProjectsRepo {
     projectId: string,
     patch: ProjectUpdate,
   ): Promise<Project | null> {
-    const changed = PROJECT_COLUMNS.filter(
-      ([key]) => patch[key] !== undefined,
-    );
+    const changed = PROJECT_COLUMNS.filter(([key]) => patch[key] !== undefined);
     const sets = changed.map(
       ([, column], i) => `${column} = $${String(i + 3)}`,
     );

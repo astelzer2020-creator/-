@@ -85,7 +85,9 @@ export async function buildApp(
 
   const projectsRepo =
     options.projectsRepo ??
-    (pool !== undefined ? new PgProjectsRepo(pool) : new InMemoryProjectsRepo());
+    (pool !== undefined
+      ? new PgProjectsRepo(pool)
+      : new InMemoryProjectsRepo());
   const scenariosRepo =
     options.scenariosRepo ??
     (pool !== undefined
@@ -115,7 +117,8 @@ export async function buildApp(
     { config: { auth: { public: true } } },
     async (_request, reply) => {
       if (pool === undefined) {
-        return { status: "ok", database: "not configured" };
+        // No database configured (in-memory mode) — unchanged M1 shape.
+        return { status: "ok" };
       }
       try {
         await pool.query("SELECT 1");
