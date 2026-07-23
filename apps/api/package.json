@@ -8,6 +8,7 @@
   "scripts": {
     "build": "tsc -b tsconfig.build.json",
     "start": "node dist/server.js",
+    "migrate": "tsc -b tsconfig.build.json && node dist/db/migrate-cli.js",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -20,12 +21,14 @@
     "@node-rs/argon2": "^2.0.2",
     "fastify": "^5.10.0",
     "fastify-plugin": "^5.0.0",
+    "pg": "^8.16.0",
     "undici": "^7.16.0",
     "zod": "^4.0.0"
   },
   "devDependencies": {
     "@atlas/config": "workspace:*",
     "@types/node": "^22.0.0",
+    "@types/pg": "^8.15.0",
     "eslint": "^9.31.0",
     "prettier": "^3.6.0",
     "typescript": "^5.8.0",

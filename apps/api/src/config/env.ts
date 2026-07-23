@@ -14,12 +14,19 @@ const EnvSchema = z.object({
   ANALYTICS_URL: z.url(),
   /** HS256 signing secret for access tokens. Never committed (docs/SECURITY.md). */
   JWT_SECRET: z.string().min(32),
-  /** Optional until Postgres lands — the pg repositories are stubs (M1). */
+  /**
+   * Postgres connection string. When set, the API runs on the pg
+   * repositories + pg user store and /readyz pings the database; when unset,
+   * the in-memory adapters serve dev and tests (data does not survive
+   * restart). Run `pnpm --filter @atlas/api migrate` before starting.
+   */
   DATABASE_URL: z.string().min(1).optional(),
   /**
-   * M1 stopgap: password for the seeded in-memory users. When unset, no users
-   * are seeded and login is impossible (safe default). Removed with the
-   * Postgres user store.
+   * Dev/pilot-UAT seeding password. With DATABASE_URL: idempotently seeds
+   * two orgs and four users (org A admin/analyst/viewer, org B analyst-b —
+   * QA-M1-3) into Postgres at boot. Without DATABASE_URL: seeds the same
+   * users into the in-memory stopgap store. When unset, no users are seeded
+   * and login is impossible (safe default).
    */
   SEED_USER_PASSWORD: z.string().min(8).optional(),
 });
