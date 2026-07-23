@@ -440,3 +440,141 @@ in the readiness score below.
   ATL-003 as closing the pilot core loop — CLOSED and any "pilot-ready" claim stay blocked until
   Postgres persistence, the web non-demo mapping, and an observed green remote CI land and are
   re-verified.
+
+## M1 Completion Verification Plan (ATL-018)
+
+Written 2026-07-23 (atlas-qa, ATL-018). This is a **plan**, not a result: nothing below is claimed as
+executed, and no verification claim is made about any unbuilt feature. It states exactly what QA will
+run, independently, when each M1 follow-up task lands (DL-015 gate: all three VERIFIED → M1 complete).
+Mapping to ATL-003 acceptance criteria: ATL-022 closes **AC-1** (persistence) and the AC-2 live
+cross-tenant residual (QA-M1-3); ATL-023 closes the web side of the core loop (QA-M1-1/-2); ATL-024
+closes **AC-4** (CI green gate). AC-2 (auth/roles) and AC-3 (analytics internal-only, no fallback)
+were already verified live in the M1 results above and will be regression-checked, not re-litigated.
+
+### ATL-022 — Postgres persistence live (P0)
+
+All checks run by QA against a real Postgres (the delivered compose/testcontainers setup), never
+against the in-memory repos. Fixture users/orgs are synthetic (TESTING_STRATEGY rule 4).
+
+1. **Migration apply + re-apply idempotency.** Apply migrations to a **fresh** Postgres; assert schema
+   objects exist (orgs/users/projects/scenarios, `projects_org_case_number_unique`, role CHECK, BIGINT
+   money columns). Run the migration runner a **second time** on the same database: it must be a clean
+   no-op (exit 0, "already applied", zero DDL executed) — no errors, no duplicate objects. Then apply
+   to a dirty database mid-state if the runner claims resumability; otherwise confirm it refuses safely.
+2. **Restart-survival.** Via the live API: login → create project → create scenario → simulate. `kill -9`
+   the API process (and separately restart the Postgres container to prove durability is in the DB, not
+   a cache). Restart, login again, GET the same ids: project, scenario, and stored results identical
+   field-by-field to the pre-kill responses. This is the §2.4/§2.9 "persists after reload" criterion —
+   the check that the M1 slice could not pass.
+3. **Live cross-org probes (two-org seed).** Requires the ATL-022 AC's real multi-org store or two-org
+   seed (closes QA-M1-3). Obtain tokens for an ORG_A user and an ORG_B user. From ORG_B: GET/PUT/DELETE
+   ORG_A's project and scenario by id → **404 every time** (not 403 — no existence leak), list → `[]`,
+   response bodies free of ORG_A identifiers; ORG_A data unchanged after the probe. Repeat in the
+   opposite direction. Also re-check org scoping is still token-derived (`request.user.orgId`), never
+   client input — by source read and by sending a forged `orgId` in request bodies/query.
+4. **Agorot BIGINT round-trip at boundary values.** POST scenarios whose money fields are: `0`, `1`,
+   `2147483647` and `2147483648` (int4 boundary — catches an accidental INTEGER column or driver cast),
+   `9007199254740991` (`Number.MAX_SAFE_INTEGER`, the JS float-precision cliff), and a value above it
+   (e.g. `9007199254740993`) — the last must either round-trip **exactly** or be **rejected at the
+   boundary** by validation; silent precision loss (value comes back off by 1 agora) is a wrong stored
+   financial number = **S1** per §1/DL-006. Round-trip = POST → pg → GET returns the identical integer;
+   also verify the pg driver path (BIGINT as string/BigInt, not `parseFloat`).
+5. **/readyz behavior with DB up/down.** DB up → 200. Stop Postgres → /readyz returns non-200 (503)
+   while the process stays alive (no crash-loop), and mutating endpoints fail with an honest 5xx error
+   envelope, never a fabricated success. Start Postgres again → /readyz recovers to 200 **without an
+   API restart**. Contrast check: /healthz (liveness) stays 200 throughout if that is its declared
+   contract.
+6. **Regression:** full gates rerun (`pnpm lint/typecheck/test`, `uv run pytest`), the api test suite
+   green against real Postgres (testcontainers), and the M1 live e2e smoke (§ M1 results, step 3)
+   repeated on the pg-backed build with the same hand-verified numbers.
+
+### ATL-023 — Web non-demo mapping + accessToken flow (P1)
+
+1. **Form→ScenarioCreate mapping correctness against the shared schema.** The mapping's output must
+   parse under the **`@atlas/shared`** `ScenarioCreate` Zod schema (imported, or guarded by a contract
+   test if the mirror survives — either way QA-M1-2's `roiOnCost` nullability must be gone). Adversarial
+   content check, not just shape: the form's `ApartmentMixRow {rooms, count, areaSqm,
+   salePricePerUnitAgorot}` and named cost fields must land in shared `{label, units, areaSqm,
+   salePricePerSqmAgorot}` / `costItems[]` with **hand-verified arithmetic** — I will compute one
+   mapped scenario to the agora myself (per-unit → per-sqm price conversion is a financial
+   transformation; any drift is a wrong number = S1). Includes rounding behavior when
+   per-unit price does not divide evenly by area.
+2. **accessToken flow.** Live against the API: login from the web UI → token attached to subsequent
+   calls; a request after the 15-minute expiry (or with a forged/expired token injected) is handled
+   honestly — user is returned to login / shown a Hebrew auth error, no silent retry loop, no stale
+   data rendered as fresh. Note where the token is stored (memory/localStorage) for the security
+   review record.
+3. **Full browser loop against live API + engine.** `VITE_DEMO=0` build, real analytics + real API
+   (Postgres-backed if ATL-022 landed first). In a real browser: login → create project → configure
+   scenario → simulate → results. Every displayed figure must equal the API response **and** my own
+   independent arithmetic (golden-fixture inputs or the M1 smoke inputs re-used). Demo banner absent
+   in non-demo mode; present in demo mode (regression).
+4. **RTL rendering of live results.** On the live results page: `dir="rtl"` and `lang="he"` hold; all
+   strings from i18n keys (no hardcoded English leaking in non-demo paths); numbers/dates LTR-embedded
+   inside RTL text (§4 E8); IRR-null and payback-null fixture states render the honest Hebrew
+   "undefined" wording, never a fabricated number (§ M1 results, ResultsPage contract).
+
+### ATL-024 — First green remote CI + prettier gate (P1)
+
+1. **What "observed green" means — nothing less:** a **link to the actual GitHub Actions run** on the
+   pushed M1-train commit (run URL + commit SHA recorded as evidence), with **all three jobs** green —
+   lint (including the ATL-021 dashboard-freshness step, exercised for real per RN-3 on a freshly
+   regenerated dashboard), test, and secrets-scan. Explicit caveat carried with the evidence: the
+   secrets-scan job is still the decorative exit-0 placeholder (QA-M0-2 / DL-009) — its green counts
+   for "workflow executes remotely", **not** as a security gate. A green run on a stale dashboard, a
+   partial-job run, or "it should pass" does not close anything.
+2. **Prettier gate proven both ways:** `prettier --check` (or `pnpm format:check`) added to the lint
+   job; demonstrated **failing** on a deliberately misformatted scratch commit (red run linked) and
+   **passing** once formatted (green run linked). One-directional evidence is insufficient.
+3. **Freshness-gate negative check (if cheap):** the RN-3 scenario — a docs change without regeneration
+   — fails the remote run as designed (already proven in scratch clones at bc52714; a remote
+   confirmation is a bonus, not a gate).
+4. **Explicit promotion list this unlocks, and nothing more:** ATL-007 → fully **verified** (its last
+   open evidence was remote CI); ATL-003 **AC-4** → MET; **QA-M0-3 closed**; **QA-M0-4 closed** (via
+   the prettier gate). NOT unlocked: QA-M0-2 (stays open until the human owner rules on DL-009),
+   and no "pilot-ready" implication — that needs all three tasks plus the Founder items per DL-015.
+
+## M2 Verification Approach (ATL-018 preview)
+
+How QA will execute PILOT_SCOPE.md §9's acceptance-criteria groups, mapped to TESTING_STRATEGY.md
+layers. §9 already references this plan's §2 scenarios and §4 encoding matrix — this section assigns
+**test types**, it does not restate criteria. §2 scenarios 3 and 6 (3D portion) are deferred per
+DL-008 (annotations above); the §2 suite for M2 is therefore 9 active scenarios plus 6's non-3D
+substance. Detailed per-criterion scripts will be written when M2 tasks are delegated.
+
+| §9 group | Golden files (pytest, blocking) | Automated API/integration | Playwright E2E | Manual / UAT |
+|---|---|---|---|---|
+| **AC-IMP** (import) | — | AC-IMP-1..5 as API-level tests with fixtures under `apps/api/test/fixtures/imports/` (TESTING_STRATEGY: every fixture in UTF-8 / UTF-8-BOM / cp1255; §4 E1–E7; §5 robustness) | AC-IMP-1 upload happy path inside the core-loop journey | AC-IMP-6 time budget on staging; §4 E4 mis-detection prompt UX |
+| **AC-SCN** (scenario + compare) | — | AC-SCN-1/-2 persistence + lifecycle against real Postgres (testcontainers; builds on ATL-022) | AC-SCN-3 compare view = results view = API response (internal consistency, golden inputs); AC-SCN-1 Hebrew validation messages | Spot-check compare on UAT data |
+| **AC-RES** (results) | AC-RES-1/-2/-3: golden fixtures + §3 tolerance policy; §3 contract test guards API↔engine drift; grow suite from 9 fixtures to the §3-required ≥12 before the M2 gate | Sensitivity structure (axes, monotonicity) at API level | AC-RES-1/-2 rendered values + honest null states in-browser | **AC-RES-4 customer reconciliation — manual only, documented session record (never repo data)**; AC-RES-5 ≤10 s on staging |
+| **AC-EXP** (PDF/XLSX) | Numbers in exports tie back to golden values via AC-RES-1 | XLSX cell-type checks (numeric not text) where library-testable | PDF text extraction: correctly ordered Hebrew + known figures present (TESTING_STRATEGY RTL-PDF rule); export triggered in the E2E journey | §4 E9/E10 visual shaping, Adobe Reader / Chrome viewer / Excel 365 / LibreOffice opens (§6 browser matrix); AC-EXP-2 completeness checklist |
+| **AC-E2E** (<30-min gate) | — | — | The single core-loop journey (§8 item 3): import → scenario → simulate → compare → PDF exists with known Hebrew string | **AC-E2E-1 executed by QA by hand, wall-clock timed, zero developer assistance**; AC-E2E-2 live authZ probes across all four surfaces (extends §2.11 + the ATL-022 two-org probes to results/exports) |
+
+Standing rules for all of the above: any failed numeric criterion is S1 (§1, DL-006); golden-file
+changes need written justification in the same PR; encoding matrix = §4 of this plan, executed not
+duplicated; Hebrew/RTL correctness is part of every criterion (§9 cross-cutting rule), not a separate
+pass; real customer data never enters fixtures (TESTING_STRATEGY rule 4) — AC-RES-4 evidence lives
+only in reconciliation session records.
+
+## Open Defects Ledger (single source of status)
+
+Consolidated 2026-07-23 (ATL-018). **This table is the one authoritative status list for QA-filed
+defects and residual notes.** The per-section defect tables above remain as historical record of
+filing; status changes are made HERE only. QA-M0-5 excluded (explicitly "not a defect"; recorded
+note only).
+
+| ID | Sev | Defect (short) | Owner | Fixed by | Status |
+|---|---|---|---|---|---|
+| QA-M0-1 | S3 | ATL-007/009 delivery handoff missing from HANDOFFS.md | atlas-ceo | Retroactive handoff filed by CEO (HANDOFFS.md, "to remedy QA defect QA-M0-1") | **CLOSED** 2026-07-21 |
+| QA-M0-2 | S3 | CI secrets-scan job is decorative exit-0 (green with zero scanning) | human owner (escalated, DL-009) | GITLEAKS_LICENSE / alternative-scanner ruling | **OPEN — escalated**, blocks any release gate relying on that job |
+| QA-M0-3 | S4 | First remote CI run never observed; gates ATL-007 + ATL-003 AC-4 "verified" | atlas-cto | ATL-024 | **OPEN** |
+| QA-M0-4 | S4 | No `prettier --check` in CI; formatting drift cannot fail CI | atlas-cto | ATL-024 | **OPEN** |
+| QA-S1-1 | S3 | Dashboard freshness gate false-positives on shallow CI clone | atlas-cto | Fix bc52714; QA re-verification RV-1..RV-9 | **CLOSED** 2026-07-21 (CONFIRMED-FIXED) |
+| QA-S1-2 | S4 | Commit e3f7e6d message claims "coordination updates" it does not contain | atlas-cto | None possible (history not rewritten, CLAUDE.md rule 8) | **CLOSED — accepted as recorded history note** |
+| QA-S1-3 | S4 | CODEBASE_AUDIT.md C-1/T-6 cite ROIScreen.jsx:61; actual line 62 | atlas-cto | Optional doc correction, backlog | **OPEN — backlog** |
+| QA-M1-1 | S3 | Web non-demo form→ScenarioCreate mapping unimplemented; live non-demo core loop cannot POST a valid scenario | atlas-cto | ATL-023 | **OPEN** — blocks any pilot on real data |
+| QA-M1-2 | S4 | Web mirror types `roiOnCost` as `number`, shared contract is `number \| null` | atlas-cto | ATL-023 | **OPEN** |
+| QA-M1-3 | S4 | Default seed is single-org — live cross-tenant probe impossible; isolation proven only via committed tests | atlas-cto | ATL-022 (two-org seed / real multi-org store) | **OPEN** |
+| RN-1 | S4 | Shallow-clone fallback passes a docs commit that changes no parsed value (enforced CI path is full-clone, where it fails) | atlas-cto | Accepted with note | **ACCEPTED** |
+| RN-2 | S4 | "Last source commit" label semantically means "last docs/** commit" | atlas-cto | Cosmetic; fix opportunistically | **ACCEPTED** |
+| RN-3 | note | Committed dashboard stale at M1 tip until `pnpm dashboard` runs with the M1 train; repaired gate will correctly fail the first remote run otherwise | atlas-cto | ATL-024 (regeneration with the train) | **OPEN** (tracked under ATL-024) |
