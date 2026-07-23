@@ -26,7 +26,45 @@ STATUS: active | released | expired-escalated
 
 ## Active locks
 
-*(none)*
+```
+TASK ID: ATL-022
+OWNER: atlas-cto
+FILES OR DIRECTORIES: apps/api/** (pg repos, migration runner), infra/environments/** (dev DB compose/env docs)
+START TIME: 2026-07-22
+EXPECTED COMPLETION: 2026-07-22 (same day)
+STATUS: active
+NOTE: filed by orchestrator on the owner's behalf BEFORE spawning (R-07 action item).
+```
+
+```
+TASK ID: ATL-013 + ATL-014
+OWNER: atlas-product
+FILES OR DIRECTORIES: docs/pilot/DRY_RUN_RUNBOOK.md (new), docs/pilot/RECONCILIATION_WORKSHEET.md (new)
+START TIME: 2026-07-22
+EXPECTED COMPLETION: 2026-07-22 (same day)
+STATUS: active
+NOTE: filed by orchestrator on the owner's behalf BEFORE spawning (R-07 action item).
+```
+
+```
+TASK ID: ATL-018
+OWNER: atlas-qa
+FILES OR DIRECTORIES: docs/pilot/QA_PLAN.md (M1 verification-plan section + DL-008 annotations)
+START TIME: 2026-07-22
+EXPECTED COMPLETION: 2026-07-22 (same day)
+STATUS: active
+NOTE: filed by orchestrator on the owner's behalf BEFORE spawning (R-07 action item).
+```
+
+```
+TASK ID: ATL-019
+OWNER: atlas-growth
+FILES OR DIRECTORIES: docs/growth/PILOT_AGREEMENT_DRAFT.md (new)
+START TIME: 2026-07-22
+EXPECTED COMPLETION: 2026-07-22 (same day)
+STATUS: active
+NOTE: filed by orchestrator on the owner's behalf BEFORE spawning (R-07 action item).
+```
 
 ## Released locks
 
